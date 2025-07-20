@@ -3,56 +3,19 @@
  * @fileOverview A job analysis AI agent that breaks down job descriptions.
  *
  * - analyzeJobDescription - A function that handles the job analysis process.
- * - JobAnalysisInput - The input type for the analyzeJobDescription function.
- * - JobAnalysisOutput - The return type for the analyzeJobDescription function.
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import {
+  JobAnalysisInputSchema,
+  type JobAnalysisInput,
+  JobAnalysisOutputSchema,
+  type JobAnalysisOutput,
+} from '@/ai/schemas/job-analyzer-schema';
 
-// Input Schema
-export const JobAnalysisInputSchema = z.object({
-  jobTitle: z.string().describe('The title of the job.'),
-  jobDescription: z
-    .string()
-    .describe('The full job description or user understanding of the role.'),
-});
-export type JobAnalysisInput = z.infer<typeof JobAnalysisInputSchema>;
-
-// Output Schema
-export const JobAnalysisOutputSchema = z.object({
-  JobRoleExplained: z.object({
-    Easy: z.string().describe('Explanation for a 5-year-old.'),
-    Intermediate: z.string().describe('Explanation for a college student.'),
-    Recruiter: z.string().describe('Explanation for another recruiter.'),
-  }),
-  TechnicalTermsAndJargon: z.object({
-    SpecificToRole: z.array(
-      z.object({
-        term: z.string().describe('Technical term specific to the role.'),
-        definition: z.string().describe('Definition of the term.'),
-      })
-    ),
-    GeneralTerms: z.array(
-      z.object({
-        term: z.string().describe('General technical term.'),
-        definition: z.string().describe('Definition of the term.'),
-      })
-    ),
-  }),
-  Tasks: z.object({
-    SpecificTasks: z.array(z.string()).describe('Specific tasks for the role.'),
-    GeneralTasks: z
-      .array(z.string())
-      .describe('General tasks applicable to similar roles.'),
-  }),
-  BooleanQuery: z
-    .string()
-    .describe('A Boolean search query optimized for Naukri.com.'),
-});
-export type JobAnalysisOutput = z.infer<typeof JobAnalysisOutputSchema>;
-
-export async function analyzeJobDescription(input: JobAnalysisInput): Promise<JobAnalysisOutput> {
+export async function analyzeJobDescription(
+  input: JobAnalysisInput
+): Promise<JobAnalysisOutput> {
   return jobAnalyzerFlow(input);
 }
 
@@ -120,7 +83,9 @@ const jobAnalyzerFlow = ai.defineFlow(
   async (input) => {
     const { output } = await jobAnalyzerPrompt(input);
     if (!output) {
-      throw new Error('An unexpected error occurred and the AI returned no output.');
+      throw new Error(
+        'An unexpected error occurred and the AI returned no output.'
+      );
     }
     return output;
   }

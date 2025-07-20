@@ -21,8 +21,8 @@ import {
 import {
   type JobAnalysisInput,
   type JobAnalysisOutput,
-  analyzeJobDescription,
-} from '@/ai/flows/job-analyzer-flow';
+} from '@/ai/schemas/job-analyzer-schema';
+import { analyzeJobDescription } from '@/ai/flows/job-analyzer-flow';
 import { Loader2, Copy, Check } from 'lucide-react';
 
 export function JobAnalyzer() {
