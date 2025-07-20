@@ -78,6 +78,29 @@ Aim is to have a better understanding of the job role
 ## Job details:
 
 {{jobDescription}}
+
+## Output format:
+
+{
+  "JobRoleExplained": {
+    "Easy": "string",
+    "Intermediate": "string",
+    "Recruiter": "string"
+  },
+  "TechnicalTermsAndJargon": {
+    "SpecificToRole": [
+      { "term": "string", "definition": "string" }
+    ],
+    "GeneralTerms": [
+      { "term": "string", "definition": "string" }
+    ]
+  },
+  "Tasks": {
+    "SpecificTasks": ["string"],
+    "GeneralTasks": ["string"]
+  },
+  "BooleanQuery": "string"
+}
 `,
 });
 
