@@ -1,11 +1,11 @@
 'use server';
 
-import { analyzeJobDescription } from '@/ai/flows/job-description-analyzer';
-import type { AnalyzeJobDescriptionInput } from '@/ai/flows/job-description-analyzer';
+import { getJobAnalysis } from '@/ai/flows/job-analyzer-flow';
+import type { JobAnalysisInput } from '@/ai/flows/job-analyzer-flow';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-export async function getAnalysisAction(input: AnalyzeJobDescriptionInput) {
+export async function getAnalysisAction(input: JobAnalysisInput) {
     const { jobTitle, jobDescription } = input;
     
     if (!jobTitle || jobTitle.length < 3) {
@@ -17,7 +17,7 @@ export async function getAnalysisAction(input: AnalyzeJobDescriptionInput) {
     }
 
     try {
-        const analysis = await analyzeJobDescription({ jobTitle, jobDescription });
+        const analysis = await getJobAnalysis({ jobTitle, jobDescription });
 
         if (!analysis) {
             throw new Error('Failed to get analysis from AI. The response was empty.');

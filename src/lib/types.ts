@@ -1,3 +1,3 @@
-import type { AnalyzeJobDescriptionOutput } from '@/ai/flows/job-description-analyzer';
+import type { JobAnalysisOutput } from '@/ai/flows/job-analyzer-flow';
 
-export type AnalysisResult = AnalyzeJobDescriptionOutput;
+export type AnalysisResult = JobAnalysisOutput;
