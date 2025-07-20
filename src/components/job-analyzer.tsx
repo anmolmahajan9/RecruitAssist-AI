@@ -155,93 +155,89 @@ export function JobAnalyzer() {
 
       {analysis && (
         <div className="space-y-6">
-          <Accordion
-            type="multiple"
-            className="space-y-6"
-            defaultValue={['exp-easy', 'exp-intermediate', 'exp-recruiter', 'terms', 'tasks']}
-          >
-            <AccordionItem value="exp-easy" className="border-none">
-                <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
-                  <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
+          <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                <Briefcase className="w-7 h-7 text-primary" />
+                Job Role Explained
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="multiple" defaultValue={['exp-easy', 'exp-intermediate', 'exp-recruiter']} className="space-y-2">
+                <AccordionItem value="exp-easy" className="border-b-0">
+                  <AccordionTrigger className="p-4 text-lg font-bold text-slate-800 hover:no-underline bg-slate-50/50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <Baby className="w-6 h-6 text-primary"/>
                       Easy explanation
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="p-6 pt-0">
+                  <AccordionContent className="p-4 pt-2">
                     <p className="text-slate-600">{analysis.JobRoleExplained.Easy}</p>
                   </AccordionContent>
-                </Card>
-            </AccordionItem>
-            <AccordionItem value="exp-intermediate" className="border-none">
-                <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
-                  <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
+                </AccordionItem>
+                 <AccordionItem value="exp-intermediate" className="border-b-0">
+                  <AccordionTrigger className="p-4 text-lg font-bold text-slate-800 hover:no-underline bg-slate-50/50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <School className="w-6 h-6 text-primary"/>
                       Intermediate explanation
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="p-6 pt-0">
+                  <AccordionContent className="p-4 pt-2">
                     <p className="text-slate-600">{analysis.JobRoleExplained.Intermediate}</p>
                   </AccordionContent>
-                </Card>
-            </AccordionItem>
-            <AccordionItem value="exp-recruiter" className="border-none">
-                <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
-                  <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
+                </AccordionItem>
+                 <AccordionItem value="exp-recruiter" className="border-b-0">
+                  <AccordionTrigger className="p-4 text-lg font-bold text-slate-800 hover:no-underline bg-slate-50/50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <Users className="w-6 h-6 text-primary"/>
                       Recruiter explanation
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="p-6 pt-0">
+                  <AccordionContent className="p-4 pt-2">
                     <p className="text-slate-600">{analysis.JobRoleExplained.Recruiter}</p>
                   </AccordionContent>
-                </Card>
-            </AccordionItem>
-            
-            <AccordionItem value="terms" className="border-none">
-               <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
-                <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
-                   <div className="flex items-center gap-3">
-                    <BrainCircuit className="w-6 h-6 text-primary"/>
-                    Technical Terms & Jargon
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-6 pt-0 space-y-6">
-                   <div>
-                    <h4 className="font-bold text-lg text-slate-800 mb-3 pb-2 border-b">Specific</h4>
-                    {renderTermList(analysis.TechnicalTermsAndJargon.SpecificToRole)}
-                  </div>
-                   <div>
-                    <h4 className="font-bold text-lg text-slate-800 mb-3 mt-6 pb-2 border-b">General</h4>
-                    {renderTermList(analysis.TechnicalTermsAndJargon.GeneralTerms)}
-                  </div>
-                </AccordionContent>
-              </Card>
-            </AccordionItem>
-
-            <AccordionItem value="tasks" className="border-none">
-              <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
-                <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-6 h-6 text-primary"/>
-                    Key Tasks
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-6 pt-0 space-y-6">
-                  <div>
-                    <h4 className="font-bold text-lg text-slate-800 mb-3 pb-2 border-b">Specific Tasks</h4>
-                    {renderTaskList(analysis.Tasks.SpecificTasks)}
-                  </div>
-                   <div>
-                    <h4 className="font-bold text-lg text-slate-800 mb-3 mt-6 pb-2 border-b">General Tasks</h4>
-                    {renderTaskList(analysis.Tasks.GeneralTasks)}
-                  </div>
-                </AccordionContent>
-              </Card>
-            </AccordionItem>
-          </Accordion>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                 <BrainCircuit className="w-7 h-7 text-primary"/>
+                Technical Terms & Jargon
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+               <div>
+                <h4 className="font-bold text-lg text-slate-800 mb-3 pb-2 border-b">Specific</h4>
+                {renderTermList(analysis.TechnicalTermsAndJargon.SpecificToRole)}
+              </div>
+               <div>
+                <h4 className="font-bold text-lg text-slate-800 mb-3 mt-6 pb-2 border-b">General</h4>
+                {renderTermList(analysis.TechnicalTermsAndJargon.GeneralTerms)}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                <FileText className="w-7 h-7 text-primary"/>
+                Key Tasks
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <h4 className="font-bold text-lg text-slate-800 mb-3 pb-2 border-b">Specific Tasks</h4>
+                {renderTaskList(analysis.Tasks.SpecificTasks)}
+              </div>
+               <div>
+                <h4 className="font-bold text-lg text-slate-800 mb-3 mt-6 pb-2 border-b">General Tasks</h4>
+                {renderTaskList(analysis.Tasks.GeneralTasks)}
+              </div>
+            </CardContent>
+          </Card>
           
           <Card className="shadow-xl rounded-2xl border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader>
