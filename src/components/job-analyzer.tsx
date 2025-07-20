@@ -23,7 +23,18 @@ import {
   type JobAnalysisOutput,
 } from '@/ai/schemas/job-analyzer-schema';
 import { analyzeJobDescription } from '@/ai/flows/job-analyzer-flow';
-import { Loader2, Copy, Check, Briefcase, Code, FileText, BrainCircuit, Users, Baby, School } from 'lucide-react';
+import {
+  Loader2,
+  Copy,
+  Check,
+  Briefcase,
+  Code,
+  FileText,
+  BrainCircuit,
+  Users,
+  Baby,
+  School,
+} from 'lucide-react';
 
 export function JobAnalyzer() {
   const [formData, setFormData] = useState<JobAnalysisInput>({
@@ -74,9 +85,16 @@ export function JobAnalyzer() {
   ) => (
     <div className="space-y-4">
       {terms.map((item, index) => (
-        <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1 p-3 bg-slate-50 rounded-lg">
-          <p className="md:col-span-1 font-semibold text-slate-800">{item.term}</p>
-          <p className="md:col-span-2 text-slate-600">{item.definition}</p>
+        <div
+          key={index}
+          className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1 p-3 bg-secondary/50 rounded-lg"
+        >
+          <p className="md:col-span-1 font-semibold text-foreground">
+            {item.term}
+          </p>
+          <p className="md:col-span-2 text-muted-foreground">
+            {item.definition}
+          </p>
         </div>
       ))}
     </div>
@@ -85,7 +103,7 @@ export function JobAnalyzer() {
   const renderTaskList = (tasks: string[]) => (
     <ul className="space-y-2 list-disc list-inside">
       {tasks.map((task, index) => (
-        <li key={index} className="text-slate-600">
+        <li key={index} className="text-muted-foreground">
           {task}
         </li>
       ))}
@@ -94,17 +112,21 @@ export function JobAnalyzer() {
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-xl rounded-2xl overflow-hidden border-0 bg-white/80 backdrop-blur-sm">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-slate-800">Enter Job Details</CardTitle>
-          <CardDescription className="text-slate-500">
+          <CardTitle className="text-2xl font-bold">
+            Enter Job Details
+          </CardTitle>
+          <CardDescription>
             Provide a job title and description to get started.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="jobTitle" className="font-semibold text-slate-700">Job Title</Label>
+              <Label htmlFor="jobTitle" className="font-semibold">
+                Job Title
+              </Label>
               <Input
                 id="jobTitle"
                 name="jobTitle"
@@ -112,11 +134,12 @@ export function JobAnalyzer() {
                 value={formData.jobTitle}
                 onChange={handleInputChange}
                 required
-                className="bg-white/70 border-slate-300 focus:ring-primary focus:border-primary"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="jobDescription" className="font-semibold text-slate-700">Job Description</Label>
+              <Label htmlFor="jobDescription" className="font-semibold">
+                Job Description
+              </Label>
               <Textarea
                 id="jobDescription"
                 name="jobDescription"
@@ -124,18 +147,18 @@ export function JobAnalyzer() {
                 value={formData.jobDescription}
                 onChange={handleInputChange}
                 required
-                className="min-h-[150px] bg-white/70 border-slate-300 focus:ring-primary focus:border-primary"
+                className="min-h-[150px]"
               />
             </div>
             <Button
               type="submit"
-              disabled={isLoading || !formData.jobTitle || !formData.jobDescription}
-              className="w-full text-lg py-6 font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl shadow-lg"
+              disabled={
+                isLoading || !formData.jobTitle || !formData.jobDescription
+              }
+              className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl"
               size="lg"
             >
-              {isLoading && (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              )}
+              {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               {isLoading ? 'Analyzing...' : 'Analyze Job'}
             </Button>
           </form>
@@ -143,7 +166,7 @@ export function JobAnalyzer() {
       </Card>
 
       {error && (
-        <Card className="bg-red-50 border-red-200 text-red-800 shadow-lg rounded-xl">
+        <Card className="bg-destructive/10 border-destructive/20 text-destructive-foreground">
           <CardHeader>
             <CardTitle>Error</CardTitle>
           </CardHeader>
@@ -155,109 +178,129 @@ export function JobAnalyzer() {
 
       {analysis && (
         <div className="space-y-6">
-          <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+              <CardTitle className="text-2xl font-bold flex items-center gap-3">
                 <Briefcase className="w-7 h-7 text-primary" />
                 Job Role Explained
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Accordion type="multiple" defaultValue={['exp-easy', 'exp-intermediate', 'exp-recruiter']} className="space-y-2">
-                <AccordionItem value="exp-easy" className="border-b-0">
-                  <AccordionTrigger className="p-4 text-lg font-bold text-slate-800 hover:no-underline bg-slate-50/50 rounded-lg">
+              <Accordion
+                type="multiple"
+                defaultValue={['exp-easy', 'exp-intermediate', 'exp-recruiter']}
+                className="space-y-2"
+              >
+                <AccordionItem value="exp-easy" className="border-0">
+                  <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Baby className="w-6 h-6 text-primary"/>
+                      <Baby className="w-6 h-6 text-primary" />
                       Easy explanation
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="p-4 pt-2">
-                    <p className="text-slate-600">{analysis.JobRoleExplained.Easy}</p>
+                    <p className="text-muted-foreground">
+                      {analysis.JobRoleExplained.Easy}
+                    </p>
                   </AccordionContent>
                 </AccordionItem>
-                 <AccordionItem value="exp-intermediate" className="border-b-0">
-                  <AccordionTrigger className="p-4 text-lg font-bold text-slate-800 hover:no-underline bg-slate-50/50 rounded-lg">
+                <AccordionItem value="exp-intermediate" className="border-0">
+                  <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <School className="w-6 h-6 text-primary"/>
+                      <School className="w-6 h-6 text-primary" />
                       Intermediate explanation
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="p-4 pt-2">
-                    <p className="text-slate-600">{analysis.JobRoleExplained.Intermediate}</p>
+                    <p className="text-muted-foreground">
+                      {analysis.JobRoleExplained.Intermediate}
+                    </p>
                   </AccordionContent>
                 </AccordionItem>
-                 <AccordionItem value="exp-recruiter" className="border-b-0">
-                  <AccordionTrigger className="p-4 text-lg font-bold text-slate-800 hover:no-underline bg-slate-50/50 rounded-lg">
+                <AccordionItem value="exp-recruiter" className="border-0">
+                  <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <Users className="w-6 h-6 text-primary"/>
+                      <Users className="w-6 h-6 text-primary" />
                       Recruiter explanation
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="p-4 pt-2">
-                    <p className="text-slate-600">{analysis.JobRoleExplained.Recruiter}</p>
+                    <p className="text-muted-foreground">
+                      {analysis.JobRoleExplained.Recruiter}
+                    </p>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
             </CardContent>
           </Card>
-          
-          <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+
+          <Card>
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-                 <BrainCircuit className="w-7 h-7 text-primary"/>
+              <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                <BrainCircuit className="w-7 h-7 text-primary" />
                 Technical Terms & Jargon
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-               <div>
-                <h4 className="font-bold text-lg text-slate-800 mb-3 pb-2 border-b">Specific</h4>
+              <div>
+                <h4 className="text-lg font-bold mb-3 pb-2 border-b">
+                  Specific
+                </h4>
                 {renderTermList(analysis.TechnicalTermsAndJargon.SpecificToRole)}
               </div>
-               <div>
-                <h4 className="font-bold text-lg text-slate-800 mb-3 mt-6 pb-2 border-b">General</h4>
+              <div>
+                <h4 className="text-lg font-bold mb-3 mt-6 pb-2 border-b">
+                  General
+                </h4>
                 {renderTermList(analysis.TechnicalTermsAndJargon.GeneralTerms)}
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+
+          <Card>
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
-                <FileText className="w-7 h-7 text-primary"/>
+              <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                <FileText className="w-7 h-7 text-primary" />
                 Key Tasks
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <h4 className="font-bold text-lg text-slate-800 mb-3 pb-2 border-b">Specific Tasks</h4>
+                <h4 className="text-lg font-bold mb-3 pb-2 border-b">
+                  Specific Tasks
+                </h4>
                 {renderTaskList(analysis.Tasks.SpecificTasks)}
               </div>
-               <div>
-                <h4 className="font-bold text-lg text-slate-800 mb-3 mt-6 pb-2 border-b">General Tasks</h4>
+              <div>
+                <h4 className="text-lg font-bold mb-3 mt-6 pb-2 border-b">
+                  General Tasks
+                </h4>
                 {renderTaskList(analysis.Tasks.GeneralTasks)}
               </div>
             </CardContent>
           </Card>
-          
-          <Card className="shadow-xl rounded-2xl border-0 bg-white/80 backdrop-blur-sm">
+
+          <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <Code className="w-6 h-6 text-primary"/>
-                <CardTitle className="text-2xl font-bold text-slate-800">Boolean Query</CardTitle>
+                <Code className="w-6 h-6 text-primary" />
+                <CardTitle className="text-2xl font-bold">
+                  Boolean Query
+                </CardTitle>
               </div>
-              <CardDescription className="text-slate-500">
+              <CardDescription>
                 A ready-to-use search query to find the best candidates.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="relative p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <p className="text-sm font-mono text-slate-700 whitespace-pre-wrap break-words">
+              <div className="relative p-4 bg-secondary/50 rounded-lg border">
+                <p className="text-sm font-mono text-muted-foreground whitespace-pre-wrap break-words">
                   {analysis.BooleanQuery}
                 </p>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-2 right-2 h-8 w-8 text-slate-500 hover:bg-slate-200"
+                  className="absolute top-2 right-2 h-8 w-8 text-muted-foreground hover:bg-accent"
                   onClick={handleCopy}
                 >
                   {copied ? (
