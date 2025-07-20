@@ -23,7 +23,7 @@ import {
   type JobAnalysisOutput,
 } from '@/ai/schemas/job-analyzer-schema';
 import { analyzeJobDescription } from '@/ai/flows/job-analyzer-flow';
-import { Loader2, Copy, Check, Briefcase, Code, FileText, BrainCircuit } from 'lucide-react';
+import { Loader2, Copy, Check, Briefcase, Code, FileText, BrainCircuit, Users, Baby, School } from 'lucide-react';
 
 export function JobAnalyzer() {
   const [formData, setFormData] = useState<JobAnalysisInput>({
@@ -158,34 +158,49 @@ export function JobAnalyzer() {
           <Accordion
             type="multiple"
             className="space-y-6"
-            defaultValue={['item-1', 'item-2', 'item-3']}
+            defaultValue={['exp-easy', 'exp-intermediate', 'exp-recruiter', 'terms', 'tasks']}
           >
-            <AccordionItem value="item-1" className="border-none">
-              <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
-                <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    <Briefcase className="w-6 h-6 text-primary"/>
-                    Job Role Explained
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-6 pt-0 space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-md text-slate-800 mb-2">Easy explanation:</h4>
+            <AccordionItem value="exp-easy" className="border-none">
+                <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+                  <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
+                    <div className="flex items-center gap-3">
+                      <Baby className="w-6 h-6 text-primary"/>
+                      Easy explanation
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="p-6 pt-0">
                     <p className="text-slate-600">{analysis.JobRoleExplained.Easy}</p>
-                  </div>
-                  <div className="pt-2">
-                    <h4 className="font-semibold text-md text-slate-800 mb-2">Intermediate explanation:</h4>
+                  </AccordionContent>
+                </Card>
+            </AccordionItem>
+            <AccordionItem value="exp-intermediate" className="border-none">
+                <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+                  <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
+                    <div className="flex items-center gap-3">
+                      <School className="w-6 h-6 text-primary"/>
+                      Intermediate explanation
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="p-6 pt-0">
                     <p className="text-slate-600">{analysis.JobRoleExplained.Intermediate}</p>
-                  </div>
-                  <div className="pt-2">
-                    <h4 className="font-semibold text-md text-slate-800 mb-2">Recruiter explanation:</h4>
+                  </AccordionContent>
+                </Card>
+            </AccordionItem>
+            <AccordionItem value="exp-recruiter" className="border-none">
+                <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
+                  <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
+                    <div className="flex items-center gap-3">
+                      <Users className="w-6 h-6 text-primary"/>
+                      Recruiter explanation
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="p-6 pt-0">
                     <p className="text-slate-600">{analysis.JobRoleExplained.Recruiter}</p>
-                  </div>
-                </AccordionContent>
-              </Card>
+                  </AccordionContent>
+                </Card>
             </AccordionItem>
             
-            <AccordionItem value="item-2" className="border-none">
+            <AccordionItem value="terms" className="border-none">
                <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
                 <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
                    <div className="flex items-center gap-3">
@@ -206,7 +221,7 @@ export function JobAnalyzer() {
               </Card>
             </AccordionItem>
 
-            <AccordionItem value="item-3" className="border-none">
+            <AccordionItem value="tasks" className="border-none">
               <Card className="shadow-xl rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm">
                 <AccordionTrigger className="p-6 text-lg font-bold text-slate-800 hover:no-underline">
                   <div className="flex items-center gap-3">
