@@ -72,14 +72,14 @@ export function JobAnalyzer() {
   const renderTermList = (
     terms: { term: string; definition: string }[]
   ) => (
-    <ul className="space-y-4">
+    <div className="space-y-4">
       {terms.map((item, index) => (
-        <li key={index} className="p-3 bg-slate-50 rounded-lg">
-          <p className="font-semibold text-slate-800">{item.term}</p>
-          <p className="text-slate-600">{item.definition}</p>
-        </li>
+        <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-1 p-3 bg-slate-50 rounded-lg">
+          <p className="md:col-span-1 font-semibold text-slate-800">{item.term}</p>
+          <p className="md:col-span-2 text-slate-600">{item.definition}</p>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 
   const renderTaskList = (tasks: string[]) => (
