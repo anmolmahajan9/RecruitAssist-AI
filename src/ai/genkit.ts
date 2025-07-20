@@ -5,7 +5,7 @@
  * prompts. You can also use it to create and reference other Genkit objects,
  * such as models, indexes, and retrievers.
  */
-import { genkit, type Plugin } from 'genkit';
+import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
 import { next } from '@genkit-ai/next';
 
