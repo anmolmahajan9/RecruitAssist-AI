@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Recruiter Assistant",
+  title: "RecruitAssist AI",
   description: "JD Breakdown + Boolean Builder App",
 };
 

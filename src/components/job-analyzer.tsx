@@ -223,11 +223,11 @@ export function JobAnalyzer() {
               </AccordionTrigger>
               <AccordionContent className="p-6 pt-0 space-y-6">
                  <div>
-                  <h4 className="font-semibold text-md text-slate-800 mb-3">Most Specific to the Role</h4>
+                  <h4 className="font-bold text-lg text-slate-800 mb-3 pb-2 border-b">Most Specific to the Role</h4>
                   {renderTermList(analysis.TechnicalTermsAndJargon.SpecificToRole)}
                 </div>
                  <div>
-                  <h4 className="font-semibold text-md text-slate-800 mb-3 mt-4">General Terms</h4>
+                  <h4 className="font-bold text-lg text-slate-800 mb-3 mt-6 pb-2 border-b">General Terms</h4>
                   {renderTermList(analysis.TechnicalTermsAndJargon.GeneralTerms)}
                 </div>
               </AccordionContent>
@@ -242,11 +242,11 @@ export function JobAnalyzer() {
               </AccordionTrigger>
               <AccordionContent className="p-6 pt-0 space-y-6">
                 <div>
-                  <h4 className="font-semibold text-md text-slate-800 mb-3">Specific Tasks</h4>
+                  <h4 className="font-bold text-lg text-slate-800 mb-3 pb-2 border-b">Specific Tasks</h4>
                   {renderTaskList(analysis.Tasks.SpecificTasks)}
                 </div>
                  <div>
-                  <h4 className="font-semibold text-md text-slate-800 mb-3 mt-4">General Tasks</h4>
+                  <h4 className="font-bold text-lg text-slate-800 mb-3 mt-6 pb-2 border-b">General Tasks</h4>
                   {renderTaskList(analysis.Tasks.GeneralTasks)}
                 </div>
               </AccordionContent>
