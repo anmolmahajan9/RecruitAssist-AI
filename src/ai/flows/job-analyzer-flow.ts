@@ -6,6 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import {
   JobAnalysisInputSchema,
   type JobAnalysisInput,
@@ -21,6 +22,7 @@ export async function analyzeJobDescription(
 
 const jobAnalyzerPrompt = ai.definePrompt({
   name: 'jobAnalyzerPrompt',
+  model: googleAI.model('gemini-1.5-flash-latest'),
   input: { schema: JobAnalysisInputSchema },
   output: { schema: JobAnalysisOutputSchema },
   prompt: `## Objective
