@@ -34,6 +34,7 @@ import {
   Users,
   Baby,
   School,
+  XCircle,
 } from 'lucide-react';
 
 export function JobAnalyzer() {
@@ -51,6 +52,13 @@ export function JobAnalyzer() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleReset = () => {
+    setFormData({ jobTitle: '', jobDescription: '' });
+    setAnalysis(null);
+    setError(null);
+    setIsLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,17 +158,31 @@ export function JobAnalyzer() {
                 className="min-h-[150px]"
               />
             </div>
-            <Button
-              type="submit"
-              disabled={
-                isLoading || !formData.jobTitle || !formData.jobDescription
-              }
-              className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl"
-              size="lg"
-            >
-              {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-              {isLoading ? 'Analyzing...' : 'Analyze Job'}
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button
+                type="submit"
+                disabled={
+                  isLoading || !formData.jobTitle || !formData.jobDescription
+                }
+                className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl"
+                size="lg"
+              >
+                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                {isLoading ? 'Analyzing...' : 'Analyze Job'}
+              </Button>
+              {analysis && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={handleReset}
+                  className="w-full sm:w-auto text-lg py-6 font-bold rounded-xl"
+                >
+                  <XCircle className="mr-2 h-5 w-5" />
+                  Clear & Start Over
+                </Button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -238,7 +260,7 @@ export function JobAnalyzer() {
             <CardHeader>
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
                 <BrainCircuit className="w-7 h-7 text-primary" />
-                Technical Terms & Jargon
+                Technical Terms &amp; Jargon
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
