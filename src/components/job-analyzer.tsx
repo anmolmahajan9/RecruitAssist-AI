@@ -164,13 +164,13 @@ export function JobAnalyzer() {
                 disabled={
                   isLoading || !formData.jobTitle || !formData.jobDescription
                 }
-                className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl"
+                className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
                 size="lg"
               >
                 {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                 {isLoading ? 'Analyzing...' : 'Analyze Job'}
               </Button>
-              {analysis && (
+              {(analysis || error) && (
                 <Button
                   type="button"
                   variant="outline"
@@ -188,7 +188,7 @@ export function JobAnalyzer() {
       </Card>
 
       {error && (
-        <Card className="bg-destructive/10 border-destructive/20 text-destructive-foreground">
+        <Card className="bg-destructive/10 border-destructive text-destructive-foreground">
           <CardHeader>
             <CardTitle>Error</CardTitle>
           </CardHeader>
@@ -199,142 +199,149 @@ export function JobAnalyzer() {
       )}
 
       {analysis && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                <Briefcase className="w-7 h-7 text-primary" />
-                Job Role Explained
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Accordion
-                type="multiple"
-                defaultValue={['exp-easy', 'exp-intermediate', 'exp-recruiter']}
-                className="space-y-2"
-              >
-                <AccordionItem value="exp-easy" className="border-0">
-                  <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Baby className="w-6 h-6 text-primary" />
-                      Easy explanation
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="p-4 pt-2">
-                    <p className="text-muted-foreground">
-                      {analysis.JobRoleExplained.Easy}
-                    </p>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="exp-intermediate" className="border-0">
-                  <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <School className="w-6 h-6 text-primary" />
-                      Intermediate explanation
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="p-4 pt-2">
-                    <p className="text-muted-foreground">
-                      {analysis.JobRoleExplained.Intermediate}
-                    </p>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="exp-recruiter" className="border-0">
-                  <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Users className="w-6 h-6 text-primary" />
-                      Recruiter explanation
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="p-4 pt-2">
-                    <p className="text-muted-foreground">
-                      {analysis.JobRoleExplained.Recruiter}
-                    </p>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                <BrainCircuit className="w-7 h-7 text-primary" />
-                Technical Terms &amp; Jargon
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="text-lg font-bold mb-3 pb-2 border-b">
-                  Specific
-                </h4>
-                {renderTermList(analysis.TechnicalTermsAndJargon.SpecificToRole)}
-              </div>
-              <div>
-                <h4 className="text-lg font-bold mb-3 mt-6 pb-2 border-b">
-                  General
-                </h4>
-                {renderTermList(analysis.TechnicalTermsAndJargon.GeneralTerms)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                <FileText className="w-7 h-7 text-primary" />
-                Key Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h4 className="text-lg font-bold mb-3 pb-2 border-b">
-                  Specific Tasks
-                </h4>
-                {renderTaskList(analysis.Tasks.SpecificTasks)}
-              </div>
-              <div>
-                <h4 className="text-lg font-bold mb-3 mt-6 pb-2 border-b">
-                  General Tasks
-                </h4>
-                {renderTaskList(analysis.Tasks.GeneralTasks)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <Code className="w-6 h-6 text-primary" />
-                <CardTitle className="text-2xl font-bold">
-                  Boolean Query
+        <Accordion
+          type="multiple"
+          defaultValue={['job-role', 'tech-terms', 'key-tasks', 'boolean-query']}
+          className="space-y-6"
+        >
+          <AccordionItem value="job-role" className="border-b-0">
+            <Card>
+              <AccordionTrigger className="p-6 hover:no-underline">
+                <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                  <Briefcase className="w-7 h-7 text-primary" />
+                  Job Role Explained
                 </CardTitle>
-              </div>
-              <CardDescription>
-                A ready-to-use search query to find the best candidates.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="relative p-4 bg-secondary/50 rounded-lg border">
-                <p className="text-sm font-mono text-muted-foreground whitespace-pre-wrap break-words">
-                  {analysis.BooleanQuery}
-                </p>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 h-8 w-8 text-muted-foreground hover:bg-accent"
-                  onClick={handleCopy}
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <Accordion
+                  type="multiple"
+                  defaultValue={['exp-easy', 'exp-intermediate', 'exp-recruiter']}
+                  className="space-y-2"
                 >
-                  {copied ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  <AccordionItem value="exp-easy" className="border-0">
+                    <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Baby className="w-6 h-6 text-primary" />
+                        Easy explanation
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4 pt-2">
+                      <p className="text-muted-foreground">
+                        {analysis.JobRoleExplained.Easy}
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="exp-intermediate" className="border-0">
+                    <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <School className="w-6 h-6 text-primary" />
+                        Intermediate explanation
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4 pt-2">
+                      <p className="text-muted-foreground">
+                        {analysis.JobRoleExplained.Intermediate}
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="exp-recruiter" className="border-0">
+                    <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline bg-secondary/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Users className="w-6 h-6 text-primary" />
+                        Recruiter explanation
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4 pt-2">
+                      <p className="text-muted-foreground">
+                        {analysis.JobRoleExplained.Recruiter}
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </AccordionContent>
+            </Card>
+          </AccordionItem>
+
+          <AccordionItem value="tech-terms" className="border-b-0">
+            <Card>
+              <AccordionTrigger className="p-6 hover:no-underline">
+                <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                  <BrainCircuit className="w-7 h-7 text-primary" />
+                  Technical Terms &amp; Jargon
+                </CardTitle>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <div>
+                  <h4 className="text-xl font-bold mb-4 pb-2 border-b">
+                    Specific
+                  </h4>
+                  {renderTermList(analysis.TechnicalTermsAndJargon.SpecificToRole)}
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold mb-4 mt-6 pb-2 border-b">
+                    General
+                  </h4>
+                  {renderTermList(analysis.TechnicalTermsAndJargon.GeneralTerms)}
+                </div>
+              </AccordionContent>
+            </Card>
+          </AccordionItem>
+          
+          <AccordionItem value="key-tasks" className="border-b-0">
+            <Card>
+              <AccordionTrigger className="p-6 hover:no-underline">
+                <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                  <FileText className="w-7 h-7 text-primary" />
+                  Key Tasks
+                </CardTitle>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <div>
+                  <h4 className="text-xl font-bold mb-4 pb-2 border-b">
+                    Specific Tasks
+                  </h4>
+                  {renderTaskList(analysis.Tasks.SpecificTasks)}
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold mb-4 mt-6 pb-2 border-b">
+                    General Tasks
+                  </h4>
+                  {renderTaskList(analysis.Tasks.GeneralTasks)}
+                </div>
+              </AccordionContent>
+            </Card>
+          </AccordionItem>
+
+          <AccordionItem value="boolean-query" className="border-b-0">
+            <Card>
+              <AccordionTrigger className="p-6 hover:no-underline">
+                  <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                    <Code className="w-6 h-6 text-primary" />
+                    Boolean Query
+                  </CardTitle>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="relative p-4 bg-secondary/50 rounded-lg border">
+                  <p className="text-sm font-mono text-muted-foreground whitespace-pre-wrap break-words">
+                    {analysis.BooleanQuery}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8 text-muted-foreground hover:bg-accent"
+                    onClick={handleCopy}
+                  >
+                    {copied ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </AccordionContent>
+            </Card>
+          </AccordionItem>
+        </Accordion>
       )}
     </div>
   );
