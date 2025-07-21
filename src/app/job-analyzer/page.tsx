@@ -154,17 +154,6 @@ function JobAnalyzerComponent() {
         initialData={formData}
       />
 
-      {isJobAnalysisLoading && !jobAnalysis && (
-        <Card className="mt-8">
-          <CardContent className="pt-6 text-center">
-            <div className="flex justify-center items-center">
-              <Loader2 className="mr-2 h-6 w-6 animate-spin text-primary" />
-              <p className="text-lg">Analyzing job, please wait...</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {jobAnalysisError && (
         <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
           <CardHeader>
@@ -199,17 +188,6 @@ function JobAnalyzerComponent() {
             </Button>
           </div>
         </div>
-      )}
-
-      {isBooleanQueryLoading && !booleanQueryAnalysis && (
-        <Card className="mt-8">
-          <CardContent className="pt-6 text-center">
-            <div className="flex justify-center items-center">
-              <Loader2 className="mr-2 h-6 w-6 animate-spin text-primary" />
-              <p className="text-lg">Generating query, please wait...</p>
-            </div>
-          </CardContent>
-        </Card>
       )}
 
       {booleanQueryError && (
