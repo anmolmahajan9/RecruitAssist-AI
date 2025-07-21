@@ -40,7 +40,7 @@ You are an experienced recruitment consultant. Your objective is to generate key
 
 1. Review and understand the Job
 
-2. Prepare relevant list of keywords and their related synonyms for boolean search. These should reflect keywords you would look for in an ideal candidate's resumes. Also generate all the possible variations of the keywords and synonyms that a candidate may write in their resume. Finally, combine them into a single boolean query string for Naukri.com.
+2. Prepare relevant list of keywords and their related synonyms for boolean search. These should reflect keywords you would look for in an ideal candidate's resumes. Also generate all the possible variations of the keywords and synonyms that a candidate may write in their resume. Finally, combine them into a single boolean query string.
 `,
 });
 

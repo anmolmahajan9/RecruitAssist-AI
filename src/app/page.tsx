@@ -20,7 +20,7 @@ export default function Home() {
           RecruitAssist AI
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          AI-powered tools to make a recruiter's daily life easier.
+          Making daily life of recruiters easy
         </p>
       </div>
 
@@ -51,8 +51,8 @@ export default function Home() {
                 Boolean Query Generator
               </CardTitle>
               <CardDescription className="pt-2 text-base">
-                Automatically generate an optimized Boolean search query for
-                Naukri.com based on a job description.
+                Automatically generate an optimized Boolean search query based
+                on a job description.
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
