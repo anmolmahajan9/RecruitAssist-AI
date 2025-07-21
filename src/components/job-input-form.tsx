@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,7 @@ interface JobInputFormProps {
   hasResults: boolean;
   buttonText: string;
   loadingText: string;
+  initialData?: JobAnalysisInput;
 }
 
 export function JobInputForm({
@@ -31,11 +32,18 @@ export function JobInputForm({
   hasResults,
   buttonText,
   loadingText,
+  initialData,
 }: JobInputFormProps) {
   const [formData, setFormData] = useState<JobAnalysisInput>({
     jobTitle: '',
     jobDescription: '',
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -48,11 +56,11 @@ export function JobInputForm({
     e.preventDefault();
     onSubmit(formData);
   };
-  
+
   const handleReset = () => {
     setFormData({ jobTitle: '', jobDescription: '' });
     onReset();
-  }
+  };
 
   return (
     <Card>

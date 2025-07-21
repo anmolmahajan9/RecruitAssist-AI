@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { JobInputForm } from '@/components/job-input-form';
 import { JobAnalysisDisplay } from '@/components/job-analysis-display';
 import {
@@ -13,21 +13,43 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search, Loader2 } from 'lucide-react';
 
-export default function JobAnalyzerPage() {
+function JobAnalyzerComponent() {
   const [analysis, setAnalysis] = useState<JobAnalysisOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [formData, setFormData] = useState<JobAnalysisInput>({
+    jobTitle: '',
+    jobDescription: '',
+  });
 
-  const handleAnalysis = async (formData: JobAnalysisInput) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const jobTitle = searchParams.get('jobTitle');
+    const jobDescription = searchParams.get('jobDescription');
+
+    if (jobTitle && jobDescription) {
+      const newFormData = { jobTitle, jobDescription };
+      setFormData(newFormData);
+      handleAnalysis(newFormData, true); // Pass true to indicate it's an auto-run
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const handleAnalysis = async (
+    data: JobAnalysisInput,
+    isAutoRun = false
+  ) => {
     setIsLoading(true);
     setError(null);
-    setAnalysis(null);
-
+    if (!isAutoRun) {
+      setAnalysis(null);
+    }
     try {
-      const result = await analyzeJobDescription(formData);
+      const result = await analyzeJobDescription(data);
       setAnalysis(result);
     } catch (err) {
       setError(
@@ -40,10 +62,24 @@ export default function JobAnalyzerPage() {
     }
   };
 
+  const handleFormSubmit = (data: JobAnalysisInput) => {
+    setFormData(data);
+    handleAnalysis(data);
+  };
+
   const handleReset = () => {
     setAnalysis(null);
     setError(null);
     setIsLoading(false);
+    setFormData({ jobTitle: '', jobDescription: '' });
+    router.push('/job-analyzer'); // Clear URL params
+  };
+
+  const handleNavigate = () => {
+    const params = new URLSearchParams();
+    params.set('jobTitle', formData.jobTitle);
+    params.set('jobDescription', formData.jobDescription);
+    window.open(`/boolean-query?${params.toString()}`, '_blank');
   };
 
   return (
@@ -51,10 +87,12 @@ export default function JobAnalyzerPage() {
       <header className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
-              <ArrowLeft className="h-5 w-5" />
-              <span className="sr-only">Back</span>
-            </Button>
+            <Link href="/">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+                <span className="sr-only">Back</span>
+              </Button>
+            </Link>
             <Link
               href="/"
               className="text-xl font-bold text-foreground hover:text-primary transition-colors"
@@ -75,13 +113,25 @@ export default function JobAnalyzerPage() {
       </header>
 
       <JobInputForm
-        onSubmit={handleAnalysis}
+        onSubmit={handleFormSubmit}
         isLoading={isLoading}
         onReset={handleReset}
         hasResults={!!analysis || !!error}
         buttonText="Analyze Job"
         loadingText="Analyzing..."
+        initialData={formData}
       />
+
+      {isLoading && !analysis && (
+        <Card className="mt-8">
+          <CardContent className="pt-6 text-center">
+            <div className="flex justify-center items-center">
+              <Loader2 className="mr-2 h-6 w-6 animate-spin text-primary" />
+              <p className="text-lg">Analyzing job, please wait...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {error && (
         <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
@@ -97,8 +147,26 @@ export default function JobAnalyzerPage() {
       {analysis && (
         <div className="mt-8">
           <JobAnalysisDisplay analysis={analysis} />
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={handleNavigate}
+              size="lg"
+              className="font-bold rounded-xl"
+            >
+              <Search className="mr-2 h-5 w-5" />
+              Generate Boolean Query
+            </Button>
+          </div>
         </div>
       )}
     </div>
+  );
+}
+
+export default function JobAnalyzerPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <JobAnalyzerComponent />
+    </Suspense>
   );
 }
