@@ -18,11 +18,13 @@ export default function CandidateRankerPage() {
   const [analysis, setAnalysis] = useState<CandidateRankerOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [jobRequirements, setJobRequirements] = useState('');
 
   const handleFormSubmit = async (data: CandidateRankerInput) => {
     setIsLoading(true);
     setError(null);
     setAnalysis(null);
+    setJobRequirements(data.jobRequirements);
 
     try {
       // Basic JSON validation before sending
@@ -55,6 +57,7 @@ export default function CandidateRankerPage() {
     setAnalysis(null);
     setError(null);
     setIsLoading(false);
+    setJobRequirements('');
   };
 
   return (
@@ -107,7 +110,10 @@ export default function CandidateRankerPage() {
 
       {analysis && (
         <div className="mt-8">
-          <CandidateRankerDisplay analysis={analysis} />
+          <CandidateRankerDisplay
+            analysis={analysis}
+            jobRequirements={jobRequirements}
+          />
         </div>
       )}
     </div>

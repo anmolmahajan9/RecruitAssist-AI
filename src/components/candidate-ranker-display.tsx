@@ -14,35 +14,27 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import type { CandidateRankerOutput } from '@/ai/schemas/candidate-ranker-schema';
-import { Trophy, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
+import { Trophy } from 'lucide-react';
+import { useMemo } from 'react';
 
 interface CandidateRankerDisplayProps {
   analysis: CandidateRankerOutput;
+  jobRequirements: string;
 }
-
-const getRankColor = (rank: number) => {
-  if (rank === 1) return 'text-yellow-400';
-  if (rank === 2) return 'text-gray-400';
-  if (rank === 3) return 'text-yellow-600';
-  return 'text-muted-foreground';
-};
-
-const StatusIcon = ({ status }: { status: 'Yes' | 'No' | 'Maybe' }) => {
-  switch (status) {
-    case 'Yes':
-      return <CheckCircle2 className="h-5 w-5 text-green-500" />;
-    case 'No':
-      return <XCircle className="h-5 w-5 text-red-500" />;
-    case 'Maybe':
-      return <HelpCircle className="h-5 w-5 text-yellow-500" />;
-    default:
-      return null;
-  }
-};
 
 export function CandidateRankerDisplay({
   analysis,
+  jobRequirements,
 }: CandidateRankerDisplayProps) {
+  const requirementsList = useMemo(
+    () =>
+      jobRequirements
+        .split('\n')
+        .map((req) => req.trim())
+        .filter(Boolean),
+    [jobRequirements]
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -68,11 +60,7 @@ export function CandidateRankerDisplay({
             >
               <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline">
                 <div className="flex items-center gap-4 w-full">
-                  <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-full font-bold text-lg ${getRankColor(
-                      candidate.rank
-                    )}`}
-                  >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full font-bold text-lg text-muted-foreground">
                     {candidate.rank}
                   </div>
                   <div className="flex-grow text-left">
@@ -96,26 +84,27 @@ export function CandidateRankerDisplay({
               </AccordionTrigger>
               <AccordionContent className="p-4 pt-0">
                 <div className="space-y-4">
-                  {candidate.mustHaves?.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-2">
-                        Must-Have Requirements
-                      </h4>
-                      <div className="space-y-2">
-                        {candidate.mustHaves.map((req, reqIndex) => (
-                          <div
-                            key={reqIndex}
-                            className="flex items-center justify-between p-2 bg-secondary/50 rounded-md"
-                          >
-                            <span className="text-foreground">
-                              {req.must_have}
-                            </span>
-                            <StatusIcon status={req.status} />
-                          </div>
-                        ))}
+                  {candidate.mustHaves?.length > 0 &&
+                    requirementsList.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-2">
+                          Must-Have Requirements
+                        </h4>
+                        <div className="space-y-2">
+                          {requirementsList.map((req, reqIndex) => (
+                            <div
+                              key={reqIndex}
+                              className="flex items-center justify-between p-2 bg-secondary/50 rounded-md"
+                            >
+                              <span className="text-foreground">{req}</span>
+                              <span className="text-2xl">
+                                {candidate.mustHaves[reqIndex] || ''}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
               </AccordionContent>
             </AccordionItem>
