@@ -11,9 +11,6 @@ import { analyzeJobDescription } from '@/ai/flows/job-analyzer-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
 
 export default function JobAnalyzerPage() {
   const [analysis, setAnalysis] = useState<JobAnalysisOutput | null>(null);
@@ -49,13 +46,10 @@ export default function JobAnalyzerPage() {
     <main className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <div className="mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
         <header className="mb-8">
-           <div className="flex justify-between items-center mb-4">
-             <Button asChild variant="ghost" className="pl-0">
-                <Link href="/" aria-label="Back to Home">
-                  <ArrowLeft className="h-5 w-5 mr-2" />
-                  Back
-                </Link>
-             </Button>
+          <div className="flex justify-between items-center mb-6">
+             <Link href="/" className="text-xl font-bold text-foreground hover:text-primary transition-colors">
+                RecruitAssist AI
+            </Link>
             <ThemeToggle />
           </div>
           <div className="text-left">
