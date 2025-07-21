@@ -27,17 +27,6 @@ export default function CandidateRankerPage() {
     setJobRequirements(data.jobRequirements);
 
     try {
-      // Basic JSON validation before sending
-      JSON.parse(data.candidatesDetails);
-    } catch (e) {
-      setError(
-        'Invalid JSON format for candidates. Please check the structure.'
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    try {
       const result = await rankCandidates(data);
       // Ensure results are sorted by rank client-side for consistency
       result.rankedCandidates.sort((a, b) => a.rank - b.rank);

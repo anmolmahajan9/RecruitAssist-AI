@@ -15,7 +15,7 @@ export const CandidateRankerInputSchema = z.object({
   jobRequirements: z.string().describe('The key requirements for the job.'),
   candidatesDetails: z
     .string()
-    .describe('A JSON string containing an array of candidate objects.'),
+    .describe('A string containing the details of candidates (e.g., copy-pasted resumes).'),
 });
 export type CandidateRankerInput = z.infer<typeof CandidateRankerInputSchema>;
 

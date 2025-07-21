@@ -42,7 +42,7 @@ You are an expert technical recruiter. Your task is to rank a list of candidates
 
 1.  Carefully review the Job Requirements.
 
-2.  For each candidate in the provided JSON, evaluate their experience, skills, and qualifications against the job requirements.
+2.  For each candidate in the provided text, evaluate their experience, skills, and qualifications against the job requirements.
 
 3.  Provide a score for each candidate from 1 to 100, where 100 is a perfect match.
 
@@ -51,10 +51,9 @@ Return a JSON object containing a 'rankedCandidates' array. Each object in the a
     - rank: The numerical rank.
     - name: The candidate's name.
     - score: The calculated score (1-100).
-    - mustHaves: An array of single emoji strings corresponding to each requirement from the input. Use "✅" for Yes, "🟡" for Maybe, and "❌" for No. The order of emojis must match the order of the job requirements provided.
+    - mustHaves: An array of emoji strings corresponding to each requirement from the input. Use "✅" for Yes, "🟡" for Maybe, and "❌" for No. The order of emojis must match the order of the job requirements provided.
     
-Do not truncate, show ALL candidates.
-`,
+Do not truncate, show ALL candidates.`,
 });
 
 const candidateRankerFlow = ai.defineFlow(

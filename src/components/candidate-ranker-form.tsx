@@ -22,23 +22,14 @@ interface CandidateRankerFormProps {
   hasResults: boolean;
 }
 
-const placeholderJson = JSON.stringify(
-  [
-    {
-      "name": "Alice Johnson",
-      "experience": "5 years in frontend development",
-      "skills": ["React", "TypeScript", "Next.js", "CSS"]
-    },
-    {
-      "name": "Bob Williams",
-      "experience": "3 years in full-stack development",
-      "skills": ["React", "Node.js", "GraphQL", "Docker"]
-    }
-  ],
-  null,
-  2
-);
+const placeholderText = `Alice Johnson
+Frontend Developer with 5 years of experience in React, TypeScript, and Next.js.
 
+---
+
+Bob Williams
+Full-stack developer skilled in React, Node.js, and GraphQL.
+`;
 
 export function CandidateRankerForm({
   onSubmit,
@@ -49,7 +40,7 @@ export function CandidateRankerForm({
   const [formData, setFormData] = useState<CandidateRankerInput>({
     jobTitle: '',
     jobRequirements: '',
-    candidatesDetails: placeholderJson,
+    candidatesDetails: '',
   });
 
   const handleInputChange = (
@@ -68,7 +59,7 @@ export function CandidateRankerForm({
     setFormData({
       jobTitle: '',
       jobRequirements: '',
-      candidatesDetails: placeholderJson,
+      candidatesDetails: '',
     });
     onReset();
   };
@@ -78,7 +69,7 @@ export function CandidateRankerForm({
       <CardHeader>
         <CardTitle className="text-2xl font-bold">Enter Details</CardTitle>
         <CardDescription>
-          Provide job details and a list of candidates in JSON format.
+          Provide job details and paste the candidate information below.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -112,12 +103,12 @@ export function CandidateRankerForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="candidatesDetails" className="font-semibold">
-              Candidates (JSON Array)
+              Candidate Details
             </Label>
             <Textarea
               id="candidatesDetails"
               name="candidatesDetails"
-              placeholder="Paste an array of candidate objects here..."
+              placeholder={placeholderText}
               value={formData.candidatesDetails}
               onChange={handleInputChange}
               required
