@@ -48,7 +48,7 @@ export default function Home() {
             <CardHeader className="flex-grow">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
                 <Search className="w-7 h-7 text-primary" />
-                Boolean Query Generator
+                Boolean Query Helper
               </CardTitle>
               <CardDescription className="pt-2 text-base">
                 Automatically generate an optimized Boolean search query based

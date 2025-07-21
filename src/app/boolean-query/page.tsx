@@ -66,7 +66,7 @@ export default function BooleanQueryPage() {
         </div>
         <div className="text-left">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
-            Boolean Query Generator
+            Boolean Query Helper
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
             Generate an optimized search query from a job description.
