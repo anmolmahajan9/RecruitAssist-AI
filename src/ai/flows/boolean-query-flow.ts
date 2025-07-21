@@ -42,7 +42,7 @@ You are an experienced recruitment consultant. Your objective is to generate key
 
 2. Prepare list of keywords relevant to this job role. These should reflect keywords you would look for in this job role's ideal candidate's resumes. note that you are not limited to the keywords provided in the Job description so cover all relevant terms that may even be missing in the provided job description. 
 
-3. Categorize these into "Specific Keywords" (this means those terms which are only relevant for ideal candidate specific to the given job role) and "General Keywords" (this means those terms which will generally be applicable to other candidates in other similar roles also).  
+3. The above list of keywords should be marked either "Specific" (this means those terms which are only relevant for ideal candidate specific to the given job role) or "General" (this means those terms which will generally be applicable to other candidates in other similar roles also).  
 
 4. Also generate all the possible variations of the keywords and synonyms that a candidate may write in their resume. 
 
@@ -50,9 +50,9 @@ You are an experienced recruitment consultant. Your objective is to generate key
 
 ## Output
 
-Provide a table with columns : "Area" , "Primary Keywords", "Synonyms / Resume Variants"
+Provide a table with columns having Primary and Synonyms.
 
-And provide 3 variations of Boolean search strings considering only keywords (not experience or location):
+And provide 3 variations of Boolean search strings based on keywords (not considering experience or location):
 1. Basic
 2. Intermediate (More advanced than basic)
 3. Advanced (More advanced and in-depth than intermediate)

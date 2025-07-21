@@ -73,9 +73,6 @@ export function BooleanQueryDisplay({ analysis }: BooleanQueryDisplayProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="font-bold">
-                  Area / Skill / Tool
-                </TableHead>
                 <TableHead className="font-bold">Primary Keywords</TableHead>
                 <TableHead className="font-bold">
                   Synonyms / Resume Variants
@@ -85,8 +82,9 @@ export function BooleanQueryDisplay({ analysis }: BooleanQueryDisplayProps) {
             <TableBody>
               {analysis.keywordTable.map((row, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{row.area}</TableCell>
-                  <TableCell>{row.primaryKeywords}</TableCell>
+                  <TableCell className="font-medium">
+                    {row.primaryKeywords}
+                  </TableCell>
                   <TableCell>{row.synonyms}</TableCell>
                 </TableRow>
               ))}

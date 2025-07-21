@@ -23,7 +23,6 @@ export const BooleanQueryOutputSchema = z.object({
   keywordTable: z
     .array(
       z.object({
-        area: z.string().describe('The area, skill, or tool.'),
         primaryKeywords: z
           .string()
           .describe('The primary keywords for the area.'),
@@ -32,9 +31,7 @@ export const BooleanQueryOutputSchema = z.object({
           .describe('The synonyms or resume variants for the keywords.'),
       })
     )
-    .describe(
-      'A table of keywords, skills, and tools with their synonyms.'
-    ),
+    .describe('A table of keywords and their synonyms.'),
   booleanQueries: z.object({
     basic: z.string().describe('A basic boolean search query.'),
     intermediate: z
