@@ -38,11 +38,15 @@ You are an experienced recruitment consultant. Your objective is to generate key
 
 ## Task
 
-1. Review and understand the Job
+1. Review and understand the Job based on details provided.
 
-2. Prepare relevant list of keywords and their related synonyms for boolean search. Categorize these into "Specific Keywords" (this means those terms which are only relevant for ideal candidate specific to the given job role) and "General Keywords" (this means those terms which will generally be applicable to other candidates in other similar roles also). These should reflect keywords you would look for in this job role's ideal candidate's resumes. 
+2. Prepare list of keywords relevant to this job role. These should reflect keywords you would look for in this job role's ideal candidate's resumes. note that you are not limited to the keywords provided in the Job description so cover all relevant terms that may even be missing in the provided job description. 
 
-3. Also generate all the possible variations of the keywords and synonyms that a candidate may write in their resume. 
+3. Categorize these into "Specific Keywords" (this means those terms which are only relevant for ideal candidate specific to the given job role) and "General Keywords" (this means those terms which will generally be applicable to other candidates in other similar roles also).  
+
+4. Also generate all the possible variations of the keywords and synonyms that a candidate may write in their resume. 
+
+5. Generate variations of Boolean search strings.
 
 ## Output
 
