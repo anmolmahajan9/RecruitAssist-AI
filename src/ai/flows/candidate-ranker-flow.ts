@@ -51,7 +51,7 @@ Return a JSON object containing a 'rankedCandidates' array. Each object in the a
     - rank: The numerical rank.
     - name: The candidate's name.
     - score: The calculated score (1-100).
-    - mustHaves: An array of strings. For each requirement, add a single emoji to the array: "✅" for Yes, "🟡" for Maybe, and "❌" for No. The order of emojis must match the order of the job requirements provided.
+    - mustHaves: An array of single emoji strings corresponding to each requirement from the input. Use "✅" for Yes, "🟡" for Maybe, and "❌" for No. The order of emojis must match the order of the job requirements provided.
     
 Do not truncate, show ALL candidates.
 `,
