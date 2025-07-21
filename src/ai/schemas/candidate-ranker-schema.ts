@@ -31,10 +31,6 @@ const RankedCandidateSchema = z.object({
   rank: z.number().describe('The numerical rank of the candidate.'),
   name: z.string().describe("The candidate's name."),
   score: z.number().describe('The match score (1-100) for the candidate.'),
-  rationale: z
-    .string()
-    .describe('A brief rationale for the assigned score and rank.'),
-  details: z.any().describe('The original candidate details provided.'),
   mustHaves: z
     .array(MustHaveSchema)
     .describe(

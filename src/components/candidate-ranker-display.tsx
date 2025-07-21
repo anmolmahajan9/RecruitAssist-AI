@@ -96,13 +96,6 @@ export function CandidateRankerDisplay({
               </AccordionTrigger>
               <AccordionContent className="p-4 pt-0">
                 <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Rationale</h4>
-                    <p className="text-muted-foreground">
-                      {candidate.rationale}
-                    </p>
-                  </div>
-
                   {candidate.mustHaves?.length > 0 && (
                     <div>
                       <h4 className="font-semibold mb-2">
@@ -123,15 +116,6 @@ export function CandidateRankerDisplay({
                       </div>
                     </div>
                   )}
-
-                  <div>
-                    <h4 className="font-semibold mb-2 mt-4">
-                      Original Candidate Details
-                    </h4>
-                    <pre className="text-xs font-mono text-foreground whitespace-pre-wrap break-words p-3 bg-secondary/50 rounded-lg border">
-                      {JSON.stringify(candidate.details, null, 2)}
-                    </pre>
-                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>
