@@ -19,17 +19,27 @@ export const CandidateRankerInputSchema = z.object({
 });
 export type CandidateRankerInput = z.infer<typeof CandidateRankerInputSchema>;
 
+const MustHaveSchema = z.object({
+  requirement: z.string().describe('The specific requirement being evaluated.'),
+  status: z
+    .enum(['Yes', 'No', 'Maybe'])
+    .describe('The evaluation status for the requirement.'),
+});
+
 // Output Schema
 const RankedCandidateSchema = z.object({
   rank: z.number().describe('The numerical rank of the candidate.'),
   name: z.string().describe("The candidate's name."),
-  score: z
-    .number()
-    .describe('The match score (1-100) for the candidate.'),
+  score: z.number().describe('The match score (1-100) for the candidate.'),
   rationale: z
     .string()
     .describe('A brief rationale for the assigned score and rank.'),
   details: z.any().describe('The original candidate details provided.'),
+  mustHaves: z
+    .array(MustHaveSchema)
+    .describe(
+      "An array evaluating the candidate against each 'must-have' requirement."
+    ),
 });
 
 export const CandidateRankerOutputSchema = z.object({

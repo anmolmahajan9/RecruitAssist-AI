@@ -14,7 +14,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import type { CandidateRankerOutput } from '@/ai/schemas/candidate-ranker-schema';
-import { Medal, Star, ThumbsDown, Trophy } from 'lucide-react';
+import { Medal, Trophy, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
 
 interface CandidateRankerDisplayProps {
   analysis: CandidateRankerOutput;
@@ -25,6 +25,19 @@ const getMedalColor = (rank: number) => {
   if (rank === 2) return 'text-gray-400';
   if (rank === 3) return 'text-yellow-600';
   return 'text-muted-foreground';
+};
+
+const StatusIcon = ({ status }: { status: 'Yes' | 'No' | 'Maybe' }) => {
+  switch (status) {
+    case 'Yes':
+      return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+    case 'No':
+      return <XCircle className="h-5 w-5 text-red-500" />;
+    case 'Maybe':
+      return <HelpCircle className="h-5 w-5 text-yellow-500" />;
+    default:
+      return null;
+  }
 };
 
 export function CandidateRankerDisplay({
@@ -42,7 +55,11 @@ export function CandidateRankerDisplay({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Accordion type="multiple" className="space-y-4">
+        <Accordion
+          type="multiple"
+          className="space-y-4"
+          defaultValue={['candidate-0']}
+        >
           {analysis.rankedCandidates.map((candidate, index) => (
             <AccordionItem
               key={index}
@@ -84,8 +101,30 @@ export function CandidateRankerDisplay({
                       {candidate.rationale}
                     </p>
                   </div>
+
+                  {candidate.mustHaves?.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-2">
+                        Must-Have Requirements
+                      </h4>
+                      <div className="space-y-2">
+                        {candidate.mustHaves.map((req, reqIndex) => (
+                          <div
+                            key={reqIndex}
+                            className="flex items-center justify-between p-2 bg-secondary/50 rounded-md"
+                          >
+                            <span className="text-foreground">
+                              {req.requirement}
+                            </span>
+                            <StatusIcon status={req.status} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
-                    <h4 className="font-semibold mb-2">
+                    <h4 className="font-semibold mb-2 mt-4">
                       Original Candidate Details
                     </h4>
                     <pre className="text-xs font-mono text-foreground whitespace-pre-wrap break-words p-3 bg-secondary/50 rounded-lg border">
