@@ -61,6 +61,18 @@ function QueryDisplay({
 export function BooleanQueryDisplay({ analysis }: BooleanQueryDisplayProps) {
   if (!analysis) return null;
 
+  const { keywordTable, booleanQueries } = analysis;
+
+  const renderKeywordRows = (
+    rows: { primaryKeywords: string; synonyms: string }[]
+  ) =>
+    rows.map((row, index) => (
+      <TableRow key={index}>
+        <TableCell className="font-medium">{row.primaryKeywords}</TableCell>
+        <TableCell>{row.synonyms}</TableCell>
+      </TableRow>
+    ));
+
   return (
     <div className="space-y-8 mt-8">
       <Card>
@@ -80,14 +92,32 @@ export function BooleanQueryDisplay({ analysis }: BooleanQueryDisplayProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {analysis.keywordTable.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">
-                    {row.primaryKeywords}
-                  </TableCell>
-                  <TableCell>{row.synonyms}</TableCell>
-                </TableRow>
-              ))}
+              {keywordTable.specificKeywords?.length > 0 && (
+                <>
+                  <TableRow className="bg-secondary/50 hover:bg-secondary/50">
+                    <TableCell
+                      colSpan={2}
+                      className="font-bold text-lg text-foreground"
+                    >
+                      Specific Keywords
+                    </TableCell>
+                  </TableRow>
+                  {renderKeywordRows(keywordTable.specificKeywords)}
+                </>
+              )}
+              {keywordTable.generalKeywords?.length > 0 && (
+                <>
+                  <TableRow className="bg-secondary/50 hover:bg-secondary/50">
+                    <TableCell
+                      colSpan={2}
+                      className="font-bold text-lg text-foreground pt-6"
+                    >
+                      General Keywords
+                    </TableCell>
+                  </TableRow>
+                  {renderKeywordRows(keywordTable.generalKeywords)}
+                </>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -102,15 +132,15 @@ export function BooleanQueryDisplay({ analysis }: BooleanQueryDisplayProps) {
         <CardContent className="space-y-6">
           <QueryDisplay
             title="1. Basic Query"
-            query={analysis.booleanQueries.basic}
+            query={booleanQueries.basic}
           />
           <QueryDisplay
             title="2. Intermediate Query"
-            query={analysis.booleanQueries.intermediate}
+            query={booleanQueries.intermediate}
           />
           <QueryDisplay
             title="3. Advanced Query"
-            query={analysis.booleanQueries.advanced}
+            query={booleanQueries.advanced}
           />
         </CardContent>
       </Card>
