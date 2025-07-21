@@ -41,12 +41,12 @@ export default function RootLayout({
             <main className="flex-grow">{children}</main>
             <footer className="py-4 px-8 text-center">
               <Link
-                href="https://linkedin.com/in/anmolmahajan9"
+                href="https://suitable.ai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-display text-2xl text-muted-foreground hover:text-primary transition-colors"
+                className="text-base text-muted-foreground hover:text-primary transition-colors"
               >
-                Anm
+                Made with ❤️ by Suitable AI
               </Link>
             </footer>
           </div>
