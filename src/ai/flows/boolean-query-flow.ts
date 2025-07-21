@@ -22,7 +22,7 @@ export async function generateBooleanQuery(
 
 const booleanQueryPrompt = ai.definePrompt({
   name: 'booleanQueryPrompt',
-  model: googleAI.model('gemini-1.5-flash-latest'),
+  model: googleAI.model('gemini-1.5-pro-latest'),
   input: { schema: BooleanQueryInputSchema },
   output: { schema: BooleanQueryOutputSchema },
   prompt: `## Role and Objective

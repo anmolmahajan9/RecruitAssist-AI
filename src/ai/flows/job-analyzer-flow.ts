@@ -22,7 +22,7 @@ export async function analyzeJobDescription(
 
 const jobAnalyzerPrompt = ai.definePrompt({
   name: 'jobAnalyzerPrompt',
-  model: googleAI.model('gemini-1.5-flash-latest'),
+  model: googleAI.model('gemini-1.5-pro-latest'),
   input: { schema: JobAnalysisInputSchema },
   output: { schema: JobAnalysisOutputSchema },
   prompt: `## Objective
