@@ -80,7 +80,7 @@ function BooleanQueryComponent() {
     const params = new URLSearchParams();
     params.set('jobTitle', formData.jobTitle);
     params.set('jobDescription', formData.jobDescription);
-    window.open(`/job-analyzer?${params.toString()}`, '_blank');
+    router.push(`/job-analyzer?${params.toString()}`);
   };
 
   return (

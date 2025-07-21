@@ -79,7 +79,7 @@ function JobAnalyzerComponent() {
     const params = new URLSearchParams();
     params.set('jobTitle', formData.jobTitle);
     params.set('jobDescription', formData.jobDescription);
-    window.open(`/boolean-query?${params.toString()}`, '_blank');
+    router.push(`/boolean-query?${params.toString()}`);
   };
 
   return (
