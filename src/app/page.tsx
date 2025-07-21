@@ -11,8 +11,7 @@ export default function Home() {
               RecruitAssist AI
             </h1>
             <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-              Break down any job description and instantly generate a powerful
-              boolean search query for Naukri.com.
+              Making daily life of recruiters easy
             </p>
           </div>
           <ThemeToggle />
