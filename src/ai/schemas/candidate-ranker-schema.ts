@@ -20,7 +20,7 @@ export const CandidateRankerInputSchema = z.object({
 export type CandidateRankerInput = z.infer<typeof CandidateRankerInputSchema>;
 
 const MustHaveSchema = z.object({
-  requirement: z.string().describe('The specific requirement being evaluated.'),
+  must_have: z.string().describe('The specific requirement being evaluated.'),
   status: z
     .enum(['Yes', 'No', 'Maybe'])
     .describe('The evaluation status for the requirement.'),

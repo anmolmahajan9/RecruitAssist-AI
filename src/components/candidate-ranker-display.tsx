@@ -108,7 +108,7 @@ export function CandidateRankerDisplay({
                             className="flex items-center justify-between p-2 bg-secondary/50 rounded-md"
                           >
                             <span className="text-foreground">
-                              {req.requirement}
+                              {req.must_have}
                             </span>
                             <StatusIcon status={req.status} />
                           </div>
