@@ -12,7 +12,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 export default function CandidateRankerPage() {
   const [analysis, setAnalysis] = useState<CandidateRankerOutput | null>(null);
@@ -37,6 +37,8 @@ export default function CandidateRankerPage() {
 
     try {
       const result = await rankCandidates(data);
+      // Ensure results are sorted by rank client-side for consistency
+      result.rankedCandidates.sort((a, b) => a.rank - b.rank);
       setAnalysis(result);
     } catch (err) {
       setError(
