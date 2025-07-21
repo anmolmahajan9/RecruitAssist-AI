@@ -45,8 +45,5 @@ export const JobAnalysisOutputSchema = z.object({
       .array(z.string())
       .describe('General tasks applicable to similar roles.'),
   }),
-  BooleanQuery: z
-    .string()
-    .describe('A Boolean search query optimized for Naukri.com.'),
 });
 export type JobAnalysisOutput = z.infer<typeof JobAnalysisOutputSchema>;

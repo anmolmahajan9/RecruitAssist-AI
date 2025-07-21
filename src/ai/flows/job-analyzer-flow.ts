@@ -37,18 +37,16 @@ Aim is to have a better understanding of the job role
 - General (this means those terms which will generally be applicable to other candidates in other similar roles also)
 
 3. Categorize the main specific tasks vs general tasks of the person in the role.
+
 4. Explain the job role in bullets for these persons:
 - For a 5 year old
 - For a college undergrad
 - For a recruiter
 
-5. Based on the above breakdown, formulate a boolean query to search for candidates in Naukri.com
-
 ## Job title: 
 {{{jobTitle}}}
 
 ## Job details:
-
 {{{jobDescription}}}
 
 ## Output format:
@@ -70,8 +68,7 @@ Aim is to have a better understanding of the job role
   "Tasks": {
     "SpecificTasks": ["string"],
     "GeneralTasks": ["string"]
-  },
-  "BooleanQuery": "string"
+  }
 }
 `,
 });

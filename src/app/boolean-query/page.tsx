@@ -4,27 +4,27 @@ import { useState } from 'react';
 import { JobInputForm } from '@/components/job-input-form';
 import { BooleanQueryDisplay } from '@/components/boolean-query-display';
 import {
-  type JobAnalysisInput,
-  type JobAnalysisOutput,
-} from '@/ai/schemas/job-analyzer-schema';
-import { analyzeJobDescription } from '@/ai/flows/job-analyzer-flow';
+  type BooleanQueryInput,
+  type BooleanQueryOutput,
+} from '@/ai/schemas/boolean-query-schema';
+import { generateBooleanQuery } from '@/ai/flows/boolean-query-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Home } from 'lucide-react';
 
 export default function BooleanQueryPage() {
-  const [analysis, setAnalysis] = useState<JobAnalysisOutput | null>(null);
+  const [analysis, setAnalysis] = useState<BooleanQueryOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAnalysis = async (formData: JobAnalysisInput) => {
+  const handleAnalysis = async (formData: BooleanQueryInput) => {
     setIsLoading(true);
     setError(null);
     setAnalysis(null);
 
     try {
-      const result = await analyzeJobDescription(formData);
+      const result = await generateBooleanQuery(formData);
       setAnalysis(result);
     } catch (err) {
       setError(
@@ -85,7 +85,7 @@ export default function BooleanQueryPage() {
 
         {analysis && (
           <div className="mt-8">
-            <BooleanQueryDisplay query={analysis.BooleanQuery} />
+            <BooleanQueryDisplay query={analysis.booleanQuery} />
           </div>
         )}
       </div>
