@@ -25,12 +25,12 @@ export default function Home() {
       </div>
 
       <main className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
-        <Link href="/job-analyzer" className="md:col-span-1">
+        <Link href="/job-explainer" className="md:col-span-1">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
             <CardHeader className="flex-grow">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
                 <Briefcase className="w-7 h-7 text-primary" />
-                Job Analyzer
+                Job Explainer
               </CardTitle>
               <CardDescription className="pt-2 text-base">
                 Break down job descriptions into key tasks, technical terms, and

@@ -3,26 +3,33 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { JobInputForm } from '@/components/job-input-form';
-import { BooleanQueryDisplay } from '@/components/boolean-query-display';
 import { JobExplainerDisplay } from '@/components/job-explainer-display';
-import {
-  type BooleanQueryInput,
-  type BooleanQueryOutput,
-} from '@/ai/schemas/boolean-query-schema';
+import { BooleanQueryDisplay } from '@/components/boolean-query-display';
 import {
   type JobExplainerInput,
   type JobExplainerOutput,
 } from '@/ai/schemas/job-explainer-schema';
-import { generateBooleanQuery } from '@/ai/flows/boolean-query-flow';
+import {
+  type BooleanQueryInput,
+  type BooleanQueryOutput,
+} from '@/ai/schemas/boolean-query-schema';
 import { explainJobDescription } from '@/ai/flows/job-explainer-flow';
+import { generateBooleanQuery } from '@/ai/flows/boolean-query-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Briefcase, Loader2 } from 'lucide-react';
+import { ArrowLeft, Search, Loader2 } from 'lucide-react';
 
-function BooleanQueryComponent() {
-  // Primary (Boolean Query) state
+function JobExplainerComponent() {
+  // Primary (Job Explainer) state
+  const [jobExplanation, setJobExplanation] = useState<JobExplainerOutput | null>(
+    null
+  );
+  const [isJobExplanationLoading, setIsJobExplanationLoading] = useState(false);
+  const [jobExplanationError, setJobExplanationError] = useState<string | null>(null);
+
+  // Secondary (Boolean Query) state
   const [booleanQueryAnalysis, setBooleanQueryAnalysis] =
     useState<BooleanQueryOutput | null>(null);
   const [isBooleanQueryLoading, setIsBooleanQueryLoading] = useState(false);
@@ -30,14 +37,7 @@ function BooleanQueryComponent() {
     null
   );
 
-  // Secondary (Job Explainer) state
-  const [jobExplanation, setJobExplanation] = useState<JobExplainerOutput | null>(
-    null
-  );
-  const [isJobExplanationLoading, setIsJobExplanationLoading] = useState(false);
-  const [jobExplanationError, setJobExplanationError] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState<BooleanQueryInput>({
+  const [formData, setFormData] = useState<JobExplainerInput>({
     jobTitle: '',
     jobDescription: '',
   });
@@ -52,36 +52,17 @@ function BooleanQueryComponent() {
     if (jobTitle && jobDescription) {
       const newFormData = { jobTitle, jobDescription };
       setFormData(newFormData);
-      handleBooleanQueryAnalysis(newFormData);
+      handleJobExplanation(newFormData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on initial load
-
-  const handleBooleanQueryAnalysis = async (data: BooleanQueryInput) => {
-    setIsBooleanQueryLoading(true);
-    setBooleanQueryError(null);
-    setBooleanQueryAnalysis(null);
-    setJobExplanation(null); // Clear secondary analysis
-    setJobExplanationError(null);
-
-    try {
-      const result = await generateBooleanQuery(data);
-      setBooleanQueryAnalysis(result);
-    } catch (err) {
-      setBooleanQueryError(
-        err instanceof Error
-          ? err.message
-          : 'An unexpected error occurred. Please try again.'
-      );
-    } finally {
-      setIsBooleanQueryLoading(false);
-    }
-  };
 
   const handleJobExplanation = async (data: JobExplainerInput) => {
     setIsJobExplanationLoading(true);
     setJobExplanationError(null);
     setJobExplanation(null);
+    setBooleanQueryAnalysis(null); // Clear secondary analysis
+    setBooleanQueryError(null);
 
     try {
       const result = await explainJobDescription(data);
@@ -97,21 +78,40 @@ function BooleanQueryComponent() {
     }
   };
 
-  const handleFormSubmit = (data: BooleanQueryInput) => {
+  const handleBooleanQueryAnalysis = async (data: BooleanQueryInput) => {
+    setIsBooleanQueryLoading(true);
+    setBooleanQueryError(null);
+    setBooleanQueryAnalysis(null);
+
+    try {
+      const result = await generateBooleanQuery(data);
+      setBooleanQueryAnalysis(result);
+    } catch (err) {
+      setBooleanQueryError(
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred. Please try again.'
+      );
+    } finally {
+      setIsBooleanQueryLoading(false);
+    }
+  };
+
+  const handleFormSubmit = (data: JobExplainerInput) => {
     setFormData(data);
-    router.push('/boolean-query'); // Clear params if any
-    handleBooleanQueryAnalysis(data);
+    router.push('/job-explainer'); // Clear params if any
+    handleJobExplanation(data);
   };
 
   const handleReset = () => {
-    setBooleanQueryAnalysis(null);
-    setBooleanQueryError(null);
-    setIsBooleanQueryLoading(false);
     setJobExplanation(null);
     setJobExplanationError(null);
     setIsJobExplanationLoading(false);
+    setBooleanQueryAnalysis(null);
+    setBooleanQueryError(null);
+    setIsBooleanQueryLoading(false);
     setFormData({ jobTitle: '', jobDescription: '' });
-    router.push('/boolean-query');
+    router.push('/job-explainer');
   };
 
   return (
@@ -136,59 +136,23 @@ function BooleanQueryComponent() {
         </div>
         <div className="text-left">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
-            Boolean Query Helper
+            Job Explainer
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Generate an optimized search query from a job description.
+            Get a detailed breakdown of any job description.
           </p>
         </div>
       </header>
 
       <JobInputForm
         onSubmit={handleFormSubmit}
-        isLoading={isBooleanQueryLoading}
+        isLoading={isJobExplanationLoading}
         onReset={handleReset}
-        hasResults={!!booleanQueryAnalysis || !!booleanQueryError}
-        buttonText="Generate Query"
-        loadingText="Generating..."
+        hasResults={!!jobExplanation || !!jobExplanationError}
+        buttonText="Explain Job"
+        loadingText="Explaining..."
         initialData={formData}
       />
-
-      {booleanQueryError && (
-        <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
-          <CardHeader>
-            <CardTitle>Boolean Query Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{booleanQueryError}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {booleanQueryAnalysis && (
-        <div className="mt-8">
-          <BooleanQueryDisplay analysis={booleanQueryAnalysis} />
-          <div className="mt-6 flex justify-end">
-            <Button
-              onClick={() => handleJobExplanation(formData)}
-              disabled={isJobExplanationLoading || !!jobExplanation}
-              size="lg"
-              className="font-bold rounded-xl"
-            >
-              {isJobExplanationLoading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Briefcase className="mr-2 h-5 w-5" />
-              )}
-              {isJobExplanationLoading
-                ? 'Explaining...'
-                : jobExplanation
-                  ? 'Explanation Complete'
-                  : 'Explain Job Description'}
-            </Button>
-          </div>
-        </div>
-      )}
 
       {jobExplanationError && (
         <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
@@ -204,16 +168,52 @@ function BooleanQueryComponent() {
       {jobExplanation && (
         <div className="mt-8">
           <JobExplainerDisplay explanation={jobExplanation} />
+          <div className="mt-6 flex justify-end">
+            <Button
+              onClick={() => handleBooleanQueryAnalysis(formData)}
+              disabled={isBooleanQueryLoading || !!booleanQueryAnalysis}
+              size="lg"
+              className="font-bold rounded-xl"
+            >
+              {isBooleanQueryLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Search className="mr-2 h-5 w-5" />
+              )}
+              {isBooleanQueryLoading
+                ? 'Generating...'
+                : booleanQueryAnalysis
+                  ? 'Query Generated'
+                  : 'Generate Boolean Query'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {booleanQueryError && (
+        <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
+          <CardHeader>
+            <CardTitle>Boolean Query Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{booleanQueryError}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {booleanQueryAnalysis && (
+        <div className="mt-8">
+          <BooleanQueryDisplay analysis={booleanQueryAnalysis} />
         </div>
       )}
     </div>
   );
 }
 
-export default function BooleanQueryPage() {
+export default function JobExplainerPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <BooleanQueryComponent />
+      <JobExplainerComponent />
     </Suspense>
   );
 }

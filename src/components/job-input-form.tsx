@@ -13,16 +13,16 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Loader2, XCircle } from 'lucide-react';
-import type { JobAnalysisInput } from '@/ai/schemas/job-analyzer-schema';
+import type { JobExplainerInput } from '@/ai/schemas/job-explainer-schema';
 
 interface JobInputFormProps {
-  onSubmit: (formData: JobAnalysisInput) => Promise<void>;
+  onSubmit: (formData: JobExplainerInput) => Promise<void>;
   isLoading: boolean;
   onReset: () => void;
   hasResults: boolean;
   buttonText: string;
   loadingText: string;
-  initialData?: JobAnalysisInput;
+  initialData?: JobExplainerInput;
 }
 
 export function JobInputForm({
@@ -34,7 +34,7 @@ export function JobInputForm({
   loadingText,
   initialData,
 }: JobInputFormProps) {
-  const [formData, setFormData] = useState<JobAnalysisInput>({
+  const [formData, setFormData] = useState<JobExplainerInput>({
     jobTitle: '',
     jobDescription: '',
   });
