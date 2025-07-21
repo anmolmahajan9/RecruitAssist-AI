@@ -13,22 +13,25 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Loader2, XCircle } from 'lucide-react';
-import type { CandidateRankerInput } from '@/ai/schemas/candidate-ranker-schema';
 
 interface CandidateRankerFormProps {
-  onSubmit: (formData: CandidateRankerInput) => Promise<void>;
+  onSubmit: (formData: {
+    jobTitle: string;
+    jobRequirements: string;
+    candidatesDetails: string;
+  }) => Promise<void>;
   isLoading: boolean;
   onReset: () => void;
   hasResults: boolean;
 }
 
 const placeholderText = `Alice Johnson
-Frontend Developer with 5 years of experience in React, TypeScript, and Next.js.
+Frontend Developer with 5 years of experience in React, TypeScript, and Next.js. Lives in New York, wants to work in San Francisco. CTC: 120k USD.
 
 ---
 
 Bob Williams
-Full-stack developer skilled in React, Node.js, and GraphQL.
+Full-stack developer skilled in React, Node.js, and GraphQL. 3 years exp. Based in Chicago.
 `;
 
 export function CandidateRankerForm({
@@ -37,7 +40,7 @@ export function CandidateRankerForm({
   onReset,
   hasResults,
 }: CandidateRankerFormProps) {
-  const [formData, setFormData] = useState<CandidateRankerInput>({
+  const [formData, setFormData] = useState({
     jobTitle: '',
     jobRequirements: '',
     candidatesDetails: '',
@@ -94,7 +97,7 @@ export function CandidateRankerForm({
             <Textarea
               id="jobRequirements"
               name="jobRequirements"
-              placeholder="e.g., 5+ years of React experience, proficiency in TypeScript, experience with state management..."
+              placeholder="List each requirement on a new line for best results..."
               value={formData.jobRequirements}
               onChange={handleInputChange}
               required
@@ -114,6 +117,9 @@ export function CandidateRankerForm({
               required
               className="min-h-[250px] font-mono text-sm"
             />
+             <p className="text-xs text-muted-foreground">
+              You can paste multiple resumes or candidate summaries here. Separate each candidate with "---" for best results.
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button

@@ -7,30 +7,59 @@ import {
   type CandidateRankerInput,
   type CandidateRankerOutput,
 } from '@/ai/schemas/candidate-ranker-schema';
+import {
+  type CandidateParserInput,
+  type CandidateParserOutput,
+} from '@/ai/schemas/candidate-parser-schema';
 import { rankCandidates } from '@/ai/flows/candidate-ranker-flow';
+import { parseCandidates } from '@/ai/flows/candidate-parser-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { type ParsedCandidate } from '@/ai/schemas/candidate-parser-schema';
 
 export default function CandidateRankerPage() {
   const [analysis, setAnalysis] = useState<CandidateRankerOutput | null>(null);
+  const [parsedCandidatesList, setParsedCandidatesList] = useState<
+    ParsedCandidate[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [jobRequirements, setJobRequirements] = useState('');
 
-  const handleFormSubmit = async (data: CandidateRankerInput) => {
+  const handleFormSubmit = async (data: {
+    jobTitle: string;
+    jobRequirements: string;
+    candidatesDetails: string;
+  }) => {
     setIsLoading(true);
     setError(null);
     setAnalysis(null);
+    setParsedCandidatesList([]);
     setJobRequirements(data.jobRequirements);
 
     try {
-      const result = await rankCandidates(data);
+      // Step 1: Parse the unstructured candidate text
+      const parserInput: CandidateParserInput = {
+        candidatesDetails: data.candidatesDetails,
+      };
+      const parsedResult: CandidateParserOutput =
+        await parseCandidates(parserInput);
+      setParsedCandidatesList(parsedResult.parsedCandidates);
+
+      // Step 2: Rank the parsed candidates
+      const rankerInput: CandidateRankerInput = {
+        jobTitle: data.jobTitle,
+        jobRequirements: data.jobRequirements,
+        candidatesJson: JSON.stringify(parsedResult.parsedCandidates, null, 2),
+      };
+      const rankerResult = await rankCandidates(rankerInput);
+
       // Ensure results are sorted by rank client-side for consistency
-      result.rankedCandidates.sort((a, b) => a.rank - b.rank);
-      setAnalysis(result);
+      rankerResult.rankedCandidates.sort((a, b) => a.rank - b.rank);
+      setAnalysis(rankerResult);
     } catch (err) {
       setError(
         err instanceof Error
@@ -47,6 +76,7 @@ export default function CandidateRankerPage() {
     setError(null);
     setIsLoading(false);
     setJobRequirements('');
+    setParsedCandidatesList([]);
   };
 
   return (
@@ -86,6 +116,17 @@ export default function CandidateRankerPage() {
         hasResults={!!analysis || !!error}
       />
 
+      {isLoading && !analysis && (
+        <Card className="mt-8">
+          <CardContent className="p-6 flex items-center justify-center">
+            <Loader2 className="mr-2 h-8 w-8 animate-spin" />
+            <span className="text-lg">
+              Parsing and ranking candidates...
+            </span>
+          </CardContent>
+        </Card>
+      )}
+
       {error && (
         <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
           <CardHeader>
@@ -102,6 +143,7 @@ export default function CandidateRankerPage() {
           <CandidateRankerDisplay
             analysis={analysis}
             jobRequirements={jobRequirements}
+            parsedCandidates={parsedCandidatesList}
           />
         </div>
       )}

@@ -13,9 +13,11 @@ import { z } from 'zod';
 export const CandidateRankerInputSchema = z.object({
   jobTitle: z.string().describe('The title of the job.'),
   jobRequirements: z.string().describe('The key requirements for the job.'),
-  candidatesDetails: z
+  candidatesJson: z
     .string()
-    .describe('A string containing the details of candidates (e.g., copy-pasted resumes).'),
+    .describe(
+      'A string containing a JSON array of parsed candidate objects.'
+    ),
 });
 export type CandidateRankerInput = z.infer<typeof CandidateRankerInputSchema>;
 
