@@ -50,7 +50,7 @@ You are an experienced recruitment consultant. Your objective is to generate key
 
 ## Output
 
-Provide a table with columns having Primary with subheads as Specific and General along with Resume Variants in another colum.
+Provide a table with columns having "Primary Keywords" with subheads as "Specific to the role" and "General" along with Resume Variants in another colum.
 
 And provide 3 variations of Boolean search strings based on keywords (not considering experience or location):
 1. Basic
