@@ -20,8 +20,27 @@ export type BooleanQueryInput = z.infer<typeof BooleanQueryInputSchema>;
 
 // Output Schema
 export const BooleanQueryOutputSchema = z.object({
-  booleanQuery: z
-    .string()
-    .describe('A Boolean search query optimized for a job search.'),
+  keywordTable: z
+    .array(
+      z.object({
+        area: z.string().describe('The area, skill, or tool.'),
+        primaryKeywords: z
+          .string()
+          .describe('The primary keywords for the area.'),
+        synonyms: z
+          .string()
+          .describe('The synonyms or resume variants for the keywords.'),
+      })
+    )
+    .describe(
+      'A table of keywords, skills, and tools with their synonyms.'
+    ),
+  booleanQueries: z.object({
+    basic: z.string().describe('A basic boolean search query.'),
+    intermediate: z
+      .string()
+      .describe('An intermediate boolean search query.'),
+    advanced: z.string().describe('An advanced boolean search query.'),
+  }),
 });
 export type BooleanQueryOutput = z.infer<typeof BooleanQueryOutputSchema>;

@@ -96,7 +96,7 @@ export default function BooleanQueryPage() {
 
       {analysis && (
         <div className="mt-8">
-          <BooleanQueryDisplay query={analysis.booleanQuery} />
+          <BooleanQueryDisplay analysis={analysis} />
         </div>
       )}
     </div>
