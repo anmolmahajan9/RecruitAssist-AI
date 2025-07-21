@@ -26,7 +26,7 @@ export default function CandidateRankerPage() {
 
     try {
       // Basic JSON validation before sending
-      JSON.parse(data.candidatesJson);
+      JSON.parse(data.candidatesDetails);
     } catch (e) {
       setError(
         'Invalid JSON format for candidates. Please check the structure.'

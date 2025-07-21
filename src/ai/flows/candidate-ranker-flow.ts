@@ -26,6 +26,7 @@ const candidateRankerPrompt = ai.definePrompt({
   input: { schema: CandidateRankerInputSchema },
   output: { schema: CandidateRankerOutputSchema },
   prompt: `## Role and Objective
+
 You are an expert technical recruiter. Your task is to rank a list of candidates one by one based on how well they fit a given job description. You need to assess ALL candidates even if the list is long. Assessment should be on each of the Must haves to be marked as Yes, Maybe or No.
 
 ## Job Title
@@ -34,12 +35,15 @@ You are an expert technical recruiter. Your task is to rank a list of candidates
 ## Job Requirements
 {{{jobRequirements}}}
 
-## Candidates (JSON format)
-{{{candidatesJson}}}
+## Candidates
+{{{candidatesDetails}}}
 
 ## Task
+
 1.  Carefully review the Job Requirements.
+
 2.  For each candidate in the provided JSON, evaluate their experience, skills, and qualifications against the job requirements.
+
 3.  Provide a score for each candidate from 1 to 100, where 100 is a perfect match.
 
 ## Output Format

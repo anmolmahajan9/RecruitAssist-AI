@@ -13,7 +13,7 @@ import { z } from 'zod';
 export const CandidateRankerInputSchema = z.object({
   jobTitle: z.string().describe('The title of the job.'),
   jobRequirements: z.string().describe('The key requirements for the job.'),
-  candidatesJson: z
+  candidatesDetails: z
     .string()
     .describe('A JSON string containing an array of candidate objects.'),
 });

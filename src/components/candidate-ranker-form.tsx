@@ -49,7 +49,7 @@ export function CandidateRankerForm({
   const [formData, setFormData] = useState<CandidateRankerInput>({
     jobTitle: '',
     jobRequirements: '',
-    candidatesJson: placeholderJson,
+    candidatesDetails: placeholderJson,
   });
 
   const handleInputChange = (
@@ -68,7 +68,7 @@ export function CandidateRankerForm({
     setFormData({
       jobTitle: '',
       jobRequirements: '',
-      candidatesJson: placeholderJson,
+      candidatesDetails: placeholderJson,
     });
     onReset();
   };
@@ -111,14 +111,14 @@ export function CandidateRankerForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="candidatesJson" className="font-semibold">
+            <Label htmlFor="candidatesDetails" className="font-semibold">
               Candidates (JSON Array)
             </Label>
             <Textarea
-              id="candidatesJson"
-              name="candidatesJson"
+              id="candidatesDetails"
+              name="candidatesDetails"
               placeholder="Paste an array of candidate objects here..."
-              value={formData.candidatesJson}
+              value={formData.candidatesDetails}
               onChange={handleInputChange}
               required
               className="min-h-[250px] font-mono text-sm"
@@ -131,7 +131,7 @@ export function CandidateRankerForm({
                 isLoading ||
                 !formData.jobTitle ||
                 !formData.jobRequirements ||
-                !formData.candidatesJson
+                !formData.candidatesDetails
               }
               className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
               size="lg"
