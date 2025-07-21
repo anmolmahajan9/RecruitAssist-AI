@@ -14,13 +14,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import type { CandidateRankerOutput } from '@/ai/schemas/candidate-ranker-schema';
-import { Medal, Trophy, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
+import { Trophy, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
 
 interface CandidateRankerDisplayProps {
   analysis: CandidateRankerOutput;
 }
 
-const getMedalColor = (rank: number) => {
+const getRankColor = (rank: number) => {
   if (rank === 1) return 'text-yellow-400';
   if (rank === 2) return 'text-gray-400';
   if (rank === 3) return 'text-yellow-600';
@@ -68,14 +68,15 @@ export function CandidateRankerDisplay({
             >
               <AccordionTrigger className="p-4 text-lg font-bold hover:no-underline">
                 <div className="flex items-center gap-4 w-full">
-                  <Medal
-                    className={`h-8 w-8 ${getMedalColor(candidate.rank)}`}
-                  />
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-full font-bold text-lg ${getRankColor(
+                      candidate.rank
+                    )}`}
+                  >
+                    {candidate.rank}
+                  </div>
                   <div className="flex-grow text-left">
                     <span className="font-bold">{candidate.name}</span>
-                    <span className="text-sm font-normal text-muted-foreground ml-2">
-                      (Rank: {candidate.rank})
-                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-right mr-4">
                     <span
