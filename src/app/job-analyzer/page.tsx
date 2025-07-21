@@ -11,7 +11,9 @@ import { analyzeJobDescription } from '@/ai/flows/job-analyzer-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
-import { Home } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
 
 export default function JobAnalyzerPage() {
   const [analysis, setAnalysis] = useState<JobAnalysisOutput | null>(null);
@@ -46,7 +48,16 @@ export default function JobAnalyzerPage() {
   return (
     <main className="min-h-screen bg-background text-foreground transition-colors duration-300">
       <div className="mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
-        <header className="flex justify-between items-center my-8 md:my-12">
+        <header className="mb-8">
+           <div className="flex justify-between items-center mb-4">
+             <Button asChild variant="ghost" className="pl-0">
+                <Link href="/" aria-label="Back to Home">
+                  <ArrowLeft className="h-5 w-5 mr-2" />
+                  Back
+                </Link>
+             </Button>
+            <ThemeToggle />
+          </div>
           <div className="text-left">
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
               Job Analyzer
@@ -54,12 +65,6 @@ export default function JobAnalyzerPage() {
             <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
               Get a detailed breakdown of any job description.
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/" aria-label="Back to Home">
-              <Home className="h-8 w-8 text-muted-foreground hover:text-primary" />
-            </Link>
-            <ThemeToggle />
           </div>
         </header>
 
