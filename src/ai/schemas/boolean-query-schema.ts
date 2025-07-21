@@ -22,6 +22,6 @@ export type BooleanQueryInput = z.infer<typeof BooleanQueryInputSchema>;
 export const BooleanQueryOutputSchema = z.object({
   booleanQuery: z
     .string()
-    .describe('A Boolean search query optimized for Naukri.com.'),
+    .describe('A Boolean search query optimized for a job search.'),
 });
 export type BooleanQueryOutput = z.infer<typeof BooleanQueryOutputSchema>;
