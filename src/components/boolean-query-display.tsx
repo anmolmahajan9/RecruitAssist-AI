@@ -10,8 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, ListChecks, SearchCode } from 'lucide-react';
 import { useState } from 'react';
 
 interface BooleanQueryDisplayProps {
@@ -74,76 +80,88 @@ export function BooleanQueryDisplay({ analysis }: BooleanQueryDisplayProps) {
     ));
 
   return (
-    <div className="space-y-8 mt-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">
-            Keyword Breakdown
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-bold">Primary Keywords</TableHead>
-                <TableHead className="font-bold">
-                  Synonyms / Resume Variants
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {keywordTable.specificKeywords?.length > 0 && (
-                <>
-                  <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-                    <TableCell
-                      colSpan={2}
-                      className="font-bold text-lg text-foreground"
-                    >
-                      Specific Keywords
-                    </TableCell>
-                  </TableRow>
-                  {renderKeywordRows(keywordTable.specificKeywords)}
-                </>
-              )}
-              {keywordTable.generalKeywords?.length > 0 && (
-                <>
-                  <TableRow className="bg-secondary/50 hover:bg-secondary/50">
-                    <TableCell
-                      colSpan={2}
-                      className="font-bold text-lg text-foreground pt-6"
-                    >
-                      General Keywords
-                    </TableCell>
-                  </TableRow>
-                  {renderKeywordRows(keywordTable.generalKeywords)}
-                </>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+    <Accordion
+      type="multiple"
+      defaultValue={['keyword-breakdown', 'boolean-strings']}
+      className="space-y-6"
+    >
+      <AccordionItem value="keyword-breakdown" className="border-b-0">
+        <Card>
+          <AccordionTrigger className="p-6 hover:no-underline">
+            <CardTitle className="text-2xl font-bold flex items-center gap-3">
+              <ListChecks className="w-7 h-7 text-primary" />
+              Keyword Breakdown
+            </CardTitle>
+          </AccordionTrigger>
+          <AccordionContent className="px-6 pb-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-bold">Primary Keywords</TableHead>
+                  <TableHead className="font-bold">
+                    Synonyms / Resume Variants
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {keywordTable.specificKeywords?.length > 0 && (
+                  <>
+                    <TableRow className="bg-secondary/50 hover:bg-secondary/50">
+                      <TableCell
+                        colSpan={2}
+                        className="font-bold text-lg text-foreground"
+                      >
+                        Specific Keywords
+                      </TableCell>
+                    </TableRow>
+                    {renderKeywordRows(keywordTable.specificKeywords)}
+                  </>
+                )}
+                {keywordTable.generalKeywords?.length > 0 && (
+                  <>
+                    <TableRow className="bg-secondary/50 hover:bg-secondary/50">
+                      <TableCell
+                        colSpan={2}
+                        className="font-bold text-lg text-foreground pt-6"
+                      >
+                        General Keywords
+                      </TableCell>
+                    </TableRow>
+                    {renderKeywordRows(keywordTable.generalKeywords)}
+                  </>
+                )}
+              </TableBody>
+            </Table>
+          </AccordionContent>
+        </Card>
+      </AccordionItem>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">
-            Boolean Search Strings
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <QueryDisplay
-            title="1. Basic Query"
-            query={booleanQueries.basic}
-          />
-          <QueryDisplay
-            title="2. Intermediate Query"
-            query={booleanQueries.intermediate}
-          />
-          <QueryDisplay
-            title="3. Advanced Query"
-            query={booleanQueries.advanced}
-          />
-        </CardContent>
-      </Card>
-    </div>
+      <AccordionItem value="boolean-strings" className="border-b-0">
+        <Card>
+          <AccordionTrigger className="p-6 hover:no-underline">
+            <CardTitle className="text-2xl font-bold flex items-center gap-3">
+              <SearchCode className="w-7 h-7 text-primary" />
+              Boolean Search Strings
+            </CardTitle>
+          </AccordionTrigger>
+          <AccordionContent className="px-6 pb-6">
+            <div className="space-y-6">
+              <QueryDisplay
+                title="1. Basic Query"
+                query={booleanQueries.basic}
+              />
+              <QueryDisplay
+                title="2. Intermediate Query"
+                query={booleanQueries.intermediate}
+              />
+              <QueryDisplay
+                title="3. Advanced Query"
+                query={booleanQueries.advanced}
+              />
+            </div>
+          </AccordionContent>
+        </Card>
+      </AccordionItem>
+    </Accordion>
   );
 }
