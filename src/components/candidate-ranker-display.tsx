@@ -141,7 +141,7 @@ export function CandidateRankerDisplay({
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
+                  <div className="space-y-4 mb-6">
                     <DetailItem
                       label="Key Skills"
                       value={parsedDetail?.keySkills}
