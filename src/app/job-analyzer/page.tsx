@@ -4,11 +4,17 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { JobInputForm } from '@/components/job-input-form';
 import { JobAnalysisDisplay } from '@/components/job-analysis-display';
+import { BooleanQueryDisplay } from '@/components/boolean-query-display';
 import {
   type JobAnalysisInput,
   type JobAnalysisOutput,
 } from '@/ai/schemas/job-analyzer-schema';
+import {
+  type BooleanQueryInput,
+  type BooleanQueryOutput,
+} from '@/ai/schemas/boolean-query-schema';
 import { analyzeJobDescription } from '@/ai/flows/job-analyzer-flow';
+import { generateBooleanQuery } from '@/ai/flows/boolean-query-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
@@ -16,9 +22,21 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Search, Loader2 } from 'lucide-react';
 
 function JobAnalyzerComponent() {
-  const [analysis, setAnalysis] = useState<JobAnalysisOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Primary (Job Analysis) state
+  const [jobAnalysis, setJobAnalysis] = useState<JobAnalysisOutput | null>(
+    null
+  );
+  const [isJobAnalysisLoading, setIsJobAnalysisLoading] = useState(false);
+  const [jobAnalysisError, setJobAnalysisError] = useState<string | null>(null);
+
+  // Secondary (Boolean Query) state
+  const [booleanQueryAnalysis, setBooleanQueryAnalysis] =
+    useState<BooleanQueryOutput | null>(null);
+  const [isBooleanQueryLoading, setIsBooleanQueryLoading] = useState(false);
+  const [booleanQueryError, setBooleanQueryError] = useState<string | null>(
+    null
+  );
+
   const [formData, setFormData] = useState<JobAnalysisInput>({
     jobTitle: '',
     jobDescription: '',
@@ -34,52 +52,66 @@ function JobAnalyzerComponent() {
     if (jobTitle && jobDescription) {
       const newFormData = { jobTitle, jobDescription };
       setFormData(newFormData);
-      handleAnalysis(newFormData, true); // Pass true to indicate it's an auto-run
+      handleJobAnalysis(newFormData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, []); // Run only once on initial load
 
-  const handleAnalysis = async (
-    data: JobAnalysisInput,
-    isAutoRun = false
-  ) => {
-    setIsLoading(true);
-    setError(null);
-    if (!isAutoRun) {
-      setAnalysis(null);
-    }
+  const handleJobAnalysis = async (data: JobAnalysisInput) => {
+    setIsJobAnalysisLoading(true);
+    setJobAnalysisError(null);
+    setJobAnalysis(null);
+    setBooleanQueryAnalysis(null); // Clear secondary analysis
+    setBooleanQueryError(null);
+
     try {
       const result = await analyzeJobDescription(data);
-      setAnalysis(result);
+      setJobAnalysis(result);
     } catch (err) {
-      setError(
+      setJobAnalysisError(
         err instanceof Error
           ? err.message
           : 'An unexpected error occurred. Please try again.'
       );
     } finally {
-      setIsLoading(false);
+      setIsJobAnalysisLoading(false);
+    }
+  };
+
+  const handleBooleanQueryAnalysis = async (data: BooleanQueryInput) => {
+    setIsBooleanQueryLoading(true);
+    setBooleanQueryError(null);
+    setBooleanQueryAnalysis(null);
+
+    try {
+      const result = await generateBooleanQuery(data);
+      setBooleanQueryAnalysis(result);
+    } catch (err) {
+      setBooleanQueryError(
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred. Please try again.'
+      );
+    } finally {
+      setIsBooleanQueryLoading(false);
     }
   };
 
   const handleFormSubmit = (data: JobAnalysisInput) => {
     setFormData(data);
-    handleAnalysis(data);
+    router.push('/job-analyzer'); // Clear params if any
+    handleJobAnalysis(data);
   };
 
   const handleReset = () => {
-    setAnalysis(null);
-    setError(null);
-    setIsLoading(false);
+    setJobAnalysis(null);
+    setJobAnalysisError(null);
+    setIsJobAnalysisLoading(false);
+    setBooleanQueryAnalysis(null);
+    setBooleanQueryError(null);
+    setIsBooleanQueryLoading(false);
     setFormData({ jobTitle: '', jobDescription: '' });
-    router.push('/job-analyzer'); // Clear URL params
-  };
-
-  const handleNavigate = () => {
-    const params = new URLSearchParams();
-    params.set('jobTitle', formData.jobTitle);
-    params.set('jobDescription', formData.jobDescription);
-    router.push(`/boolean-query?${params.toString()}`);
+    router.push('/job-analyzer');
   };
 
   return (
@@ -114,15 +146,15 @@ function JobAnalyzerComponent() {
 
       <JobInputForm
         onSubmit={handleFormSubmit}
-        isLoading={isLoading}
+        isLoading={isJobAnalysisLoading}
         onReset={handleReset}
-        hasResults={!!analysis || !!error}
+        hasResults={!!jobAnalysis || !!jobAnalysisError}
         buttonText="Analyze Job"
         loadingText="Analyzing..."
         initialData={formData}
       />
 
-      {isLoading && !analysis && (
+      {isJobAnalysisLoading && !jobAnalysis && (
         <Card className="mt-8">
           <CardContent className="pt-6 text-center">
             <div className="flex justify-center items-center">
@@ -133,30 +165,67 @@ function JobAnalyzerComponent() {
         </Card>
       )}
 
-      {error && (
+      {jobAnalysisError && (
         <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
           <CardHeader>
-            <CardTitle>Error</CardTitle>
+            <CardTitle>Job Analysis Error</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>{error}</p>
+            <p>{jobAnalysisError}</p>
           </CardContent>
         </Card>
       )}
 
-      {analysis && (
+      {jobAnalysis && (
         <div className="mt-8">
-          <JobAnalysisDisplay analysis={analysis} />
+          <JobAnalysisDisplay analysis={jobAnalysis} />
           <div className="mt-6 flex justify-end">
             <Button
-              onClick={handleNavigate}
+              onClick={() => handleBooleanQueryAnalysis(formData)}
+              disabled={isBooleanQueryLoading || !!booleanQueryAnalysis}
               size="lg"
               className="font-bold rounded-xl"
             >
-              <Search className="mr-2 h-5 w-5" />
-              Generate Boolean Query
+              {isBooleanQueryLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Search className="mr-2 h-5 w-5" />
+              )}
+              {isBooleanQueryLoading
+                ? 'Generating...'
+                : booleanQueryAnalysis
+                  ? 'Query Generated'
+                  : 'Generate Boolean Query'}
             </Button>
           </div>
+        </div>
+      )}
+
+      {isBooleanQueryLoading && !booleanQueryAnalysis && (
+        <Card className="mt-8">
+          <CardContent className="pt-6 text-center">
+            <div className="flex justify-center items-center">
+              <Loader2 className="mr-2 h-6 w-6 animate-spin text-primary" />
+              <p className="text-lg">Generating query, please wait...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {booleanQueryError && (
+        <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
+          <CardHeader>
+            <CardTitle>Boolean Query Error</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{booleanQueryError}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {booleanQueryAnalysis && (
+        <div className="mt-8">
+          <BooleanQueryDisplay analysis={booleanQueryAnalysis} />
         </div>
       )}
     </div>
