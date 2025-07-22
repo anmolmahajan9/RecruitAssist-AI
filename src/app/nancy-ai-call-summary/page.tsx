@@ -69,7 +69,7 @@ export default function NancyAiCallSummaryPage() {
             Nancy AI Call Summary
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Generate a client-friendly summary of a candidate call assessment.
+            Generate a summary of a candidate call assessment.
           </p>
         </div>
       </header>

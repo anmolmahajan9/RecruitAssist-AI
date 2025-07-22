@@ -85,7 +85,7 @@ export default function Home() {
                 Nancy AI Call Summary
               </CardTitle>
               <CardDescription className="pt-2 text-base">
-                Generate a client-friendly summary of a candidate call assessment.
+                Generate a summary of a candidate call assessment.
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
