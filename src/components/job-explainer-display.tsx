@@ -20,6 +20,7 @@ import {
   Baby,
   School,
   Users,
+  CheckCircle,
 } from 'lucide-react';
 
 interface JobExplainerDisplayProps {
@@ -54,11 +55,23 @@ export function JobExplainerDisplay({ explanation }: JobExplainerDisplayProps) {
       ))}
     </ul>
   );
+  
+  const renderMustHaves = (mustHaves: string[]) => (
+    <ul className="space-y-3">
+      {mustHaves.map((item, index) => (
+        <li key={index} className="flex items-start gap-3">
+          <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+          <span className="text-muted-foreground">{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+
 
   return (
     <Accordion
       type="multiple"
-      defaultValue={['job-role', 'tech-terms', 'key-tasks']}
+      defaultValue={['job-role', 'tech-terms', 'key-tasks', 'must-haves']}
       className="space-y-6"
     >
       <AccordionItem value="job-role" className="border-b-0">
@@ -165,6 +178,20 @@ export function JobExplainerDisplay({ explanation }: JobExplainerDisplayProps) {
               </h4>
               {renderTaskList(explanation.Tasks.GeneralTasks)}
             </div>
+          </AccordionContent>
+        </Card>
+      </AccordionItem>
+      
+      <AccordionItem value="must-haves" className="border-b-0">
+        <Card>
+          <AccordionTrigger className="p-6 hover:no-underline">
+            <CardTitle className="text-2xl font-bold flex items-center gap-3">
+              <CheckCircle className="w-7 h-7 text-primary" />
+              Must-Have Screening Criteria
+            </CardTitle>
+          </AccordionTrigger>
+          <AccordionContent className="px-6 pb-6 space-y-6">
+            {renderMustHaves(explanation.MustHaves)}
           </AccordionContent>
         </Card>
       </AccordionItem>

@@ -45,5 +45,6 @@ export const JobExplainerOutputSchema = z.object({
       .array(z.string())
       .describe('General tasks applicable to similar roles.'),
   }),
+  MustHaves: z.array(z.string()).describe('A list of must-have criteria for the role.'),
 });
 export type JobExplainerOutput = z.infer<typeof JobExplainerOutputSchema>;

@@ -26,7 +26,7 @@ const jobExplainerPrompt = ai.definePrompt({
   input: { schema: JobExplainerInputSchema },
   output: { schema: JobExplainerOutputSchema },
   prompt: `## Objective
-Aim is to have a better understanding of the job role
+Aim is to have a better understanding of the job role.
 
 ## Tasks
 
@@ -38,7 +38,9 @@ Aim is to have a better understanding of the job role
 
 3. Categorize the main specific tasks vs general tasks of the person in the role. Cover as many tasks as you can, never pick and choose.
 
-4. Explain the job role in bullets for these persons:
+4. Create must haves for the role in simple sentences like "Must have experience with..." or " Must have knowledge of..." and similar sentences. Must haves will be provided to a recruiter to screen the candidate for first level screening call, so consider everything the hiring manager is looking for as per the job details.
+
+5. Explain the job role in bullets for these persons:
 - For a 5 year old
 - For a college undergrad
 - For a recruiter
@@ -68,7 +70,15 @@ Aim is to have a better understanding of the job role
   "Tasks": {
     "SpecificTasks": ["string"],
     "GeneralTasks": ["string"]
-  }
+  },
+  "MustHaves": [
+    "Must have experience with...",
+    "Must be able to...",
+    "Must know how to...",
+    "Must understand...",
+    "Must be familiar with...",
+    "Must have worked on..."
+  ]
 }
 `,
 });
