@@ -36,7 +36,7 @@ Your task is to identify the candidate table from the unstructured text and cons
 1.  The entire output must be a single HTML string in the 'emailBody' field.
 2.  Identify the client's name and job title from the text. If not present, use generic placeholders like "[Client Name]" and "[Role Name]".
 3.  Wrap all sentences and paragraphs in <p> tags to preserve line breaks.
-4.  Convert the candidate table from the input text into a proper HTML table (i.e., use <table>, <thead>, <tbody>, <tr>, <th>, and <td> tags). Ensure the table cells have some padding (e.g., style="padding: 8px;").
+4.  Convert the candidate table from the input text into a proper HTML table (i.e., use <table>, <thead>, <tbody>, <tr>, <th>, and <td> tags). Ensure the table has a border (e.g., style="border: 1px solid black; border-collapse: collapse;") and cells have padding and a border (e.g., style="border: 1px solid black; padding: 8px;").
 5.  Start with a greeting (e.g., "<p>Hi [Client Name],</p>").
 6.  Add a professional opening line (e.g., "<p>Hope you’re doing well.</p>").
 7.  State the purpose: submitting candidates for the role (e.g., "<p>Please find below the candidate details for the [Role Name] position for your review.</p>").
