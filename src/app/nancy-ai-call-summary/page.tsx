@@ -69,8 +69,7 @@ export default function NancyAiCallSummaryPage() {
             Nancy AI Call Summary
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Refine a call assessment to be client-friendly by removing scores
-            and negative points.
+            Generate a client-friendly summary of a candidate call assessment.
           </p>
         </div>
       </header>

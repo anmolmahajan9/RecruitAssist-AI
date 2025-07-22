@@ -85,7 +85,7 @@ export default function Home() {
                 Nancy AI Call Summary
               </CardTitle>
               <CardDescription className="pt-2 text-base">
-                Refine a call assessment by removing scores and negative points for client sharing.
+                Generate a client-friendly summary of a candidate call assessment.
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
