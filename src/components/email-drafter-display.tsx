@@ -17,28 +17,31 @@ export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
   if (!result) return null;
 
   const handleCopy = () => {
-    if (emailBodyRef.current) {
-      // Create a range and select the contents of the div, not the div itself.
-      // This is the key to avoiding copying the container's styles.
+    // Create a temporary element to hold the HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = result.emailBody;
+    document.body.appendChild(tempDiv);
+
+    try {
+      // Select the content of the temporary element
       const range = document.createRange();
-      range.selectNodeContents(emailBodyRef.current);
-      
+      range.selectNodeContents(tempDiv);
       const selection = window.getSelection();
       selection?.removeAllRanges();
       selection?.addRange(range);
-      
-      try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }
-      } catch (err) {
-        console.error('Failed to copy HTML: ', err);
+
+      // Execute the copy command
+      const successful = document.execCommand('copy');
+      if (successful) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       }
-      
-      // Deselect the text after copying
-      selection?.removeAllRanges();
+    } catch (err) {
+      console.error('Failed to copy HTML: ', err);
+    } finally {
+      // Clean up the temporary element and clear the selection
+      document.body.removeChild(tempDiv);
+      window.getSelection()?.removeAllRanges();
     }
   };
 
