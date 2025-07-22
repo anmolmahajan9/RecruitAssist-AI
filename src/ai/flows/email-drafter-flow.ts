@@ -35,7 +35,7 @@ Your task is to identify the candidate table from the unstructured text and cons
 
 1.  The entire output must be a single HTML string in the 'emailBody' field.
 2.  **Wrap the entire email body in a single \`<div>\` with inline CSS to set the font to Arial, size 10pt (e.g., \`<div style="font-family: Arial, sans-serif; font-size: 10pt;">...\`**
-3.  Identify the client's name, job title, other details from the text. If not present, use generic placeholders like "[Client Name]", "[Role Name]", etc. If using placeholders, highlight the placeholder with yellow.
+3.  Identify the client's name, job title, other details from the text. If not present, use generic placeholders like "[Client Name]", "[Role Name]", etc. If using placeholders, highlight the placeholder with yellow highlighter. Only use placeholders if client name, role name is not available. First priority is to use actual data.
 4.  Wrap all sentences and paragraphs in <p> tags to preserve line breaks. Use one line space between most lines.
 5.  Convert the candidate table from the input text into a proper HTML table (i.e., use <table>, <thead>, <tbody>, <tr>, <th>, and <td> tags). Ensure the table has a border (e.g., style="border: 1px solid black; border-collapse: collapse;") and cells have padding and a border (e.g., style="border: 1px solid black; padding: 8px;"). All candidate details in the table should be reproduced verbatim as is, no candidate detail should be changed.
 6.  Start with a greeting (e.g., "<p>Hi [Client Name],</p>").
