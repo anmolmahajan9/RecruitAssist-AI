@@ -73,7 +73,7 @@ export function CallSummaryForm({
               size="lg"
             >
               {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-              {isLoading ? 'Summarizing...' : 'Generate Client Summary'}
+              {isLoading ? 'Summarizing...' : 'Generate Summary'}
             </Button>
             {hasResults && (
               <Button
