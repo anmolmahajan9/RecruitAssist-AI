@@ -31,8 +31,8 @@ export default function Home() {
         </p>
       </div>
 
-      <main className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <Link href="/job-explainer" className="md:col-span-1">
+      <main className="w-full max-w-2xl flex flex-col gap-8">
+        <Link href="/job-explainer">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
             <CardHeader className="flex-grow">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -50,7 +50,7 @@ export default function Home() {
           </Card>
         </Link>
 
-        <Link href="/boolean-query" className="md:col-span-1">
+        <Link href="/boolean-query">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
             <CardHeader className="flex-grow">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -67,7 +67,7 @@ export default function Home() {
             </div>
           </Card>
         </Link>
-        <Link href="/candidate-ranker" className="md:col-span-1">
+        <Link href="/candidate-ranker">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
             <CardHeader className="flex-grow">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -84,7 +84,7 @@ export default function Home() {
             </div>
           </Card>
         </Link>
-        <Link href="/nancy-ai-call-summary" className="md:col-span-1">
+        <Link href="/nancy-ai-call-summary">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
             <CardHeader className="flex-grow">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -100,7 +100,7 @@ export default function Home() {
             </div>
           </Card>
         </Link>
-        <Link href="/email-drafter" className="md:col-span-2">
+        <Link href="/email-drafter">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
             <CardHeader className="flex-grow">
               <CardTitle className="text-2xl font-bold flex items-center gap-3">
