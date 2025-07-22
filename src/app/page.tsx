@@ -6,7 +6,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { ArrowRight, Briefcase, Search, Medal } from 'lucide-react';
+import { ArrowRight, Briefcase, Search, Medal, Phone } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -24,7 +24,7 @@ export default function Home() {
         </p>
       </div>
 
-      <main className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
+      <main className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <Link href="/job-explainer" className="md:col-span-1">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
             <CardHeader className="flex-grow">
@@ -74,6 +74,22 @@ export default function Home() {
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Start Ranking <ArrowRight className="ml-2 h-5 w-5" />
+            </div>
+          </Card>
+        </Link>
+        <Link href="/nancy-ai-call-summary" className="md:col-span-1">
+          <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
+            <CardHeader className="flex-grow">
+              <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                <Phone className="w-7 h-7 text-primary" />
+                Nancy AI Call Summary
+              </CardTitle>
+              <CardDescription className="pt-2 text-base">
+                Refine a call assessment by removing scores and negative points for client sharing.
+              </CardDescription>
+            </CardHeader>
+            <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
+              Summarize Call <ArrowRight className="ml-2 h-5 w-5" />
             </div>
           </Card>
         </Link>
