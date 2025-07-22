@@ -23,6 +23,7 @@ interface EmailDrafterFormProps {
 
 const placeholderText = `Client: Ravi
 Role: Senior Frontend Developer
+Comments: Combine both tables
 
 Candidate | Experience | Availability
 --- | --- | ---
