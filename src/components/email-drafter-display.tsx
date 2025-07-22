@@ -21,7 +21,7 @@ export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
       // Create a range and select the contents of the div, not the div itself.
       // This is the key to avoiding copying the container's styles.
       const range = document.createRange();
-      range.selectNodeContents(emailBodyRef.current); 
+      range.selectNodeContents(emailBodyRef.current);
       
       const selection = window.getSelection();
       selection?.removeAllRanges();
@@ -64,13 +64,11 @@ export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
           {copied ? 'Copied!' : 'Copy Email'}
         </Button>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto rounded-lg p-4">
-           <div
-            ref={emailBodyRef}
-            dangerouslySetInnerHTML={{ __html: result.emailBody }}
-          />
-        </div>
+      <CardContent className="overflow-x-auto p-4">
+        <div
+          ref={emailBodyRef}
+          dangerouslySetInnerHTML={{ __html: result.emailBody }}
+        />
       </CardContent>
     </Card>
   );
