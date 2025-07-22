@@ -32,11 +32,11 @@ Aim is to have a better understanding of the job role
 
 1. Understand the context of the job.
 
-2. Assume that I do not know any of the technical terms or jargon related to the role so in the beginning define each technical term. Also add relevant terms even if those terms are not mentioned in the Job Details below. Categorize the technical terms in following manner:
+2. Assume that I do not know any of the technical terms or jargon related to the role so in the beginning define each technical term. Also add relevant terms even if those terms are not mentioned in the Job Details below. Cover as many terms as you can, never pick and choose. Categorize the technical terms in following manner:
 - Most specific to the job role (this means those terms which are only relevant for ideal candidate specific to the given job role) 
 - General (this means those terms which will generally be applicable to other candidates in other similar roles also)
 
-3. Categorize the main specific tasks vs general tasks of the person in the role.
+3. Categorize the main specific tasks vs general tasks of the person in the role. Cover as many tasks as you can, never pick and choose.
 
 4. Explain the job role in bullets for these persons:
 - For a 5 year old
