@@ -58,7 +58,7 @@ export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert max-w-none rounded-lg border bg-secondary/30 p-4">
+        <div className="prose prose-sm dark:prose-invert max-w-none rounded-lg p-4">
            <div
             ref={emailBodyRef}
             dangerouslySetInnerHTML={{ __html: result.emailBody }}
