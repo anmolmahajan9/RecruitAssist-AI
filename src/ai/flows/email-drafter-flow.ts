@@ -27,7 +27,7 @@ const emailDrafterPrompt = ai.definePrompt({
   output: { schema: EmailDrafterOutputSchema },
   prompt: `You are a recruitment consultant writing a professional HTML email to a client for candidate submission.
 
-You will be given a block of unstructured text that contains a candidate table, and may also contain the client's name and the job title.
+You will be given a block of unstructured text that contains a candidate table, and may also contain the client's name, job title, name of attachments and other instructions related to the email.
 
 Your task is to identify the candidate table from the unstructured text and construct a full HTML email body around it.
 
@@ -35,9 +35,9 @@ Your task is to identify the candidate table from the unstructured text and cons
 
 1.  The entire output must be a single HTML string in the 'emailBody' field.
 2.  **Wrap the entire email body in a single \`<div>\` with inline CSS to set the font to Arial, size 10pt (e.g., \`<div style="font-family: Arial, sans-serif; font-size: 10pt;">...\`**
-3.  Identify the client's name and job title from the text. If not present, use generic placeholders like "[Client Name]" and "[Role Name]".
-4.  Wrap all sentences and paragraphs in <p> tags to preserve line breaks.
-5.  Convert the candidate table from the input text into a proper HTML table (i.e., use <table>, <thead>, <tbody>, <tr>, <th>, and <td> tags). Ensure the table has a border (e.g., style="border: 1px solid black; border-collapse: collapse;") and cells have padding and a border (e.g., style="border: 1px solid black; padding: 8px;").
+3.  Identify the client's name, job title, other details from the text. If not present, use generic placeholders like "[Client Name]", "[Role Name]", etc.
+4.  Wrap all sentences and paragraphs in <p> tags to preserve line breaks. Use one line space between most lines.
+5.  Convert the candidate table from the input text into a proper HTML table (i.e., use <table>, <thead>, <tbody>, <tr>, <th>, and <td> tags). Ensure the table has a border (e.g., style="border: 1px solid black; border-collapse: collapse;") and cells have padding and a border (e.g., style="border: 1px solid black; padding: 8px;"). All candidate details in the table should be reproduced verbatim as is, no candidate detail should be changed.
 6.  Start with a greeting (e.g., "<p>Hi [Client Name],</p>").
 7.  Add a professional opening line (e.g., "<p>Hope you’re doing well.</p>").
 8.  State the purpose: submitting candidates for the role (e.g., "<p>Please find below the candidate details for the [Role Name] position for your review.</p>").
