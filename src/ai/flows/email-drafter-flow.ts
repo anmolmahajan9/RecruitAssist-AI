@@ -25,23 +25,26 @@ const emailDrafterPrompt = ai.definePrompt({
   model: googleAI.model('gemini-1.5-flash-latest'),
   input: { schema: EmailDrafterInputSchema },
   output: { schema: EmailDrafterOutputSchema },
-  prompt: `You are a recruitment consultant writing a professional email to a client for candidate submission.
+  prompt: `You are a recruitment consultant writing a professional HTML email to a client for candidate submission.
 
 You will be given a block of unstructured text that contains a candidate table, and may also contain the client's name and the job title.
 
-Your task is to identify the candidate table and construct a full email body around it. Use the candidate table **as-is** — do **not** reformat, reword, or alter it in any way. You should only generate the introductory and closing text.
+Your task is to identify the candidate table from the unstructured text and construct a full HTML email body around it.
 
 **Instructions for Output:**
 
-1.  Identify the client's name and job title from the text if they are present. If not, use generic placeholders like "[Client Name]" and "[Role Name]".
-2.  Start with a greeting (e.g., "Hi [Client Name],").
-3.  Add a brief, professional opening line (e.g., “Hope you’re doing well.”).
-4.  State the purpose: submitting a candidate or multiple candidates for the identified role.
-5.  Say “Please find below the candidate details for your review.”
-6.  Insert the original, unaltered candidate table.
-7.  After the table, write a short closing line (e.g., “Let us know a convenient time to schedule interviews.” or “Looking forward to your feedback.”).
-8.  Maintain a polite and business-friendly tone.
-9.  The final output should be a single string in the 'emailBody' field, containing the complete email.
+1.  The entire output must be a single HTML string in the 'emailBody' field.
+2.  Identify the client's name and job title from the text. If not present, use generic placeholders like "[Client Name]" and "[Role Name]".
+3.  Wrap all sentences and paragraphs in <p> tags to preserve line breaks.
+4.  Convert the candidate table from the input text into a proper HTML table (i.e., use <table>, <thead>, <tbody>, <tr>, <th>, and <td> tags).
+5.  Style the HTML table with a border: \`<table style="border: 1px solid black; border-collapse: collapse;">\`.
+6.  Style all table cells (<th> and <td>) with borders: \`<th style="border: 1px solid black; padding: 8px;">\` and \`<td style="border: 1px solid black; padding: 8px;">\`.
+7.  Start with a greeting (e.g., "<p>Hi [Client Name],</p>").
+8.  Add a professional opening line (e.g., "<p>Hope you’re doing well.</p>").
+9.  State the purpose: submitting candidates for the role (e.g., "<p>Please find below the candidate details for the [Role Name] position for your review.</p>").
+10. Insert the formatted HTML table.
+11. After the table, write a short closing line (e.g., "<p>Looking forward to your feedback.</p>").
+12. Maintain a polite and business-friendly tone.
 
 **Unstructured Input:**
 {{{unstructuredText}}}

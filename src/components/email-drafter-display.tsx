@@ -4,7 +4,7 @@ import type { EmailDrafterOutput } from '@/ai/schemas/email-drafter-schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, MailCheck } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 interface EmailDrafterDisplayProps {
   result: EmailDrafterOutput;
@@ -12,14 +12,29 @@ interface EmailDrafterDisplayProps {
 
 export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const emailBodyRef = useRef<HTMLDivElement>(null);
 
   if (!result) return null;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(result.emailBody);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (emailBodyRef.current) {
+      const range = document.createRange();
+      range.selectNode(emailBodyRef.current);
+      window.getSelection()?.removeAllRanges();
+      window.getSelection()?.addRange(range);
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+      }
+      window.getSelection()?.removeAllRanges();
+    }
   };
+
 
   return (
     <Card>
@@ -43,8 +58,11 @@ export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap rounded-lg border bg-secondary/30 p-4">
-          {result.emailBody}
+        <div className="prose prose-sm dark:prose-invert max-w-none rounded-lg border bg-secondary/30 p-4">
+           <div
+            ref={emailBodyRef}
+            dangerouslySetInnerHTML={{ __html: result.emailBody }}
+          />
         </div>
       </CardContent>
     </Card>
