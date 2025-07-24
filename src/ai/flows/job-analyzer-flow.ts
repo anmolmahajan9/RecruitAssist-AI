@@ -13,10 +13,12 @@ import {
   JobAnalysisOutputSchema,
   type JobAnalysisOutput,
 } from '@/ai/schemas/job-analyzer-schema';
+import { logQuery } from '@/services/loggingService';
 
 export async function analyzeJobDescription(
   input: JobAnalysisInput
 ): Promise<JobAnalysisOutput> {
+  await logQuery('jobAnalyzerFlow', input);
   return jobAnalyzerFlow(input);
 }
 

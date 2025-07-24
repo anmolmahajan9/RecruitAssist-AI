@@ -13,10 +13,12 @@ import {
   BooleanQueryOutputSchema,
   type BooleanQueryOutput,
 } from '@/ai/schemas/boolean-query-schema';
+import { logQuery } from '@/services/loggingService';
 
 export async function generateBooleanQuery(
   input: BooleanQueryInput
 ): Promise<BooleanQueryOutput> {
+  await logQuery('booleanQueryFlow', input);
   return booleanQueryFlow(input);
 }
 

@@ -1,0 +1,21 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  projectId: 'recruitassist-ai-knbnk',
+  appId: '1:798548224026:web:fae9ac51adbeb04256c9a3',
+  storageBucket: 'recruitassist-ai-knbnk.firebasestorage.app',
+  apiKey: 'AIzaSyDIV1N1lkYqQCULfYY4jQE02w43tILHUas',
+  authDomain: 'recruitassist-ai-knbnk.firebaseapp.com',
+  measurementId: 'G-VP8D5Y9W9J',
+  messagingSenderId: '798548224026',
+};
+
+// Initialize Firebase
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
+
+export { app, firestore };

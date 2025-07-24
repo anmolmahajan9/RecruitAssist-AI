@@ -13,10 +13,12 @@ import {
   JobExplainerOutputSchema,
   type JobExplainerOutput,
 } from '@/ai/schemas/job-explainer-schema';
+import { logQuery } from '@/services/loggingService';
 
 export async function explainJobDescription(
   input: JobExplainerInput
 ): Promise<JobExplainerOutput> {
+  await logQuery('jobExplainerFlow', input);
   return jobExplainerFlow(input);
 }
 

@@ -13,10 +13,12 @@ import {
   EmailDrafterOutputSchema,
   type EmailDrafterOutput,
 } from '@/ai/schemas/email-drafter-schema';
+import { logQuery } from '@/services/loggingService';
 
 export async function draftEmail(
   input: EmailDrafterInput
 ): Promise<EmailDrafterOutput> {
+  await logQuery('emailDrafterFlow', input);
   return emailDrafterFlow(input);
 }
 

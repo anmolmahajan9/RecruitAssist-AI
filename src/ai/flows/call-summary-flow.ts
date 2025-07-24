@@ -13,10 +13,12 @@ import {
   CallSummaryOutputSchema,
   type CallSummaryOutput,
 } from '@/ai/schemas/call-summary-schema';
+import { logQuery } from '@/services/loggingService';
 
 export async function generateCallSummary(
   input: CallSummaryInput
 ): Promise<CallSummaryOutput> {
+  await logQuery('callSummaryFlow', input);
   return callSummaryFlow(input);
 }
 

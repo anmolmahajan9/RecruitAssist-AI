@@ -13,10 +13,12 @@ import {
   CandidateRankerOutputSchema,
   type CandidateRankerOutput,
 } from '@/ai/schemas/candidate-ranker-schema';
+import { logQuery } from '@/services/loggingService';
 
 export async function rankCandidates(
   input: CandidateRankerInput
 ): Promise<CandidateRankerOutput> {
+  await logQuery('candidateRankerFlow', input);
   return candidateRankerFlow(input);
 }
 

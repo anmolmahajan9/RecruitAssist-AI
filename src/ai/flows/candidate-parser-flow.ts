@@ -13,10 +13,12 @@ import {
   CandidateParserOutputSchema,
   type CandidateParserOutput,
 } from '@/ai/schemas/candidate-parser-schema';
+import { logQuery } from '@/services/loggingService';
 
 export async function parseCandidates(
   input: CandidateParserInput
 ): Promise<CandidateParserOutput> {
+  await logQuery('candidateParserFlow', input);
   return candidateParserFlow(input);
 }
 
