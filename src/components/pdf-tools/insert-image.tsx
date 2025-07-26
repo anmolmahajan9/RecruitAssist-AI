@@ -49,7 +49,7 @@ export function InsertImage() {
       const image = await pdfDoc.embedPng(imageBytes);
 
       // Define a fixed small size for the image
-      const desiredWidth = 50;
+      const desiredWidth = 100;
       const imageDims = image.scale(1); // Start with original scale to get ratio
       const scaledDims = {
         width: desiredWidth,
@@ -75,7 +75,8 @@ export function InsertImage() {
       const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'modified.pdf';
+      const originalName = pdfFile.name.replace(/\.pdf$/i, '');
+      link.download = `${originalName}-suitable-ai.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
