@@ -66,6 +66,7 @@ export function InsertImage() {
           y: height - scaledDims.height - 30, // 30 points margin from top
           width: scaledDims.width,
           height: scaledDims.height,
+          opacity: 0.2,
         });
       }
 
@@ -103,7 +104,7 @@ export function InsertImage() {
       <CardHeader>
         <CardTitle>Insert Image into PDF</CardTitle>
         <CardDescription>
-          Upload a PDF and an image to embed the image on the first page.
+          Upload a PDF and an image to embed the image on every page.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
