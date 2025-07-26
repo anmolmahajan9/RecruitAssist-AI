@@ -48,17 +48,27 @@ export function InsertImage() {
       const pdfDoc = await PDFDocument.load(pdfBytes);
       const image = await pdfDoc.embedPng(imageBytes);
 
-      const firstPage = pdfDoc.getPages()[0];
-      const { width, height } = firstPage.getSize();
+      // Define a fixed small size for the image
+      const desiredWidth = 50;
+      const imageDims = image.scale(1); // Start with original scale to get ratio
+      const scaledDims = {
+        width: desiredWidth,
+        height: (imageDims.height / imageDims.width) * desiredWidth,
+      };
       
-      // Example: Place image at bottom-left with a margin
-      const imageDims = image.scale(0.25); // Scale image to 25% of its original size
-      firstPage.drawImage(image, {
-        x: 50,
-        y: 50,
-        width: imageDims.width,
-        height: imageDims.height,
-      });
+      const pages = pdfDoc.getPages();
+      for (const page of pages) {
+        const { width, height } = page.getSize();
+        
+        // Position image at top right with a margin
+        page.drawImage(image, {
+          x: width - scaledDims.width - 30, // 30 points margin from right
+          y: height - scaledDims.height - 30, // 30 points margin from top
+          width: scaledDims.width,
+          height: scaledDims.height,
+        });
+      }
+
 
       const modifiedPdfBytes = await pdfDoc.save();
 
