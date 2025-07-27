@@ -218,31 +218,31 @@ export function InsertImage() {
           <RadioGroup
             value={watermarkSource}
             onValueChange={(value) => setWatermarkSource(value as 'upload' | 'default')}
-            className="flex flex-col sm:flex-row gap-4"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
           >
             <Label htmlFor="r-default" className="flex-1">
-              <Card className="cursor-pointer hover:border-primary">
-                <CardHeader className="flex items-center gap-4 space-y-0 p-4">
-                  <RadioGroupItem value="default" id="r-default" className="self-start mt-1" />
-                  <div className="flex-1 text-center">
+              <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full">
+                 <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
+                  <RadioGroupItem value="default" id="r-default" />
+                  <div className="flex-1 text-center space-y-2">
                      <Image
                       src={DEFAULT_LOGO_URL}
                       alt="Default Logo"
                       width={100}
-                      height={100}
-                      className="mx-auto rounded-md"
+                      height={40}
+                      className="mx-auto h-10 object-contain"
                     />
-                    <span className="font-bold block mt-2">Use Default Logo</span>
+                    <span className="font-medium block">Use Default Logo</span>
                   </div>
                 </CardHeader>
               </Card>
             </Label>
              <Label htmlFor="r-upload" className="flex-1">
-              <Card className="cursor-pointer hover:border-primary h-full">
-                <CardHeader className="flex items-center gap-4 space-y-0 p-4 h-full">
-                  <RadioGroupItem value="upload" id="r-upload"  className="self-start mt-1" />
+              <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full">
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4 h-full">
+                  <RadioGroupItem value="upload" id="r-upload" />
                    <div
-                    className="flex-1 flex flex-col items-center justify-center text-center"
+                    className="flex-1 flex flex-col items-center justify-center text-center space-y-2"
                     onClick={handleWatermarkClick}
                   >
                     <Input
@@ -253,14 +253,14 @@ export function InsertImage() {
                       onChange={handleWatermarkChange}
                       ref={watermarkInputRef}
                     />
-                    <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                    <ImageIcon className="w-10 h-10 text-muted-foreground" />
                     {watermarkFile ? (
-                      <p className="text-sm font-medium text-foreground mt-2">
+                      <p className="text-sm font-medium text-foreground">
                         {watermarkFile.name}
                       </p>
                     ) : (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        <span className="font-semibold text-primary">
+                      <p className="text-sm font-medium">
+                        <span className="text-primary">
                           Click to upload
                         </span>{' '}
                         a PNG or JPG
