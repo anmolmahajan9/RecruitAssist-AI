@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -21,20 +21,32 @@ import {
 } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
 
 const MAX_FILES = 5;
 
-// Base64 encoding of the image
-const LOGO_BASE64 =
-  'iVBORw0KGgoAAAANSUhEUgAAAJAAAABkCAYAAABaB3xDAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAV3pUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHjaVY9bDsJAEEX/UuPEnBQS18n/V1h4u3BvP+BvMGFixvEiyTczu3tzV/a6aHdd9j8/b2938v/sPjD6GvT48X5/B3F+YvH014P/3V1kRkUBAQECgBAQIECBAAECgJQEBAgQIECDwK0BAgAABAgQGBAgQECBAgACBxAIGnC9gYVqQ3zE//+vL//8BAP//A/TqAAEAAAABJRU5ErkJggg==';
-const logoUrl = `data:image/png;base64,${LOGO_BASE64}`;
-
 export function InsertImage() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchLogoUrl = async () => {
+      try {
+        const logoRef = ref(storage, 'logo.png');
+        const url = await getDownloadURL(logoRef);
+        setLogoUrl(url);
+      } catch (err) {
+        console.error("Failed to fetch logo from Firebase Storage:", err);
+        setError("Could not load watermark image from storage. Please ensure 'logo.png' exists.");
+      }
+    };
+    fetchLogoUrl();
+  }, []);
 
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -92,11 +104,16 @@ export function InsertImage() {
       setError('Please select at least one PDF file.');
       return;
     }
+    if (!logoUrl) {
+      setError('Watermark image is not available. Cannot process files.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
+      // Fetch the logo image from the URL. Note: This may require CORS configuration on your bucket.
       const response = await fetch(logoUrl);
       const imageBytes = await response.arrayBuffer();
 
@@ -130,7 +147,7 @@ export function InsertImage() {
       }
     } catch (err) {
       console.error(err);
-      setError('An error occurred while processing the PDFs.');
+      setError('An error occurred while processing the PDFs. You may need to configure CORS on your Firebase Storage bucket to allow access.');
     } finally {
       setIsLoading(false);
     }
@@ -187,8 +204,12 @@ export function InsertImage() {
 
         <div className="space-y-2">
           <h4 className="font-semibold">Watermark Preview</h4>
-          <div className="flex justify-center p-4 bg-muted rounded-md">
-            <img src={logoUrl} alt="Logo Preview" className="h-16 w-auto" />
+          <div className="flex justify-center items-center p-4 bg-muted rounded-md min-h-[80px]">
+            {logoUrl ? (
+              <img src={logoUrl} alt="Logo Preview" className="h-16 w-auto" />
+            ) : (
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            )}
           </div>
         </div>
 
@@ -230,7 +251,7 @@ export function InsertImage() {
         <CardFooter className="flex-col sm:flex-row gap-2 pt-4">
           <Button
             onClick={handleProcess}
-            disabled={isLoading || pdfFiles.length === 0}
+            disabled={isLoading || pdfFiles.length === 0 || !logoUrl}
             size="lg"
             className="w-full"
           >
