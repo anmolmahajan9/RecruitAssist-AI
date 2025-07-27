@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 const MAX_FILES = 100;
-const DEFAULT_LOGO_URL = 'https://recruitassist-ai-knbnk.web.app/logo.png'; // Path to the logo in the public folder
+const DEFAULT_LOGO_URL = 'https://recruitassist-ai-knbnk.web.app/logo-temp.png'; // Path to the logo in the public folder
 
 export function InsertImage() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
