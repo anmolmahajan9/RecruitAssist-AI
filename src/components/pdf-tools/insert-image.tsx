@@ -42,7 +42,7 @@ export function InsertImage() {
         setLogoUrl(url);
       } catch (err) {
         console.error("Failed to fetch logo from Firebase Storage:", err);
-        setError("Could not load watermark image from storage. Please ensure 'logo default.png' exists.");
+        setError("Could not load watermark image. This is likely a CORS issue. Please check your Firebase Storage CORS configuration to allow requests from this domain.");
       }
     };
     fetchLogoUrl();
@@ -115,6 +115,9 @@ export function InsertImage() {
     try {
       // Fetch the logo image from the URL. Note: This may require CORS configuration on your bucket.
       const response = await fetch(logoUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch watermark image (status: ${response.status})`);
+      }
       const imageBytes = await response.arrayBuffer();
 
       for (const pdfFile of pdfFiles) {
