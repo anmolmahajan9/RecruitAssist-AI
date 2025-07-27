@@ -117,7 +117,7 @@ export function JobInputForm({
                 variant="outline"
                 size="lg"
                 onClick={handleReset}
-                className="w-full sm:w-auto text-lg py-6 font-bold rounded-xl"
+                className="w-full sm:w-auto text-lg py-6 font-bold rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
               >
                 <XCircle className="mr-2 h-5 w-5" />
                 Clear & Start Over

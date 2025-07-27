@@ -367,7 +367,7 @@ export function InsertImage() {
             variant="outline"
             size="lg"
             onClick={handleReset}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
           >
             <Trash2 className="mr-2 h-5 w-5" />
             Clear
