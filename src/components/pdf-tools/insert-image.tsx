@@ -109,9 +109,7 @@ export function InsertImage() {
     setError(null);
 
     try {
-      // Use a CORS proxy to bypass browser restrictions for fetching the image.
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      const response = await fetch(proxyUrl + logoUrl);
+      const response = await fetch(logoUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch watermark image (status: ${response.status})`);
       }
