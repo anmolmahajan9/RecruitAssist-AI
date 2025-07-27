@@ -35,7 +35,7 @@ export default function PdfEditorPage() {
             PDF Tools
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Quick pdf editing for recruiters
+            Combine multiple PDFs into a single file or insert images
           </p>
         </div>
       </header>
