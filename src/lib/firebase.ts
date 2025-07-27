@@ -9,7 +9,7 @@ const firebaseConfig = {
   projectId: 'recruitassist-ai-knbnk',
   appId: '1:798548224026:web:fae9ac51adbeb04256c9a3',
   storageBucket: 'recruitassist-ai-knbnk.appspot.com',
-  apiKey: 'AIzaSyDIV1N1lkYqQCULfYY4jQE02w43tILHUas',
+  apiKey: 'AIzaSyDtKjBvPSE3zYisxIRTHR0ASIwVafCxURI',
   authDomain: 'recruitassist-ai-knbnk.firebaseapp.com',
   measurementId: 'G-VP8D5Y9W9J',
   messagingSenderId: '798548224026',
