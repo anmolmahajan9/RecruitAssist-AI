@@ -273,33 +273,35 @@ export function InsertImage() {
           </RadioGroup>
         </div>
 
-        <div
-          className={cn(
-            'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
-            dragging ? 'border-primary bg-accent' : 'border-border',
-            'hover:border-primary hover:bg-muted/50 cursor-pointer'
-          )}
-          onClick={handleAddFilesClick}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <h4 className="font-semibold mb-4 text-lg">2. Upload PDFs</h4>
-          <Input
-            id="pdf-files"
-            type="file"
-            accept="application/pdf"
-            multiple
-            className="hidden"
-            onChange={handlePdfChange}
-            ref={pdfFileInputRef}
-          />
-          <div className="flex flex-col items-center justify-center space-y-2">
-            <UploadCloud className="w-12 h-12 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              <span className="font-semibold text-primary">Click to upload</span>{' '}
-              or drag and drop
-            </p>
+        <div>
+          <h4 className="font-semibold text-lg mb-4">2. Upload PDFs</h4>
+          <div
+            className={cn(
+              'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+              dragging ? 'border-primary bg-accent' : 'border-border',
+              'hover:border-primary hover:bg-muted/50 cursor-pointer'
+            )}
+            onClick={handleAddFilesClick}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <Input
+              id="pdf-files"
+              type="file"
+              accept="application/pdf"
+              multiple
+              className="hidden"
+              onChange={handlePdfChange}
+              ref={pdfFileInputRef}
+            />
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <UploadCloud className="w-12 h-12 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-primary">Click to upload</span>{' '}
+                or drag and drop
+              </p>
+            </div>
           </div>
         </div>
 
