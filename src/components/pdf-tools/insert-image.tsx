@@ -109,8 +109,9 @@ export function InsertImage() {
     setError(null);
 
     try {
-      // Fetch the logo image from the URL. Note: This may require CORS configuration on your bucket.
-      const response = await fetch(logoUrl);
+      // Use a CORS proxy to bypass browser restrictions for fetching the image.
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const response = await fetch(proxyUrl + logoUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch watermark image (status: ${response.status})`);
       }
