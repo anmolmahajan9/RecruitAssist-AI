@@ -1,62 +1,95 @@
+
 'use client';
 
-import { useState, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Loader2,
   Download,
   Trash2,
-  ImageUp,
-  FileUp,
-  PlusCircle,
-  XCircle,
+  UploadCloud,
+  File as FileIcon,
 } from 'lucide-react';
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
+import { cn } from '@/lib/utils';
+
+const MAX_FILES = 5;
+
+// Base64 encoding of the image
+const LOGO_BASE64 =
+  'iVBORw0KGgoAAAANSUhEUgAAAJAAAABkCAYAAABaB3xDAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAV3pUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHjaVY9bDsJAEEX/UuPEnBQS18n/V1h4u3BvP+BvMGFixvEiyTczu3tzV/a6aHdd9j8/b2938v/sPjD6GvT48X5/B3F+YvH014P/3V1kRkUBAQECgBAQIECBAAECgJQEBAgQIECDwK0BAgAABAgQGBAgQECBAgACBxAIGnC9gYVqQ3zE//+vL//8BAP//A/TqAAEAAAABJRU5ErkJggg==';
+const logoUrl = `data:image/png;base64,${LOGO_BASE64}`;
 
 export function InsertImage() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const pdfInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files).filter(
-        (file) => file.type === 'application/pdf'
+      const newFiles = Array.from(e.target.files);
+      setPdfFiles((prevFiles) =>
+        [...prevFiles, ...newFiles].slice(0, MAX_FILES)
       );
-      setPdfFiles(newFiles);
       setError(null);
-    }
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedImage = e.target.files[0];
-      if (!selectedImage.type.startsWith('image/')) {
-        setError('Please select a valid image file (PNG, JPG, etc.).');
-        setImageFile(null);
-      } else {
-        setImageFile(selectedImage);
-        setError(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
     }
   };
 
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files).filter(
+        (file) => file.type === 'application/pdf'
+      );
+      setPdfFiles((prevFiles) =>
+        [...prevFiles, ...newFiles].slice(0, MAX_FILES)
+      );
+      setError(null);
+    }
+  }, []);
+
+  const removeFile = (index: number) => {
+    setPdfFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleAddFilesClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   const handleProcess = async () => {
-    if (pdfFiles.length === 0 || !imageFile) {
-      setError('Please select at least one PDF and an image file.');
+    if (pdfFiles.length === 0) {
+      setError('Please select at least one PDF file.');
       return;
     }
 
@@ -64,67 +97,40 @@ export function InsertImage() {
     setError(null);
 
     try {
-      const imageBytes = await imageFile.arrayBuffer();
-      let image = null;
+      const response = await fetch(logoUrl);
+      const imageBytes = await response.arrayBuffer();
 
       for (const pdfFile of pdfFiles) {
         const pdfBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(pdfBytes);
-
-        // Embed image only once per document if it hasn't been embedded yet
-        if (!image) {
-          if (imageFile.type === 'image/png') {
-            image = await pdfDoc.embedPng(imageBytes);
-          } else if (
-            imageFile.type === 'image/jpeg' ||
-            imageFile.type === 'image/jpg'
-          ) {
-            image = await pdfDoc.embedJpg(imageBytes);
-          } else {
-            throw new Error(
-              'Unsupported image format. Please use PNG or JPG.'
-            );
-          }
-        }
-
-        const desiredWidth = 100;
-        const imageDims = image.scale(1);
-        const scaledDims = {
-          width: desiredWidth,
-          height: (imageDims.height / imageDims.width) * desiredWidth,
-        };
+        const logoImage = await pdfDoc.embedPng(imageBytes);
 
         const pages = pdfDoc.getPages();
         for (const page of pages) {
           const { width, height } = page.getSize();
-
-          page.drawImage(image, {
-            x: width - scaledDims.width - 30,
-            y: height - scaledDims.height - 30,
-            width: scaledDims.width,
-            height: scaledDims.height,
-            opacity: 0.2,
+          const logoDims = logoImage.scale(0.1);
+          page.drawImage(logoImage, {
+            x: width - logoDims.width - 20,
+            y: height - logoDims.height - 20,
+            width: logoDims.width,
+            height: logoDims.height,
           });
         }
 
         const modifiedPdfBytes = await pdfDoc.save();
-
         const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        const originalName = pdfFile.name.replace(/\.pdf$/i, '');
-        link.download = `${originalName}-suitable-ai.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `watermarked_${pdfFile.name}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
       }
     } catch (err) {
       console.error(err);
-      setError(
-        err instanceof Error ? err.message : 'Failed to process files.'
-      );
+      setError('An error occurred while processing the PDFs.');
     } finally {
       setIsLoading(false);
     }
@@ -132,161 +138,123 @@ export function InsertImage() {
 
   const handleReset = () => {
     setPdfFiles([]);
-    setImageFile(null);
     setError(null);
-    if (pdfInputRef.current) {
-      pdfInputRef.current.value = '';
-    }
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
-    }
-  };
-
-  const removePdfFile = (indexToRemove: number) => {
-    setPdfFiles((prevFiles) =>
-      prevFiles.filter((_, index) => index !== indexToRemove)
-    );
-    setError(null);
-  };
-
-  const removeImageFile = () => {
-    setImageFile(null);
-    setError(null);
-    if (imageInputRef.current) {
-      imageInputRef.current.value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
-      <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold">Insert Image into PDF</CardTitle>
-        <CardDescription className="mt-2 text-md">
-          Embed a small, semi-transparent image watermark onto every page of
-          your selected PDF document(s).
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">Insert Watermark</CardTitle>
+        <CardDescription>
+          Select PDF files to add a watermark to each page.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <Label htmlFor="pdf-file-insert" className="text-lg font-semibold">
-            Select PDF File(s)
-          </Label>
+        <div
+          className={cn(
+            'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+            dragging ? 'border-primary bg-accent' : 'border-border',
+            'hover:border-primary hover:bg-muted/50 cursor-pointer'
+          )}
+          onClick={handleAddFilesClick}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <Input
-            id="pdf-file-insert"
+            id="pdf-files"
             type="file"
             accept="application/pdf"
-            onChange={handlePdfChange}
             multiple
             className="hidden"
-            ref={pdfInputRef}
+            onChange={handlePdfChange}
+            ref={fileInputRef}
           />
-          <Button
-            onClick={() => pdfInputRef.current?.click()}
-            className="w-full py-3 text-lg"
-            variant="outline"
-          >
-            <PlusCircle className="mr-2 h-5 w-5" />
-            {pdfFiles.length === 0 ? 'Choose PDF(s)' : 'Change PDF(s)'}
-          </Button>
-          {pdfFiles.length > 0 && (
-            <ul className="space-y-2 mt-2">
+          <div className="flex flex-col items-center justify-center space-y-2">
+            <UploadCloud className="w-12 h-12 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-primary">Click to upload</span>{' '}
+              or drag and drop
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Up to {MAX_FILES} PDFs
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h4 className="font-semibold">Watermark Preview</h4>
+          <div className="flex justify-center p-4 bg-muted rounded-md">
+            <img src={logoUrl} alt="Logo Preview" className="h-16 w-auto" />
+          </div>
+        </div>
+
+        {pdfFiles.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Selected Files:</h4>
+            <ul className="space-y-2">
               {pdfFiles.map((file, index) => (
                 <li
-                  key={file.name + index}
-                  className="flex items-center justify-between p-2 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm"
+                  key={index}
+                  className="flex items-center justify-between p-2 rounded-md bg-muted"
                 >
-                  <div className="flex items-center flex-grow min-w-0 mr-2">
-                    <FileUp className="h-5 w-5 text-blue-500 mr-3 flex-shrink-0" />
-                    <span className="truncate text-base font-medium text-gray-800 dark:text-gray-200">
+                  <div className="flex items-center gap-2 truncate">
+                    <FileIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <span
+                      className="font-medium text-sm truncate"
+                      title={file.name}
+                    >
                       {file.name}
                     </span>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removePdfFile(index)}
-                    className="h-7 w-7 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 flex-shrink-0"
+                    onClick={() => removeFile(index)}
+                    className="h-7 w-7 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
                   >
-                    <XCircle className="h-4 w-4" />
-                    <span className="sr-only">Remove PDF</span>
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </li>
               ))}
             </ul>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="space-y-4">
-          <Label htmlFor="image-file-insert" className="text-lg font-semibold">
-            Select Image File
-          </Label>
-          <Input
-            id="image-file-insert"
-            type="file"
-            accept="image/png, image/jpeg"
-            onChange={handleImageChange}
-            className="hidden"
-            ref={imageInputRef}
-          />
-          <Button
-            onClick={() => imageInputRef.current?.click()}
-            className="w-full py-3 text-lg"
-            variant="outline"
-          >
-            <ImageUp className="mr-2 h-5 w-5" />
-            {imageFile ? 'Change Image' : 'Choose Image'}
-          </Button>
-          {imageFile && (
-            <div className="flex items-center justify-between p-2 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm mt-2">
-              <div className="flex items-center flex-grow min-w-0 mr-2">
-                <ImageUp className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
-                <span className="truncate text-base font-medium text-gray-800 dark:text-gray-200">
-                  {imageFile.name}
-                </span>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={removeImageFile}
-                className="h-7 w-7 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 flex-shrink-0"
-              >
-                <XCircle className="h-4 w-4" />
-                <span className="sr-only">Remove Image</span>
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {error && <p className="text-sm text-destructive mt-4 text-center">{error}</p>}
-
-        <div className="flex flex-col sm:flex-row gap-4 mt-6">
+        {error && <p className="text-sm text-destructive text-center">{error}</p>}
+      </CardContent>
+      {pdfFiles.length > 0 && (
+        <CardFooter className="flex-col sm:flex-row gap-2 pt-4">
           <Button
             onClick={handleProcess}
-            disabled={isLoading || pdfFiles.length === 0 || !imageFile}
+            disabled={isLoading || pdfFiles.length === 0}
             size="lg"
-            className="flex-grow py-3 text-lg"
+            className="w-full"
           >
             {isLoading ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             ) : (
               <Download className="mr-2 h-5 w-5" />
             )}
-            {isLoading ? 'Processing...' : 'Process & Download'}
+            {isLoading
+              ? 'Processing...'
+              : `Add Watermark to ${pdfFiles.length} File(s)`}
           </Button>
 
-          {(pdfFiles.length > 0 || imageFile) && (
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handleReset}
-              className="w-full sm:w-auto py-3 text-lg"
-            >
-              <Trash2 className="mr-2 h-5 w-5" />
-              Clear All
-            </Button>
-          )}
-        </div>
-      </CardContent>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={handleReset}
+            className="w-full sm:w-auto"
+          >
+            <Trash2 className="mr-2 h-5 w-5" />
+            Clear
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }
