@@ -21,7 +21,6 @@ import {
   UploadCloud,
   File as FileIcon,
   ImageIcon,
-  Building,
 } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
@@ -158,7 +157,7 @@ export function InsertImage() {
         const pages = pdfDoc.getPages();
         for (const page of pages) {
           const { width, height } = page.getSize();
-          const logoDims = watermarkImage.scale(0.1);
+          const logoDims = watermarkImage.scale(0.08);
           page.drawImage(watermarkImage, {
             x: width - logoDims.width - 20,
             y: height - logoDims.height - 20,
@@ -219,61 +218,59 @@ export function InsertImage() {
           <RadioGroup
             value={watermarkSource}
             onValueChange={(value) => setWatermarkSource(value as 'upload' | 'default')}
-            className="flex gap-4"
+            className="flex flex-col sm:flex-row gap-4"
           >
             <Label htmlFor="r-default" className="flex-1">
               <Card className="cursor-pointer hover:border-primary">
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
-                  <RadioGroupItem value="default" id="r-default" />
-                  <Building className="h-6 w-6 text-muted-foreground" />
-                  <span className="font-bold">Use Default Logo</span>
+                <CardHeader className="flex items-center gap-4 space-y-0 p-4">
+                  <RadioGroupItem value="default" id="r-default" className="self-start mt-1" />
+                  <div className="flex-1 text-center">
+                     <Image
+                      src={DEFAULT_LOGO_URL}
+                      alt="Default Logo"
+                      width={100}
+                      height={100}
+                      className="mx-auto rounded-md"
+                    />
+                    <span className="font-bold block mt-2">Use Default Logo</span>
+                  </div>
                 </CardHeader>
               </Card>
             </Label>
              <Label htmlFor="r-upload" className="flex-1">
-              <Card className="cursor-pointer hover:border-primary">
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
-                  <RadioGroupItem value="upload" id="r-upload" />
-                  <UploadCloud className="h-6 w-6 text-muted-foreground" />
-                  <span className="font-bold">Upload an Image</span>
+              <Card className="cursor-pointer hover:border-primary h-full">
+                <CardHeader className="flex items-center gap-4 space-y-0 p-4 h-full">
+                  <RadioGroupItem value="upload" id="r-upload"  className="self-start mt-1" />
+                   <div
+                    className="flex-1 flex flex-col items-center justify-center text-center"
+                    onClick={handleWatermarkClick}
+                  >
+                    <Input
+                      id="watermark-file"
+                      type="file"
+                      accept="image/png, image/jpeg"
+                      className="hidden"
+                      onChange={handleWatermarkChange}
+                      ref={watermarkInputRef}
+                    />
+                    <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                    {watermarkFile ? (
+                      <p className="text-sm font-medium text-foreground mt-2">
+                        {watermarkFile.name}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        <span className="font-semibold text-primary">
+                          Click to upload
+                        </span>{' '}
+                        a PNG or JPG
+                      </p>
+                    )}
+                  </div>
                 </CardHeader>
               </Card>
             </Label>
           </RadioGroup>
-
-          {watermarkSource === 'upload' && (
-            <div
-              className={cn(
-                'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
-                'hover:border-primary hover:bg-primary/10 cursor-pointer'
-              )}
-              onClick={handleWatermarkClick}
-            >
-              <Input
-                id="watermark-file"
-                type="file"
-                accept="image/png, image/jpeg"
-                className="hidden"
-                onChange={handleWatermarkChange}
-                ref={watermarkInputRef}
-              />
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                {watermarkFile ? (
-                  <p className="text-sm font-medium text-foreground">
-                    {watermarkFile.name}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-semibold text-primary">
-                      Click to upload
-                    </span>{' '}
-                    a PNG or JPG
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
         <div
