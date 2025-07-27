@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -11,7 +11,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Download, Trash2, ImageUp, FileUp } from 'lucide-react';
+import {
+  Loader2,
+  Download,
+  Trash2,
+  ImageUp,
+  FileUp,
+  PlusCircle,
+  XCircle,
+} from 'lucide-react';
 import { PDFDocument, rgb } from 'pdf-lib';
 
 export function InsertImage() {
@@ -20,15 +28,29 @@ export function InsertImage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setPdfFiles(Array.from(e.target.files));
+      const newFiles = Array.from(e.target.files).filter(
+        (file) => file.type === 'application/pdf'
+      );
+      setPdfFiles(newFiles);
+      setError(null);
     }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
+      const selectedImage = e.target.files[0];
+      if (!selectedImage.type.startsWith('image/')) {
+        setError('Please select a valid image file (PNG, JPG, etc.).');
+        setImageFile(null);
+      } else {
+        setImageFile(selectedImage);
+        setError(null);
+      }
     }
   };
 
@@ -43,19 +65,30 @@ export function InsertImage() {
 
     try {
       const imageBytes = await imageFile.arrayBuffer();
+      let image = null;
 
       for (const pdfFile of pdfFiles) {
         const pdfBytes = await pdfFile.arrayBuffer();
-
         const pdfDoc = await PDFDocument.load(pdfBytes);
-        
-        // Use a consistent variable for the embedded image to avoid re-embedding.
-        // It's better to embed once per document.
-        const image = await pdfDoc.embedPng(imageBytes);
 
-        // Define a fixed small size for the image
+        // Embed image only once per document if it hasn't been embedded yet
+        if (!image) {
+          if (imageFile.type === 'image/png') {
+            image = await pdfDoc.embedPng(imageBytes);
+          } else if (
+            imageFile.type === 'image/jpeg' ||
+            imageFile.type === 'image/jpg'
+          ) {
+            image = await pdfDoc.embedJpg(imageBytes);
+          } else {
+            throw new Error(
+              'Unsupported image format. Please use PNG or JPG.'
+            );
+          }
+        }
+
         const desiredWidth = 100;
-        const imageDims = image.scale(1); // Start with original scale to get ratio
+        const imageDims = image.scale(1);
         const scaledDims = {
           width: desiredWidth,
           height: (imageDims.height / imageDims.width) * desiredWidth,
@@ -65,10 +98,9 @@ export function InsertImage() {
         for (const page of pages) {
           const { width, height } = page.getSize();
 
-          // Position image at top right with a margin
           page.drawImage(image, {
-            x: width - scaledDims.width - 30, // 30 points margin from right
-            y: height - scaledDims.height - 30, // 30 points margin from top
+            x: width - scaledDims.width - 30,
+            y: height - scaledDims.height - 30,
             width: scaledDims.width,
             height: scaledDims.height,
             opacity: 0.2,
@@ -85,9 +117,8 @@ export function InsertImage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
-        // A small delay to help browsers handle multiple downloads
-        await new Promise(resolve => setTimeout(resolve, 500));
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     } catch (err) {
       console.error(err);
@@ -103,72 +134,137 @@ export function InsertImage() {
     setPdfFiles([]);
     setImageFile(null);
     setError(null);
-    const pdfInput = document.getElementById(
-      'pdf-file-insert'
-    ) as HTMLInputElement;
-    const imageInput = document.getElementById(
-      'image-file-insert'
-    ) as HTMLInputElement;
-    if (pdfInput) pdfInput.value = '';
-    if (imageInput) imageInput.value = '';
+    if (pdfInputRef.current) {
+      pdfInputRef.current.value = '';
+    }
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
+  };
+
+  const removePdfFile = (indexToRemove: number) => {
+    setPdfFiles((prevFiles) =>
+      prevFiles.filter((_, index) => index !== indexToRemove)
+    );
+    setError(null);
+  };
+
+  const removeImageFile = () => {
+    setImageFile(null);
+    setError(null);
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Insert Image into PDF</CardTitle>
-        <CardDescription>
-          Upload a PDF and an image to embed the image on every page.
+    <Card className="w-full max-w-lg mx-auto">
+      <CardHeader className="text-center">
+        <CardTitle className="text-3xl font-bold">Insert Image into PDF</CardTitle>
+        <CardDescription className="mt-2 text-md">
+          Embed a small, semi-transparent image watermark onto every page of
+          your selected PDF document(s).
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="pdf-file-insert">PDF File(s)</Label>
-            <Input
-              id="pdf-file-insert"
-              type="file"
-              accept="application/pdf"
-              onChange={handlePdfChange}
-              multiple
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="image-file-insert">Image File</Label>
-            <Input
-              id="image-file-insert"
-              type="file"
-              accept="image/png"
-              onChange={handleImageChange}
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-            />
-          </div>
+        <div className="space-y-4">
+          <Label htmlFor="pdf-file-insert" className="text-lg font-semibold">
+            Select PDF File(s)
+          </Label>
+          <Input
+            id="pdf-file-insert"
+            type="file"
+            accept="application/pdf"
+            onChange={handlePdfChange}
+            multiple
+            className="hidden"
+            ref={pdfInputRef}
+          />
+          <Button
+            onClick={() => pdfInputRef.current?.click()}
+            className="w-full py-3 text-lg"
+            variant="outline"
+          >
+            <PlusCircle className="mr-2 h-5 w-5" />
+            {pdfFiles.length === 0 ? 'Choose PDF(s)' : 'Change PDF(s)'}
+          </Button>
+          {pdfFiles.length > 0 && (
+            <ul className="space-y-2 mt-2">
+              {pdfFiles.map((file, index) => (
+                <li
+                  key={file.name + index}
+                  className="flex items-center justify-between p-2 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm"
+                >
+                  <div className="flex items-center flex-grow min-w-0 mr-2">
+                    <FileUp className="h-5 w-5 text-blue-500 mr-3 flex-shrink-0" />
+                    <span className="truncate text-base font-medium text-gray-800 dark:text-gray-200">
+                      {file.name}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removePdfFile(index)}
+                    className="h-7 w-7 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 flex-shrink-0"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    <span className="sr-only">Remove PDF</span>
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        {pdfFiles.length > 0 && (
-           <div className="space-y-1">
-             {pdfFiles.map((file, index) => (
-                <p key={index} className="text-sm text-muted-foreground flex items-center gap-2 bg-secondary/50 p-2 rounded-md">
-                  <FileUp className="w-4 h-4" /> PDF: {file.name}
-                </p>
-             ))}
-           </div>
-        )}
-        {imageFile && (
-          <p className="text-sm text-muted-foreground flex items-center gap-2 bg-secondary/50 p-2 rounded-md">
-            <ImageUp className="w-4 h-4" /> Image: {imageFile.name}
-          </p>
-        )}
+        <div className="space-y-4">
+          <Label htmlFor="image-file-insert" className="text-lg font-semibold">
+            Select Image File
+          </Label>
+          <Input
+            id="image-file-insert"
+            type="file"
+            accept="image/png, image/jpeg"
+            onChange={handleImageChange}
+            className="hidden"
+            ref={imageInputRef}
+          />
+          <Button
+            onClick={() => imageInputRef.current?.click()}
+            className="w-full py-3 text-lg"
+            variant="outline"
+          >
+            <ImageUp className="mr-2 h-5 w-5" />
+            {imageFile ? 'Change Image' : 'Choose Image'}
+          </Button>
+          {imageFile && (
+            <div className="flex items-center justify-between p-2 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm mt-2">
+              <div className="flex items-center flex-grow min-w-0 mr-2">
+                <ImageUp className="h-5 w-5 text-green-500 mr-3 flex-shrink-0" />
+                <span className="truncate text-base font-medium text-gray-800 dark:text-gray-200">
+                  {imageFile.name}
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={removeImageFile}
+                className="h-7 w-7 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 flex-shrink-0"
+              >
+                <XCircle className="h-4 w-4" />
+                <span className="sr-only">Remove Image</span>
+              </Button>
+            </div>
+          )}
+        </div>
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-sm text-destructive mt-4 text-center">{error}</p>}
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 mt-6">
           <Button
             onClick={handleProcess}
             disabled={isLoading || pdfFiles.length === 0 || !imageFile}
             size="lg"
-            className="w-full text-lg"
+            className="flex-grow py-3 text-lg"
           >
             {isLoading ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -183,10 +279,10 @@ export function InsertImage() {
               variant="outline"
               size="lg"
               onClick={handleReset}
-              className="w-full sm:w-auto text-lg"
+              className="w-full sm:w-auto py-3 text-lg"
             >
               <Trash2 className="mr-2 h-5 w-5" />
-              Clear
+              Clear All
             </Button>
           )}
         </div>

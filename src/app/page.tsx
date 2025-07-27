@@ -42,7 +42,7 @@ export default function Home() {
               </CardTitle>
               <CardDescription className="pt-2 text-base">
                 Break down job descriptions into key tasks, technical terms, and
-                easy-to-understand explanations.
+                easy-to-understand explanations
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
@@ -60,7 +60,7 @@ export default function Home() {
               </CardTitle>
               <CardDescription className="pt-2 text-base">
                 Automatically generate an optimized Boolean search query based
-                on a job description.
+                on a job description
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
@@ -77,7 +77,7 @@ export default function Home() {
               </CardTitle>
               <CardDescription className="pt-2 text-base">
                 Rank a list of candidates against a job description and get a
-                prioritized list.
+                prioritized list
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
@@ -93,7 +93,7 @@ export default function Home() {
                 Nancy AI Call Summary
               </CardTitle>
               <CardDescription className="pt-2 text-base">
-                Generate a summary of a candidate call assessment.
+                Generate a summary of a candidate call assessment
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
@@ -109,7 +109,7 @@ export default function Home() {
                 Email Drafter
               </CardTitle>
               <CardDescription className="pt-2 text-base">
-                Draft a professional email to a client for candidate submission.
+                Draft a professional email to a client for candidate submission
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
@@ -125,7 +125,7 @@ export default function Home() {
                 PDF Editor
               </CardTitle>
               <CardDescription className="pt-2 text-base">
-                Combine multiple PDFs into a single file or insert images.
+                Combine multiple PDFs into a single file or insert images
               </CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
