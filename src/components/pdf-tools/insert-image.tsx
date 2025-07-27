@@ -228,9 +228,9 @@ export function InsertImage() {
                      <Image
                       src={DEFAULT_LOGO_URL}
                       alt="Default Logo"
-                      width={100}
-                      height={40}
-                      className="mx-auto h-10 object-contain"
+                      width={150}
+                      height={60}
+                      className="mx-auto h-16 object-contain"
                     />
                     <span className="font-medium block">Use Default Logo</span>
                   </div>
