@@ -35,7 +35,7 @@ export default function PdfEditorPage() {
             PDF Tools
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            A collection of simple tools to manipulate PDF documents.
+            Quick pdf editing for recruiters
           </p>
         </div>
       </header>
