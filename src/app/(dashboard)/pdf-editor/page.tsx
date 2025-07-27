@@ -41,16 +41,16 @@ export default function PdfEditorPage() {
       </header>
 
       <Tabs defaultValue="combine" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 h-auto rounded-lg">
+        <TabsList className="grid w-full grid-cols-2 p-1 h-auto rounded-lg bg-secondary/80">
           <TabsTrigger
             value="combine"
-            className="text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2 transition-all duration-300 hover:bg-primary/20"
           >
             Combine PDFs
           </TabsTrigger>
           <TabsTrigger
             value="insert-image"
-            className="text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2 transition-all duration-300 hover:bg-primary/20"
           >
             Insert Watermark
           </TabsTrigger>
