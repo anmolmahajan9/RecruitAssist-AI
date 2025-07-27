@@ -35,17 +35,11 @@ export function InsertImage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fetchLogoUrl = async () => {
-      try {
-        const logoRef = ref(storage, 'logo default.png');
-        const url = await getDownloadURL(logoRef);
-        setLogoUrl(url);
-      } catch (err) {
-        console.error("Failed to fetch logo from Firebase Storage:", err);
-        setError("Could not load watermark image. This is likely a CORS issue. Please check your Firebase Storage CORS configuration to allow requests from this domain.");
-      }
-    };
-    fetchLogoUrl();
+    // Statically set the URL provided by the user.
+    // Note: The token in this URL can expire. A more robust long-term solution
+    // is to fetch the URL dynamically and ensure CORS is configured on the bucket.
+    const staticLogoUrl = 'https://firebasestorage.googleapis.com/v0/b/recruitassist-ai-knbnk.firebasestorage.app/o/logo%20default.png?alt=media&token=83c8e6ca-a402-448b-9dd1-2b3745731ea8';
+    setLogoUrl(staticLogoUrl);
   }, []);
 
   const handleAddFiles = (files: File[]) => {
