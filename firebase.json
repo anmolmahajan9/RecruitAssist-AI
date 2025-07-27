@@ -3,7 +3,7 @@
     "public": "public",
     "headers": [
       {
-        "source": "/logo.png",
+        "source": "**/*.png",
         "headers": [
           {
             "key": "Access-Control-Allow-Origin",
