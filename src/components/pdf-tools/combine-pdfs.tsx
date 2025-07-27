@@ -193,7 +193,7 @@ export function CombinePdfs() {
               {pdfFiles.map((file, index) => (
                 <li
                   key={file.name + index}
-                  className="flex items-center justify-between p-2 rounded-md bg-muted"
+                  className="flex items-center justify-between p-2 rounded-md border"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <FileIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
