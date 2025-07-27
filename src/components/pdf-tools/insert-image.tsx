@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useCallback, useRef } from 'react';
@@ -180,9 +181,11 @@ export function InsertImage() {
         document.body.removeChild(a);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error during PDF processing:', err);
       setError(
-        'An error occurred while processing the PDFs. Please ensure files and network are okay.'
+        err instanceof Error
+          ? `Error: ${err.message}`
+          : 'An unknown error occurred during PDF processing.'
       );
     } finally {
       setIsLoading(false);
