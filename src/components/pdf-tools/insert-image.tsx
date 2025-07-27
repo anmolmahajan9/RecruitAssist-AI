@@ -37,12 +37,12 @@ export function InsertImage() {
   useEffect(() => {
     const fetchLogoUrl = async () => {
       try {
-        const logoRef = ref(storage, 'logo.png');
+        const logoRef = ref(storage, 'logo default.png');
         const url = await getDownloadURL(logoRef);
         setLogoUrl(url);
       } catch (err) {
         console.error("Failed to fetch logo from Firebase Storage:", err);
-        setError("Could not load watermark image from storage. Please ensure 'logo.png' exists.");
+        setError("Could not load watermark image from storage. Please ensure 'logo default.png' exists.");
       }
     };
     fetchLogoUrl();
