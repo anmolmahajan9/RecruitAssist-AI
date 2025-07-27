@@ -12,22 +12,31 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Loader2,
   Download,
   Trash2,
   UploadCloud,
   File as FileIcon,
-  Image as ImageIcon,
+  ImageIcon,
+  Building,
 } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 const MAX_FILES = 100;
+const DEFAULT_LOGO_URL =
+  'https://firebasestorage.googleapis.com/v0/b/recruitassist-ai-knbnk.firebasestorage.app/o/logo%20default.png?alt=media&token=83c8e6ca-a402-448b-9dd1-2b3745731ea8';
 
 export function InsertImage() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
   const [watermarkFile, setWatermarkFile] = useState<File | null>(null);
+  const [watermarkSource, setWatermarkSource] = useState<'upload' | 'default'>(
+    'default'
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -100,20 +109,20 @@ export function InsertImage() {
       pdfFileInputRef.current.click();
     }
   };
-  
+
   const handleWatermarkClick = () => {
     if (watermarkInputRef.current) {
       watermarkInputRef.current.click();
     }
-  }
+  };
 
   const handleProcess = async () => {
     if (pdfFiles.length === 0) {
       setError('Please select at least one PDF file.');
       return;
     }
-    if (!watermarkFile) {
-      setError('Please upload a watermark image.');
+    if (watermarkSource === 'upload' && !watermarkFile) {
+      setError('Please upload a watermark image or select the default logo.');
       return;
     }
 
@@ -121,14 +130,29 @@ export function InsertImage() {
     setError(null);
 
     try {
-      const imageBytes = await watermarkFile.arrayBuffer();
+      let imageBytes: ArrayBuffer;
+      let imageType: 'png' | 'jpeg';
+
+      if (watermarkSource === 'upload' && watermarkFile) {
+        imageBytes = await watermarkFile.arrayBuffer();
+        imageType = watermarkFile.type === 'image/png' ? 'png' : 'jpeg';
+      } else {
+        // Fetch the default logo
+        const response = await fetch(DEFAULT_LOGO_URL);
+        if (!response.ok) {
+          throw new Error('Failed to load default logo.');
+        }
+        imageBytes = await response.arrayBuffer();
+        imageType = 'png'; // Assuming default logo is PNG
+      }
+
 
       for (const pdfFile of pdfFiles) {
         const pdfBytes = await pdfFile.arrayBuffer();
         const pdfDoc = await PDFDocument.load(pdfBytes);
-        
+
         let watermarkImage;
-        if (watermarkFile.type === 'image/png') {
+        if (imageType === 'png') {
           watermarkImage = await pdfDoc.embedPng(imageBytes);
         } else {
           watermarkImage = await pdfDoc.embedJpg(imageBytes);
@@ -162,7 +186,7 @@ export function InsertImage() {
     } catch (err) {
       console.error(err);
       setError(
-        'An error occurred while processing the PDFs. Please ensure the files are not corrupted.'
+        'An error occurred while processing the PDFs. Please ensure files and network are okay.'
       );
     } finally {
       setIsLoading(false);
@@ -172,6 +196,7 @@ export function InsertImage() {
   const handleReset = () => {
     setPdfFiles([]);
     setWatermarkFile(null);
+    setWatermarkSource('default');
     setError(null);
     if (pdfFileInputRef.current) {
       pdfFileInputRef.current.value = '';
@@ -186,38 +211,70 @@ export function InsertImage() {
       <CardHeader>
         <CardTitle className="text-2xl font-bold">Insert Watermark</CardTitle>
         <CardDescription>
-          Upload your watermark image, then select PDF files to apply it to.
+          Choose a watermark, then select PDF files to apply it to.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-            <h4 className="font-semibold">1. Upload Watermark</h4>
+        <div className="space-y-4">
+          <h4 className="font-semibold">1. Choose Watermark Source</h4>
+          <RadioGroup
+            value={watermarkSource}
+            onValueChange={(value) => setWatermarkSource(value as 'upload' | 'default')}
+            className="flex gap-4"
+          >
+            <Label htmlFor="r-default" className="flex-1">
+              <Card className="cursor-pointer hover:border-primary">
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
+                  <RadioGroupItem value="default" id="r-default" />
+                  <Building className="h-6 w-6 text-muted-foreground" />
+                  <span className="font-bold">Use Default Logo</span>
+                </CardHeader>
+              </Card>
+            </Label>
+             <Label htmlFor="r-upload" className="flex-1">
+              <Card className="cursor-pointer hover:border-primary">
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
+                  <RadioGroupItem value="upload" id="r-upload" />
+                  <UploadCloud className="h-6 w-6 text-muted-foreground" />
+                  <span className="font-bold">Upload an Image</span>
+                </CardHeader>
+              </Card>
+            </Label>
+          </RadioGroup>
+
+          {watermarkSource === 'upload' && (
             <div
-                className={cn(
+              className={cn(
                 'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
                 'hover:border-primary hover:bg-primary/10 cursor-pointer'
-                )}
-                onClick={handleWatermarkClick}
+              )}
+              onClick={handleWatermarkClick}
             >
-                <Input
-                    id="watermark-file"
-                    type="file"
-                    accept="image/png, image/jpeg"
-                    className="hidden"
-                    onChange={handleWatermarkChange}
-                    ref={watermarkInputRef}
-                />
-                <div className="flex flex-col items-center justify-center space-y-2">
+              <Input
+                id="watermark-file"
+                type="file"
+                accept="image/png, image/jpeg"
+                className="hidden"
+                onChange={handleWatermarkChange}
+                ref={watermarkInputRef}
+              />
+              <div className="flex flex-col items-center justify-center space-y-2">
                 <ImageIcon className="w-12 h-12 text-muted-foreground" />
                 {watermarkFile ? (
-                     <p className="text-sm font-medium text-foreground">{watermarkFile.name}</p>
-                ): (
-                    <p className="text-sm text-muted-foreground">
-                        <span className="font-semibold text-primary">Click to upload</span> a PNG or JPG
-                    </p>
+                  <p className="text-sm font-medium text-foreground">
+                    {watermarkFile.name}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-primary">
+                      Click to upload
+                    </span>{' '}
+                    a PNG or JPG
+                  </p>
                 )}
-                </div>
+              </div>
             </div>
+          )}
         </div>
 
         <div
@@ -282,13 +339,19 @@ export function InsertImage() {
           </div>
         )}
 
-        {error && <p className="text-sm text-destructive text-center">{error}</p>}
+        {error && (
+          <p className="text-sm text-destructive text-center">{error}</p>
+        )}
       </CardContent>
       {pdfFiles.length > 0 && (
         <CardFooter className="flex-col sm:flex-row gap-2 pt-4">
           <Button
             onClick={handleProcess}
-            disabled={isLoading || pdfFiles.length === 0 || !watermarkFile}
+            disabled={
+              isLoading ||
+              pdfFiles.length === 0 ||
+              (watermarkSource === 'upload' && !watermarkFile)
+            }
             size="lg"
             className="w-full"
           >
