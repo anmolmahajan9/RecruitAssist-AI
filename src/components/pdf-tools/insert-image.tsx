@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
 
-const MAX_FILES = 5;
+const MAX_FILES = 100;
 
 export function InsertImage() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
@@ -48,13 +48,21 @@ export function InsertImage() {
     fetchLogoUrl();
   }, []);
 
+  const handleAddFiles = (files: File[]) => {
+    if (pdfFiles.length + files.length > MAX_FILES) {
+      setError(`You cannot process more than ${MAX_FILES} files at once.`);
+      return;
+    }
+    const newFiles = files.filter(
+      (file) => file.type === 'application/pdf'
+    );
+    setPdfFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    setError(null);
+  }
+
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setPdfFiles((prevFiles) =>
-        [...prevFiles, ...newFiles].slice(0, MAX_FILES)
-      );
-      setError(null);
+      handleAddFiles(Array.from(e.target.files));
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -79,15 +87,9 @@ export function InsertImage() {
     setDragging(false);
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
-      const newFiles = Array.from(files).filter(
-        (file) => file.type === 'application/pdf'
-      );
-      setPdfFiles((prevFiles) =>
-        [...prevFiles, ...newFiles].slice(0, MAX_FILES)
-      );
-      setError(null);
+      handleAddFiles(Array.from(files));
     }
-  }, []);
+  }, [pdfFiles]);
 
   const removeFile = (index: number) => {
     setPdfFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
@@ -199,9 +201,6 @@ export function InsertImage() {
               <span className="font-semibold text-primary">Click to upload</span>{' '}
               or drag and drop
             </p>
-            <p className="text-xs text-muted-foreground">
-              Up to {MAX_FILES} PDFs
-            </p>
           </div>
         </div>
 
@@ -223,7 +222,7 @@ export function InsertImage() {
               {pdfFiles.map((file, index) => (
                 <li
                   key={index}
-                  className="flex items-center justify-between p-2 rounded-md bg-muted"
+                  className="flex items-center justify-between p-2 rounded-md border"
                 >
                   <div className="flex items-center gap-2 truncate">
                     <FileIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
