@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useCallback, useRef } from 'react';
@@ -28,8 +27,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 const MAX_FILES = 100;
-const DEFAULT_LOGO_BASE64 =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAYFBMVEX///8BAQEAAAD8/PwICAgKCgrf39/v7+8ZGRnOzs4pKSkWFhbx8fG7u7usrKyampo+Pj47OztBQUGbm5tPT09dXV2oqKh4eHhISEiUlJRhYWGhoaGtra3CwsLs7OyQkJCAgIBVdXJYAAACsklEQVR4nO3d65KiMBQGYAgQBREBBUFA8f+/9MvSKS10QhMnlPO+8w2nDGwan9M2bVq1atXqf11I+pT0K+lD0l+lD0n/lD4k/VP6kPTP1kfSb6ePpb/Ofjb9ffq49C/so9N/to9L/9k+Jv1n+5j0f+yj0/92H5f+s31s+k/30em/3cel/2wfJ//VfTT9XxpI+g8tJH0gPZJeS3v/xEEyS4n/Xv3w9I/V/0N/nf4f/efoH4/vGv1k9Bf0s9E/os7Xda/Qf0H9aPpf6j/Vv0L9fPjP1F9aP4b6fPFP1Z9V/Rz1S9S/Vv1i9c/UL1v9C9f/jP1z9L+h/T/rT1L9M/aH1n6l/nPof2n+l/gP7n1T/pvpPqP+l+l+p/yn1P6h/Tfq3qF+x/iv1L1G/Xv2P1G9dPzL1i9bPUP169RfWv1L9T/dfqP49+6/S/2f7n1J/T/1L9L9R/f/UP1f/M+rfnX8e/bvzL1T/rvwL1b8r/3L1r8p/Sv2r8k+rflf+0erfjn8s/dvyL1L/rvyL1e9Wf2f9u9Y/Wf1r1z9e/evWv2z9y9Z/bf231n97/TfXf3/9d9S/f/331G9gP4L6jew/S/297B9O/b3sH1P9vewvUP9vewP1H9jew/xX1h9e/5L68OqX1V9d/Sz19ZWvrD6/+nnpSytfWn159bPSl1e+uvrj6u+lLy99ffXF1b9PfWn179efXn199bfS33/0urvL36o+vvr76W+uPr76u+tv776e+u/v/6v1d9f/R3199S/S3379Uvq369+lfq369+vflv9t9a/bf231r9t/bfWf2v9t9a/7b131r/vvXX1v999etb1N+Tft36N+nfpn6d+rfp36h+tfo36l+kfpH6J+nfkv6J+nfkv6l+i/p36p+q/qH6Z+ofqn6Z+kfpH6p+sfqn6x+pfrX6p+sfq36V+lfrn6Z+ufrn61+tfrn6x+t/oP6d6nfqP6d6p/t/pn6b6r/lvr36v+t/r36r+x/pv7b6t+tfqD6l+ofrf6p+n+sf6z6T6l/Tf2f1f+l/hP6b63/ivpf6j+p/k+qH6v+T6r/pPpB6h+k/pHqL6l+p/qL6p+k/pHqL6r/l+rHqv+X6r+j/t36h6pfqn6Z+mHrX6p+sfrH6g/1n0//S9o/Zv0P1f9P/T/U/1f9T9Q/TP0j1Q9UP1T9UPVP1T9Q/S9UP0S9S9Sv0r9KtWvUr9G/SrVr1F/JvVr1Z9J/erVJ9N/Rv2J9N/qv1H9T9S/Rf0L1H9J/Sv0L9B/Q/0L1O/pX6t+jPpr6V+jfpD6D+hfqT6V+lfoP516hfoX6V+lPpL6h+m/pH6t+g/q/5n6R+n/sP6Z+n/pv4n6v+u/g/qn6T+V+kfov47+nfqP6f+F+kfov6b+j/t/y+lD6//D2n9pfpP6t6jftX6T6rfqH6t+o36b6r/kvrX6P+1+i9r/y/179X/sPoP1B9IfSD0j0//P9IfkH4k/Un6l6hfof4T6x9c8X8C1atVrVb9C/wH+kO7IeLwJ1MAAAAASUVORK5CYII=';
+const DEFAULT_LOGO_URL = '/logo.png'; // Path to the logo in the public folder
 
 export function InsertImage() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
@@ -137,8 +135,10 @@ export function InsertImage() {
         imageBytes = await watermarkFile.arrayBuffer();
         imageType = watermarkFile.type === 'image/png' ? 'png' : 'jpeg';
       } else {
-        // Use fetch to decode the base64 string correctly.
-        const response = await fetch(DEFAULT_LOGO_BASE64);
+        const response = await fetch(DEFAULT_LOGO_URL);
+        if (!response.ok) {
+           throw new Error(`Failed to load default logo: ${response.statusText}`);
+        }
         imageBytes = await response.arrayBuffer();
         imageType = 'png';
       }
