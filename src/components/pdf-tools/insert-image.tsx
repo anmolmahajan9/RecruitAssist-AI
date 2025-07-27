@@ -137,12 +137,17 @@ export function InsertImage() {
         imageBytes = await watermarkFile.arrayBuffer();
         imageType = watermarkFile.type === 'image/png' ? 'png' : 'jpeg';
       } else {
-        // Fetch the default logo from the Base64 string
-        const response = await fetch(DEFAULT_LOGO_BASE64);
-        imageBytes = await response.arrayBuffer();
+        // Decode the Base64 string into an ArrayBuffer
+        const base64String = DEFAULT_LOGO_BASE64.split(',')[1];
+        const binaryString = atob(base64String);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        imageBytes = bytes.buffer;
         imageType = 'png';
       }
-
 
       for (const pdfFile of pdfFiles) {
         const pdfBytes = await pdfFile.arrayBuffer();
