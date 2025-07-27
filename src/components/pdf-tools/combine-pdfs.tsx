@@ -24,7 +24,7 @@ import {
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
 
-const MAX_FILES = 5;
+const MAX_FILES = 100;
 
 export function CombinePdfs() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
@@ -33,13 +33,21 @@ export function CombinePdfs() {
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleAddFiles = (files: File[]) => {
+    if (pdfFiles.length + files.length > MAX_FILES) {
+      setError(`You cannot combine more than ${MAX_FILES} files.`);
+      return;
+    }
+    const newFiles = files.filter(
+      (file) => file.type === 'application/pdf'
+    );
+    setPdfFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    setError(null);
+  }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setPdfFiles((prevFiles) =>
-        [...prevFiles, ...newFiles].slice(0, MAX_FILES)
-      );
-      setError(null);
+      handleAddFiles(Array.from(e.target.files));
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -64,15 +72,9 @@ export function CombinePdfs() {
     setDragging(false);
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
-      const newFiles = Array.from(files).filter(
-        (file) => file.type === 'application/pdf'
-      );
-      setPdfFiles((prevFiles) =>
-        [...prevFiles, ...newFiles].slice(0, MAX_FILES)
-      );
-      setError(null);
+      handleAddFiles(Array.from(files));
     }
-  }, []);
+  }, [pdfFiles]);
 
   const removeFile = (index: number) => {
     setPdfFiles(pdfFiles.filter((_, i) => i !== index));
@@ -163,7 +165,7 @@ export function CombinePdfs() {
           className={cn(
             'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
             dragging ? 'border-primary bg-accent' : 'border-border',
-            'hover:border-primary hover:bg-muted/50 cursor-pointer'
+            'hover:border-primary hover:bg-primary/10 cursor-pointer'
           )}
         >
           <Input
@@ -180,9 +182,6 @@ export function CombinePdfs() {
             <p className="text-sm text-muted-foreground">
               <span className="font-semibold text-primary">Click to upload</span>{' '}
               or drag and drop
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Up to {MAX_FILES} PDFs
             </p>
           </div>
         </div>
