@@ -214,7 +214,7 @@ export function InsertImage() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
-          <h4 className="font-semibold">Choose Watermark</h4>
+          <h4 className="font-semibold text-lg">1. Choose Watermark</h4>
           <RadioGroup
             value={watermarkSource}
             onValueChange={(value) => setWatermarkSource(value as 'upload' | 'default')}
@@ -284,7 +284,7 @@ export function InsertImage() {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <h4 className="font-semibold mb-4">Upload PDFs</h4>
+          <h4 className="font-semibold mb-4 text-lg">2. Upload PDFs</h4>
           <Input
             id="pdf-files"
             type="file"
