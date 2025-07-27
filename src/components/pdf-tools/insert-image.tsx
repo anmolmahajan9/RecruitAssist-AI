@@ -143,6 +143,7 @@ export function InsertImage() {
             y: height - logoDims.height - 20,
             width: logoDims.width,
             height: logoDims.height,
+            opacity: 0.5,
           });
         }
 
@@ -151,7 +152,8 @@ export function InsertImage() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `watermarked_${pdfFile.name}`;
+        const originalName = pdfFile.name.replace(/\.pdf$/i, '');
+        a.download = `${originalName}-suitable-ai.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
