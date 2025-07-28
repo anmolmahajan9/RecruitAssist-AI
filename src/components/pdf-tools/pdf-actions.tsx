@@ -50,9 +50,15 @@ export function PdfActions() {
       setError(`You cannot process more than ${MAX_FILES} files at once.`);
       return;
     }
-    const newFiles = files.filter(
-      (file) => file.type === 'application/pdf'
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+    const newFiles = Array.from(files).filter((file) =>
+      allowedTypes.includes(file.type)
     );
+
     setPdfFiles((prevFiles) => [...prevFiles, ...newFiles]);
     setError(null);
   };
@@ -359,12 +365,12 @@ export function PdfActions() {
 
         {/* Step 3: Upload PDFs */}
         <div>
-          <h4 className="font-semibold text-lg mb-4">{stepNumber}. Upload PDFs</h4>
+          <h4 className="font-semibold text-lg mb-4">{stepNumber}. Upload Files</h4>
           <div
             className={cn(
               'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
               dragging ? 'border-primary bg-accent' : 'border-border',
-              'hover:border-primary hover:bg-primary/10 cursor-pointer'
+              'hover:bg-primary/10 cursor-pointer'
             )}
             onClick={handleAddFilesClick}
             onDragOver={handleDragOver}
@@ -374,7 +380,7 @@ export function PdfActions() {
             <Input
               id="pdf-files"
               type="file"
-              accept="application/pdf"
+              accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               multiple
               className="hidden"
               onChange={handlePdfChange}
