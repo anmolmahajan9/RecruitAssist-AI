@@ -24,6 +24,8 @@ import {
   Combine,
   Droplet,
   PlusCircle,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { PDFDocument } from 'pdf-lib';
 import { cn } from '@/lib/utils';
@@ -102,6 +104,18 @@ export function PdfActions() {
 
   const removeFile = (index: number) => {
     setPdfFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+  
+  const moveFile = (index: number, direction: 'up' | 'down') => {
+    const newFiles = [...pdfFiles];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+    if (newIndex >= 0 && newIndex < newFiles.length) {
+      const temp = newFiles[index];
+      newFiles[index] = newFiles[newIndex];
+      newFiles[newIndex] = temp;
+      setPdfFiles(newFiles);
+    }
   };
 
   const handleAddFilesClick = () => {
@@ -240,15 +254,11 @@ export function PdfActions() {
     }
   };
 
+  const stepNumber = action === 'combine' ? 2 : 3;
+
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">PDF Actions</CardTitle>
-        <CardDescription>
-          Choose an action, upload your files, and process them.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         {/* Step 1: Choose Action */}
         <div className="space-y-4">
           <h4 className="font-semibold text-lg">1. Choose your Action</h4>
@@ -349,12 +359,12 @@ export function PdfActions() {
 
         {/* Step 3: Upload PDFs */}
         <div>
-          <h4 className="font-semibold text-lg mb-4">{action === 'watermark' || action === 'both' ? '3.': '2.'} Upload PDFs</h4>
+          <h4 className="font-semibold text-lg mb-4">{stepNumber}. Upload PDFs</h4>
           <div
             className={cn(
               'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
               dragging ? 'border-primary bg-accent' : 'border-border',
-              'hover:border-primary hover:bg-muted/50 cursor-pointer'
+              'hover:border-primary hover:bg-primary/10 cursor-pointer'
             )}
             onClick={handleAddFilesClick}
             onDragOver={handleDragOver}
@@ -398,14 +408,38 @@ export function PdfActions() {
                       {file.name}
                     </span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeFile(index)}
-                    className="h-7 w-7 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    {(action === 'combine' || action === 'both') && (
+                       <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => moveFile(index, 'up')}
+                          disabled={index === 0}
+                          className="h-7 w-7"
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => moveFile(index, 'down')}
+                          disabled={index === pdfFiles.length - 1}
+                          className="h-7 w-7"
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeFile(index)}
+                      className="h-7 w-7 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>
