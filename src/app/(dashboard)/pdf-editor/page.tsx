@@ -4,6 +4,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CombinePdfs } from '@/components/pdf-tools/combine-pdfs';
 import { InsertImage } from '@/components/pdf-tools/insert-image';
+import { PdfActions } from '@/components/pdf-tools/pdf-actions';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -40,8 +41,14 @@ export default function PdfEditorPage() {
         </div>
       </header>
 
-      <Tabs defaultValue="combine" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 p-1 h-auto rounded-lg bg-secondary/80">
+      <Tabs defaultValue="actions" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 p-1 h-auto rounded-lg bg-secondary/80">
+          <TabsTrigger
+            value="actions"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2 transition-all duration-300 hover:bg-primary/20"
+          >
+            PDF Actions
+          </TabsTrigger>
           <TabsTrigger
             value="combine"
             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2 transition-all duration-300 hover:bg-primary/20"
@@ -55,6 +62,9 @@ export default function PdfEditorPage() {
             Insert Watermark
           </TabsTrigger>
         </TabsList>
+        <TabsContent value="actions" className="mt-6">
+          <PdfActions />
+        </TabsContent>
         <TabsContent value="combine" className="mt-6">
           <CombinePdfs />
         </TabsContent>

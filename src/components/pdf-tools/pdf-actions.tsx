@@ -1,0 +1,433 @@
+
+'use client';
+
+import React, { useState, useCallback, useRef } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Loader2,
+  Download,
+  Trash2,
+  UploadCloud,
+  File as FileIcon,
+  ImageIcon,
+  Combine,
+  Droplet,
+  PlusCircle,
+} from 'lucide-react';
+import { PDFDocument } from 'pdf-lib';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+
+const MAX_FILES = 100;
+const DEFAULT_LOGO_URL = 'https://recruitassist-ai-knbnk.web.app/logo.png';
+
+export function PdfActions() {
+  const [action, setAction] = useState<'combine' | 'watermark' | 'both'>('combine');
+  const [pdfFiles, setPdfFiles] = useState<File[]>([]);
+  const [watermarkFile, setWatermarkFile] = useState<File | null>(null);
+  const [watermarkSource, setWatermarkSource] = useState<'upload' | 'default'>('default');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const pdfFileInputRef = useRef<HTMLInputElement>(null);
+  const watermarkInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAddPdfFiles = (files: File[]) => {
+    if (pdfFiles.length + files.length > MAX_FILES) {
+      setError(`You cannot process more than ${MAX_FILES} files at once.`);
+      return;
+    }
+    const newFiles = files.filter(
+      (file) => file.type === 'application/pdf'
+    );
+    setPdfFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    setError(null);
+  };
+
+  const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      handleAddPdfFiles(Array.from(e.target.files));
+      if (pdfFileInputRef.current) {
+        pdfFileInputRef.current.value = '';
+      }
+    }
+  };
+  
+  const handleWatermarkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+      setWatermarkFile(file);
+      setError(null);
+    } else {
+      setWatermarkFile(null);
+      setError('Please select a valid PNG or JPEG image for the watermark.');
+    }
+  };
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragging(false);
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        handleAddPdfFiles(Array.from(files));
+      }
+    },
+    [pdfFiles]
+  );
+
+  const removeFile = (index: number) => {
+    setPdfFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleAddFilesClick = () => {
+    if (pdfFileInputRef.current) {
+      pdfFileInputRef.current.click();
+    }
+  };
+
+  const handleWatermarkClick = () => {
+    if (watermarkInputRef.current) {
+      watermarkInputRef.current.click();
+    }
+  };
+  
+  const handleProcess = async () => {
+    if (pdfFiles.length === 0) {
+      setError('Please select at least one PDF file.');
+      return;
+    }
+     if ((action === 'watermark' || action === 'both') && watermarkSource === 'upload' && !watermarkFile) {
+      setError('Please upload a watermark image or select the default logo.');
+      return;
+    }
+    if ((action === 'combine' || action === 'both') && pdfFiles.length < 2) {
+      setError('Please select at least two PDF files to combine.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+        const mergedPdf = await PDFDocument.create();
+
+        for (const file of pdfFiles) {
+            const pdfBytes = await file.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const copiedPages = await mergedPdf.copyPages(
+              pdfDoc,
+              pdfDoc.getPageIndices()
+            );
+            copiedPages.forEach((page) => mergedPdf.addPage(page));
+        }
+
+        if (action === 'watermark' || action === 'both') {
+            let imageBytes: ArrayBuffer;
+            let imageType: 'png' | 'jpeg';
+
+            if (watermarkSource === 'upload' && watermarkFile) {
+                imageBytes = await watermarkFile.arrayBuffer();
+                imageType = watermarkFile.type === 'image/png' ? 'png' : 'jpeg';
+            } else {
+                const response = await fetch(DEFAULT_LOGO_URL);
+                if (!response.ok) {
+                   throw new Error(`Failed to load default logo: ${response.statusText}`);
+                }
+                imageBytes = await response.arrayBuffer();
+                imageType = 'png';
+            }
+            
+            let watermarkImage;
+            if (imageType === 'png') {
+              watermarkImage = await mergedPdf.embedPng(imageBytes);
+            } else {
+              watermarkImage = await mergedPdf.embedJpg(imageBytes);
+            }
+    
+            const pages = mergedPdf.getPages();
+            for (const page of pages) {
+              const { width, height } = page.getSize();
+              const logoDims = watermarkImage.scale(0.08);
+              page.drawImage(watermarkImage, {
+                x: width - logoDims.width - 20,
+                y: height - logoDims.height - 20,
+                width: logoDims.width,
+                height: logoDims.height,
+                opacity: 0.5,
+              });
+            }
+        }
+        
+        const finalPdfBytes = await mergedPdf.save();
+        const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `processed-${Date.now()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+    } catch (err) {
+      console.error('Error during PDF processing:', err);
+      setError(
+        err instanceof Error
+          ? `Error: ${err.message}`
+          : 'An unknown error occurred during PDF processing.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setPdfFiles([]);
+    setWatermarkFile(null);
+    setWatermarkSource('default');
+    setError(null);
+    if (pdfFileInputRef.current) {
+      pdfFileInputRef.current.value = '';
+    }
+    if (watermarkInputRef.current) {
+      watermarkInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold">PDF Actions</CardTitle>
+        <CardDescription>
+          Choose an action, upload your files, and process them.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Step 1: Choose Action */}
+        <div className="space-y-4">
+          <h4 className="font-semibold text-lg">1. Choose your Action</h4>
+          <RadioGroup
+            value={action}
+            onValueChange={(value) => setAction(value as 'combine' | 'watermark' | 'both')}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+          >
+            <Label htmlFor="action-combine">
+              <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full p-4 flex flex-col items-center justify-center text-center">
+                  <RadioGroupItem value="combine" id="action-combine" className="absolute top-4 right-4"/>
+                  <Combine className="w-10 h-10 mb-2 text-primary"/>
+                  <span className="font-semibold">Combine PDFs</span>
+                  <span className="text-xs text-muted-foreground mt-1">Merge multiple PDFs into one.</span>
+              </Card>
+            </Label>
+             <Label htmlFor="action-watermark">
+              <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full p-4 flex flex-col items-center justify-center text-center">
+                  <RadioGroupItem value="watermark" id="action-watermark" className="absolute top-4 right-4"/>
+                  <Droplet className="w-10 h-10 mb-2 text-primary"/>
+                  <span className="font-semibold">Insert Watermark</span>
+                  <span className="text-xs text-muted-foreground mt-1">Add a watermark to PDFs.</span>
+              </Card>
+            </Label>
+             <Label htmlFor="action-both">
+              <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full p-4 flex flex-col items-center justify-center text-center">
+                  <RadioGroupItem value="both" id="action-both" className="absolute top-4 right-4"/>
+                  <PlusCircle className="w-10 h-10 mb-2 text-primary"/>
+                  <span className="font-semibold">Combine & Watermark</span>
+                   <span className="text-xs text-muted-foreground mt-1">Merge and then add a watermark.</span>
+              </Card>
+            </Label>
+          </RadioGroup>
+        </div>
+
+        {/* Step 2: Choose Watermark (if applicable) */}
+        {(action === 'watermark' || action === 'both') && (
+            <div className="space-y-4">
+                <h4 className="font-semibold text-lg">2. Choose Watermark</h4>
+                 <RadioGroup
+                    value={watermarkSource}
+                    onValueChange={(value) => setWatermarkSource(value as 'upload' | 'default')}
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                  >
+                    <Label htmlFor="r-default" className="flex-1">
+                      <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full">
+                         <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
+                          <RadioGroupItem value="default" id="r-default" />
+                          <div className="flex-1 text-center space-y-2">
+                             <Image
+                              src={DEFAULT_LOGO_URL}
+                              alt="Default Logo"
+                              width={240}
+                              height={96}
+                              className="mx-auto h-24 object-contain"
+                            />
+                            <span className="font-medium block">Use Default Logo</span>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    </Label>
+                     <Label htmlFor="r-upload" className="flex-1">
+                      <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full">
+                        <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4 h-full">
+                          <RadioGroupItem value="upload" id="r-upload" />
+                           <div
+                            className="flex-1 flex flex-col items-center justify-center text-center space-y-2"
+                            onClick={handleWatermarkClick}
+                          >
+                            <Input
+                              id="watermark-file"
+                              type="file"
+                              accept="image/png, image/jpeg"
+                              className="hidden"
+                              onChange={handleWatermarkChange}
+                              ref={watermarkInputRef}
+                            />
+                            <ImageIcon className="w-10 h-10 text-muted-foreground" />
+                            {watermarkFile ? (
+                              <p className="text-sm font-medium text-foreground">
+                                {watermarkFile.name}
+                              </p>
+                            ) : (
+                              <p className="text-sm font-medium">
+                                <span className="text-primary">
+                                  Click to upload
+                                </span>{' '}
+                                a PNG or JPG
+                              </p>
+                            )}
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    </Label>
+                </RadioGroup>
+            </div>
+        )}
+
+        {/* Step 3: Upload PDFs */}
+        <div>
+          <h4 className="font-semibold text-lg mb-4">{action === 'watermark' || action === 'both' ? '3.': '2.'} Upload PDFs</h4>
+          <div
+            className={cn(
+              'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+              dragging ? 'border-primary bg-accent' : 'border-border',
+              'hover:border-primary hover:bg-muted/50 cursor-pointer'
+            )}
+            onClick={handleAddFilesClick}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <Input
+              id="pdf-files"
+              type="file"
+              accept="application/pdf"
+              multiple
+              className="hidden"
+              onChange={handlePdfChange}
+              ref={pdfFileInputRef}
+            />
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <UploadCloud className="w-12 h-12 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-primary">Click to upload</span>{' '}
+                or drag and drop
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {pdfFiles.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-semibold">Selected Files:</h4>
+            <ul className="space-y-2">
+              {pdfFiles.map((file, index) => (
+                <li
+                  key={index}
+                  className="flex items-center justify-between p-2 rounded-md border"
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <FileIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <span
+                      className="font-medium text-sm truncate"
+                      title={file.name}
+                    >
+                      {file.name}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeFile(index)}
+                    className="h-7 w-7 hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {error && (
+          <p className="text-sm text-destructive text-center">{error}</p>
+        )}
+      </CardContent>
+      {pdfFiles.length > 0 && (
+        <CardFooter className="flex-col sm:flex-row gap-2 pt-4">
+          <Button
+            onClick={handleProcess}
+            disabled={
+              isLoading ||
+              pdfFiles.length === 0 ||
+              ((action === 'watermark' || action === 'both') && watermarkSource === 'upload' && !watermarkFile)
+            }
+            size="lg"
+            className="w-full"
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-5 w-5" />
+            )}
+            {isLoading
+              ? 'Processing...'
+              : `Process ${pdfFiles.length} File(s)`}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={handleReset}
+            className="w-full sm:w-auto hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+          >
+            <Trash2 className="mr-2 h-5 w-5" />
+            Clear
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
+  );
+}
