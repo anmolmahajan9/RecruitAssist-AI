@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { CallSummaryOutput } from '@/ai/schemas/call-summary-schema';
@@ -12,7 +13,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useState } from 'react';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
 
 interface CallSummaryDisplayProps {
   summary: CallSummaryOutput;
@@ -65,6 +66,28 @@ function CopyableBlock({
   );
 }
 
+// Helper function to wrap text
+const wrapText = (text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] => {
+    const words = text.split(' ');
+    let lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+        const potentialLine = currentLine === '' ? word : `${currentLine} ${word}`;
+        const width = font.widthOfTextAtSize(potentialLine, fontSize);
+
+        if (width > maxWidth) {
+            lines.push(currentLine);
+            currentLine = word;
+        } else {
+            currentLine = potentialLine;
+        }
+    }
+    lines.push(currentLine);
+    return lines;
+};
+
+
 export function CallSummaryDisplay({ summary }: CallSummaryDisplayProps) {
   const [isPdfLoading, setIsPdfLoading] = useState(false);
 
@@ -78,51 +101,75 @@ export function CallSummaryDisplay({ summary }: CallSummaryDisplayProps) {
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage();
       const { width, height } = page.getSize();
+      
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-      
-      const margin = 50;
-      const maxWidth = width - 2 * margin;
+
+      const gray = rgb(0.3, 0.3, 0.3);
+      const lightGray = rgb(0.5, 0.5, 0.5);
+      const black = rgb(0, 0, 0);
+      const blue = rgb(0.1, 0.4, 0.9);
+      const margin = 40;
       let y = height - margin;
 
-      const drawText = (text: string, f: any, size: number, indent = 0) => {
-        const lines = text.split('\n');
-        for (const line of lines) {
-           if (y < margin) { 
-              // This basic implementation doesn't add new pages.
-              // For long text, a more complex solution would be needed.
-              return; 
-            }
-            page.drawText(line, {
-              x: margin + indent,
-              y,
-              font: f,
-              size,
-              color: rgb(0, 0, 0),
-              maxWidth: maxWidth - indent,
-            });
-            y -= size * 1.4; // Line height
-        }
-      }
+      // 1. Header
+      const logoUrl = 'https://recruitassist-ai-knbnk.web.app/logo.png';
+      const logoResponse = await fetch(logoUrl);
+      const logoBytes = await logoResponse.arrayBuffer();
+      const logoImage = await pdfDoc.embedPng(logoBytes);
+      const logoDims = logoImage.scale(0.25);
+      page.drawImage(logoImage, {
+        x: margin,
+        y: y - logoDims.height + 15,
+        width: logoDims.width,
+        height: logoDims.height,
+      });
 
-      drawText('Call Assessment Summary', boldFont, 18);
-      y -= 20;
+      page.drawText('Interview Report', { x: width - margin - 110, y: y, font: boldFont, size: 16, color: black });
+      const generationDate = `Generated on ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`;
+      page.drawText(generationDate, { x: width - margin - font.widthOfTextAtSize(generationDate, 10), y: y - 15, font, size: 10, color: lightGray });
+      
+      y -= 70; // Space after header
 
-      drawText('Detailed Assessment', boldFont, 14);
-      y -= 5;
-      drawText(summary.detailedAssessment, font, 11);
-      y -= 20;
+      // Line separator
+      page.drawLine({
+          start: { x: margin, y },
+          end: { x: width - margin, y },
+          thickness: 1,
+          color: rgb(0.9, 0.9, 0.9),
+      });
 
-      drawText('Overall Summary', boldFont, 14);
-      y -= 5;
-      drawText(summary.summary, font, 11);
+      y -= 40; // Space for content
+
+
+      // 2. Summary Section
+      page.drawText('Summary', { x: margin, y, font: boldFont, size: 18, color: black });
+      y -= 25;
+      
+      const summaryLines = wrapText(summary.summary, font, 11, width - 2 * margin);
+      summaryLines.forEach(line => {
+        page.drawText(line, { x: margin, y, font, size: 11, color: gray, lineHeight: 15 });
+        y -= 15;
+      });
+
+      y -= 20; // Space before next section
+
+      // 3. Interviewer Feedback / Detailed Assessment
+      page.drawText('Interviewer Feedback', { x: margin, y, font: boldFont, size: 18, color: black });
+      y -= 25;
+
+      const assessmentLines = wrapText(summary.detailedAssessment, font, 11, width - 2 * margin);
+      assessmentLines.forEach(line => {
+          page.drawText(line, { x: margin, y, font, size: 11, color: gray, lineHeight: 15 });
+          y -= 15;
+      });
 
       const pdfBytes = await pdfDoc.save();
 
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = 'call-summary.pdf';
+      link.download = 'call-summary-report.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
