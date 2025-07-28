@@ -1,9 +1,6 @@
 
 'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CombinePdfs } from '@/components/pdf-tools/combine-pdfs';
-import { InsertImage } from '@/components/pdf-tools/insert-image';
 import { PdfActions } from '@/components/pdf-tools/pdf-actions';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
@@ -36,42 +33,11 @@ export default function PdfEditorPage() {
             PDF Tools
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Combine multiple PDFs into a single file or insert images
+            Combine PDFs, insert watermarks, or do both at once.
           </p>
         </div>
       </header>
-
-      <Tabs defaultValue="actions" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 p-1 h-auto rounded-lg bg-secondary/80">
-          <TabsTrigger
-            value="actions"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2 transition-all duration-300 hover:bg-primary/20"
-          >
-            PDF Actions
-          </TabsTrigger>
-          <TabsTrigger
-            value="combine"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2 transition-all duration-300 hover:bg-primary/20"
-          >
-            Combine PDFs
-          </TabsTrigger>
-          <TabsTrigger
-            value="insert-image"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg rounded-md py-2 transition-all duration-300 hover:bg-primary/20"
-          >
-            Insert Watermark
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="actions" className="mt-6">
-          <PdfActions />
-        </TabsContent>
-        <TabsContent value="combine" className="mt-6">
-          <CombinePdfs />
-        </TabsContent>
-        <TabsContent value="insert-image" className="mt-6">
-          <InsertImage />
-        </TabsContent>
-      </Tabs>
+      <PdfActions />
     </div>
   );
 }
