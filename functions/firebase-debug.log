@@ -1,0 +1,33 @@
+[debug] [2025-07-27T14:35:17.429Z] ----------------------------------------------------------------------
+[debug] [2025-07-27T14:35:17.454Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /home/user/.global_modules/bin/firebase deploy --only functions
+[debug] [2025-07-27T14:35:17.454Z] CLI Version:   14.11.1
+[debug] [2025-07-27T14:35:17.455Z] Platform:      linux
+[debug] [2025-07-27T14:35:17.455Z] Node Version:  v20.19.1
+[debug] [2025-07-27T14:35:17.455Z] Time:          Sun Jul 27 2025 14:35:17 GMT+0000 (Coordinated Universal Time)
+[debug] [2025-07-27T14:35:17.455Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-27T14:35:18.013Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-27T14:35:18.014Z] > authorizing via signed-in user (anmolmahajan9@gmail.com)
+[debug] [2025-07-27T14:35:18.014Z] [iam] checking project recruitassist-ai-knbnk for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-07-27T14:35:18.016Z] No OAuth tokens found
+[debug] [2025-07-27T14:35:18.016Z] No OAuth tokens found
+[debug] [2025-07-27T14:35:18.036Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-27T14:35:18.036Z] > authorizing via signed-in user (anmolmahajan9@gmail.com)
+[debug] [2025-07-27T14:35:18.040Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/recruitassist-ai-knbnk:testIamPermissions [none]
+[debug] [2025-07-27T14:35:18.044Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/recruitassist-ai-knbnk:testIamPermissions x-goog-quota-user=projects/recruitassist-ai-knbnk
+[debug] [2025-07-27T14:35:18.045Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/recruitassist-ai-knbnk:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-07-27T14:35:18.460Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/recruitassist-ai-knbnk:testIamPermissions 200
+[debug] [2025-07-27T14:35:18.463Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/recruitassist-ai-knbnk:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-07-27T14:35:18.465Z] No OAuth tokens found
+[debug] [2025-07-27T14:35:18.465Z] No OAuth tokens found
+[debug] [2025-07-27T14:35:18.466Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-27T14:35:18.466Z] > authorizing via signed-in user (anmolmahajan9@gmail.com)
+[debug] [2025-07-27T14:35:18.466Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/recruitassist-ai-knbnk/serviceAccounts/recruitassist-ai-knbnk@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-07-27T14:35:18.469Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/recruitassist-ai-knbnk/serviceAccounts/recruitassist-ai-knbnk@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-07-27T14:35:19.483Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/recruitassist-ai-knbnk/serviceAccounts/recruitassist-ai-knbnk@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-07-27T14:35:19.485Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/recruitassist-ai-knbnk/serviceAccounts/recruitassist-ai-knbnk@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'recruitassist-ai-knbnk'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
