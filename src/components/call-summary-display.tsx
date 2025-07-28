@@ -68,23 +68,26 @@ function CopyableBlock({
 
 // Helper function to wrap text
 const wrapText = (text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] => {
-    const words = text.split(' ');
-    let lines: string[] = [];
-    let currentLine = '';
+    const allLines: string[] = [];
+    const paragraphs = text.split('\n');
 
-    for (const word of words) {
-        const potentialLine = currentLine === '' ? word : `${currentLine} ${word}`;
-        const width = font.widthOfTextAtSize(potentialLine, fontSize);
+    for (const paragraph of paragraphs) {
+        const words = paragraph.split(' ');
+        let currentLine = '';
+        for (const word of words) {
+            const potentialLine = currentLine === '' ? word : `${currentLine} ${word}`;
+            const width = font.widthOfTextAtSize(potentialLine, fontSize);
 
-        if (width > maxWidth) {
-            lines.push(currentLine);
-            currentLine = word;
-        } else {
-            currentLine = potentialLine;
+            if (width > maxWidth) {
+                allLines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = potentialLine;
+            }
         }
+        allLines.push(currentLine);
     }
-    lines.push(currentLine);
-    return lines;
+    return allLines;
 };
 
 
