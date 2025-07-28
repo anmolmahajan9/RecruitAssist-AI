@@ -237,24 +237,24 @@ export function PdfActions() {
             className="grid grid-cols-1 sm:grid-cols-3 gap-4"
           >
             <Label htmlFor="action-combine">
-              <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full p-4 flex flex-col items-center justify-center text-center">
-                  <RadioGroupItem value="combine" id="action-combine" className="absolute top-4 right-4"/>
+              <Card className={cn("cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2", action === 'combine' ? "border-primary bg-primary/5" : "hover:border-primary/50")}>
+                  <RadioGroupItem value="combine" id="action-combine" className="sr-only"/>
                   <Combine className="w-10 h-10 mb-2 text-primary"/>
                   <span className="font-semibold">Combine PDFs</span>
                   <span className="text-xs text-muted-foreground mt-1">Merge multiple PDFs into one.</span>
               </Card>
             </Label>
              <Label htmlFor="action-watermark">
-              <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full p-4 flex flex-col items-center justify-center text-center">
-                  <RadioGroupItem value="watermark" id="action-watermark" className="absolute top-4 right-4"/>
+              <Card className={cn("cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2", action === 'watermark' ? "border-primary bg-primary/5" : "hover:border-primary/50")}>
+                  <RadioGroupItem value="watermark" id="action-watermark" className="sr-only"/>
                   <Droplet className="w-10 h-10 mb-2 text-primary"/>
                   <span className="font-semibold">Insert Watermark</span>
                   <span className="text-xs text-muted-foreground mt-1">Add a watermark to PDFs.</span>
               </Card>
             </Label>
              <Label htmlFor="action-both">
-              <Card className="cursor-pointer hover:border-primary data-[state=checked]:border-primary h-full p-4 flex flex-col items-center justify-center text-center">
-                  <RadioGroupItem value="both" id="action-both" className="absolute top-4 right-4"/>
+              <Card className={cn("cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2", action === 'both' ? "border-primary bg-primary/5" : "hover:border-primary/50")}>
+                  <RadioGroupItem value="both" id="action-both" className="sr-only"/>
                   <PlusCircle className="w-10 h-10 mb-2 text-primary"/>
                   <span className="font-semibold">Combine & Watermark</span>
                    <span className="text-xs text-muted-foreground mt-1">Merge and then add a watermark.</span>
