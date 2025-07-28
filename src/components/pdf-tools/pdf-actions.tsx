@@ -116,17 +116,69 @@ export function PdfActions() {
     }
   };
   
+  const getWatermarkBytes = async (): Promise<[ArrayBuffer, 'png' | 'jpeg'] | [null, null]> => {
+      if (watermarkSource === 'upload' && watermarkFile) {
+        const imageBytes = await watermarkFile.arrayBuffer();
+        const imageType = watermarkFile.type === 'image/png' ? 'png' : 'jpeg';
+        return [imageBytes, imageType];
+      } else {
+        const response = await fetch(DEFAULT_LOGO_URL);
+        if (!response.ok) {
+           throw new Error(`Failed to load default logo: ${response.statusText}`);
+        }
+        const imageBytes = await response.arrayBuffer();
+        return [imageBytes, 'png'];
+      }
+  }
+
+  const applyWatermark = async (pdfDoc: PDFDocument) => {
+      const [imageBytes, imageType] = await getWatermarkBytes();
+      if (!imageBytes || !imageType) return;
+
+      let watermarkImage;
+      if (imageType === 'png') {
+        watermarkImage = await pdfDoc.embedPng(imageBytes);
+      } else {
+        watermarkImage = await pdfDoc.embedJpg(imageBytes);
+      }
+  
+      const pages = pdfDoc.getPages();
+      for (const page of pages) {
+        const { width, height } = page.getSize();
+        const logoDims = watermarkImage.scale(0.08);
+        page.drawImage(watermarkImage, {
+          x: width - logoDims.width - 20,
+          y: height - logoDims.height - 20,
+          width: logoDims.width,
+          height: logoDims.height,
+          opacity: 0.5,
+        });
+      }
+  };
+  
+  const downloadPdf = (bytes: Uint8Array, filename: string) => {
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+  }
+
   const handleProcess = async () => {
     if (pdfFiles.length === 0) {
       setError('Please select at least one PDF file.');
       return;
     }
-     if ((action === 'watermark' || action === 'both') && watermarkSource === 'upload' && !watermarkFile) {
+    if ((action === 'watermark' || action === 'both') && watermarkSource === 'upload' && !watermarkFile) {
       setError('Please upload a watermark image or select the default logo.');
       return;
     }
     if ((action === 'combine' || action === 'both') && pdfFiles.length < 2) {
-      setError('Please select at least two PDF files to combine.');
+      setError('Please select at least two PDF files to combine for this action.');
       return;
     }
 
@@ -134,8 +186,17 @@ export function PdfActions() {
     setError(null);
 
     try {
+      if (action === 'watermark') {
+        for (const pdfFile of pdfFiles) {
+          const pdfBytes = await pdfFile.arrayBuffer();
+          const pdfDoc = await PDFDocument.load(pdfBytes);
+          await applyWatermark(pdfDoc);
+          const modifiedPdfBytes = await pdfDoc.save();
+          const originalName = pdfFile.name.replace(/\.pdf$/i, '');
+          downloadPdf(modifiedPdfBytes, `${originalName}-watermarked.pdf`);
+        }
+      } else { // 'combine' or 'both'
         const mergedPdf = await PDFDocument.create();
-
         for (const file of pdfFiles) {
             const pdfBytes = await file.arrayBuffer();
             const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -146,53 +207,13 @@ export function PdfActions() {
             copiedPages.forEach((page) => mergedPdf.addPage(page));
         }
 
-        if (action === 'watermark' || action === 'both') {
-            let imageBytes: ArrayBuffer;
-            let imageType: 'png' | 'jpeg';
-
-            if (watermarkSource === 'upload' && watermarkFile) {
-                imageBytes = await watermarkFile.arrayBuffer();
-                imageType = watermarkFile.type === 'image/png' ? 'png' : 'jpeg';
-            } else {
-                const response = await fetch(DEFAULT_LOGO_URL);
-                if (!response.ok) {
-                   throw new Error(`Failed to load default logo: ${response.statusText}`);
-                }
-                imageBytes = await response.arrayBuffer();
-                imageType = 'png';
-            }
-            
-            let watermarkImage;
-            if (imageType === 'png') {
-              watermarkImage = await mergedPdf.embedPng(imageBytes);
-            } else {
-              watermarkImage = await mergedPdf.embedJpg(imageBytes);
-            }
-    
-            const pages = mergedPdf.getPages();
-            for (const page of pages) {
-              const { width, height } = page.getSize();
-              const logoDims = watermarkImage.scale(0.08);
-              page.drawImage(watermarkImage, {
-                x: width - logoDims.width - 20,
-                y: height - logoDims.height - 20,
-                width: logoDims.width,
-                height: logoDims.height,
-                opacity: 0.5,
-              });
-            }
+        if (action === 'both') {
+          await applyWatermark(mergedPdf);
         }
         
         const finalPdfBytes = await mergedPdf.save();
-        const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `processed-${Date.now()}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        downloadPdf(finalPdfBytes, `processed-document.pdf`);
+      }
 
     } catch (err) {
       console.error('Error during PDF processing:', err);
