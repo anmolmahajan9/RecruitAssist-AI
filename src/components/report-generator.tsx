@@ -21,6 +21,8 @@ import {
   File as FileIcon,
   UploadCloud,
   Download,
+  Combine,
+  FileText,
 } from 'lucide-react';
 import {
   PDFDocument,
@@ -396,7 +398,7 @@ export function ReportGenerator() {
       10,
       contentWidth - 40
     );
-    const summaryHeight = 25 + 10 + summaryLines.length * 14;
+    const summaryHeight = 25 + 20 + summaryLines.length * 14;
 
     if (checkPageBreak(summaryHeight + 20)) y = height - margin;
     const summaryStartY = y;
@@ -419,7 +421,7 @@ export function ReportGenerator() {
       size: 16,
       color: textPrimary,
     });
-    y -= 10;
+    y -= 20;
 
     for (const line of summaryLines) {
       if (checkPageBreak(14)) y = height - margin - 50;
@@ -448,7 +450,7 @@ export function ReportGenerator() {
         contentWidth - 40
       );
       const blockHeight =
-        20 + 20 + barHeight + 10 + assessmentLines.length * 14 - (assessmentLines.length > 0 ? 0 : 14) + 10;
+        20 + 20 + barHeight + 10 + assessmentLines.length * 14 + 10;
       if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
       const startBlockY = y;
@@ -527,19 +529,27 @@ export function ReportGenerator() {
       <CardContent className="space-y-6">
         <div className="space-y-2">
             <Label className="font-semibold">1. Report Type</Label>
-            <RadioGroup
+             <RadioGroup
                 value={includeResume}
                 onValueChange={(value) => setIncludeResume(value as 'yes' | 'no')}
-                className="flex gap-4"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
             >
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id="r-yes" />
-                    <Label htmlFor="r-yes">Assessment + Resume</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="r-no" />
-                    <Label htmlFor="r-no">Assessment Only</Label>
-                </div>
+                <Label htmlFor="r-yes">
+                    <Card className={cn("cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2", includeResume === 'yes' ? "border-primary bg-primary/5" : "hover:border-primary/50")}>
+                        <RadioGroupItem value="yes" id="r-yes" className="sr-only"/>
+                        <Combine className="w-10 h-10 mb-2 text-primary"/>
+                        <span className="font-semibold">Assessment + Resume</span>
+                        <span className="text-xs text-muted-foreground mt-1">Generates a full report.</span>
+                    </Card>
+                </Label>
+                <Label htmlFor="r-no">
+                    <Card className={cn("cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2", includeResume === 'no' ? "border-primary bg-primary/5" : "hover:border-primary/50")}>
+                        <RadioGroupItem value="no" id="r-no" className="sr-only"/>
+                        <FileText className="w-10 h-10 mb-2 text-primary"/>
+                        <span className="font-semibold">Assessment Only</span>
+                        <span className="text-xs text-muted-foreground mt-1">Generates the assessment PDF.</span>
+                    </Card>
+                </Label>
             </RadioGroup>
         </div>
       
