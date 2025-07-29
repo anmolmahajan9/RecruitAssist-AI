@@ -387,7 +387,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
                   {item.score}/5
                 </span>
               </div>
-              <div className="w-full bg-secondary rounded-full h-1.5 mb-3">
+              <div className="w-full bg-secondary rounded-full h-1.5 mb-3 overflow-hidden">
                 <div
                   className={cn(
                     'h-1.5 rounded-full',
