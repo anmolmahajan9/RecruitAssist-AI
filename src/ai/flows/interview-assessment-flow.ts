@@ -36,13 +36,13 @@ This is the assessment of a call interview of a candidate. Assessment has been d
 
 ## Task
 
-Carefully analyze the provided assessment text. Extract the following information accurately:
+Carefully analyze the provided call assessment text. Extract the following information along with restructuring wherever asked:
 
 - Candidate's full name.
 - The role they interviewed for.
 - The date and time of the interview based on start time. Standardize the format to 'DD MMM, YYYY HH:MM AM/PM'. 
-- Criteria that are assessed along with the assessment. Now, it’s important that you remove the negative points from the assessment. I cannot share any negative points to the client. Also, do not mention "must have" or "good to have" labels.
-- A list of all assessed skills. For each skill, extract the skill name, a numerical score (0-100), and a descriptive rating (e.g., "Excellent", "Good").
+- Criteria that are assessed without mentioning "must have" or "good to have".
+- Assessment of each criteria. Now, it’s important that restructure the assessment text without the negative points. I cannot share any negative points to the client. 
 - A comprehensive summary of the interview, including all notes and observations.
 - The overall status (Pass or Fail).
 

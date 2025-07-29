@@ -19,17 +19,17 @@ export type InterviewAssessmentInput = z.infer<typeof InterviewAssessmentInputSc
 
 const AssessmentCriterionSchema = z.object({
   criteria: z.string().describe('The name of the criterion being assessed.'),
-  assessment: z.string().describe("The positive assessment for the criterion."),
-  score: z.number().describe("The numerical score for the criterion.")
+  assessment: z.string().describe("The restructured, positive assessment for the criterion."),
+  score: z.number().describe("The numerical score for the criterion as found in the text.")
 });
 
 // Output Schema
 export const InterviewAssessmentOutputSchema = z.object({
   candidate_name: z.string().describe("The full name of the candidate."),
   interviewed_role: z.string().describe("The job role the candidate interviewed for."),
-  interview_datetime: z.string().describe("The date and time of the interview in 'DD MMM, YYYY HH:MM' format."),
-  assessment_criteria: z.array(AssessmentCriterionSchema).describe("An array of assessment criteria, scores, and positive feedback."),
-  interview_summary: z.string().describe("A comprehensive positive summary of the candidate's performance."),
+  interview_datetime: z.string().describe("The date and time of the interview in 'DD MMM, YYYY HH:MM AM/PM' format."),
+  assessment_criteria: z.array(AssessmentCriterionSchema).describe("An array of assessment criteria, scores, and restructured positive feedback."),
+  interview_summary: z.string().describe("A comprehensive summary of the candidate's performance, rephrased to be positive."),
   overall_status: z.enum(['Pass', 'Fail']).describe("The final interview outcome."),
 });
 export type InterviewAssessmentOutput = z.infer<typeof InterviewAssessmentOutputSchema>;
