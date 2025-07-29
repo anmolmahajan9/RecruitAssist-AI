@@ -17,11 +17,12 @@ import { useState } from 'react';
 
 interface CallSummaryDisplayProps {
   assessment: InterviewAssessmentOutput;
+  showFooter?: boolean;
 }
 
 const DEFAULT_LOGO_URL = 'https://recruitassist-ai-knbnk.web.app/logo.png';
 
-export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
+export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummaryDisplayProps) {
   if (!assessment) return null;
   const {
     candidate_name,
@@ -115,12 +116,12 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const margin = 50;
       const contentWidth = width - margin * 2;
-      let y = height - margin - 50; // Extra space for watermark
+      let y = height - margin;
 
       const checkPageBreak = (spaceNeeded: number) => {
         if (y - spaceNeeded < margin) {
           page = pdfDoc.addPage();
-          y = height - margin - 50; // Extra space for watermark
+          y = height - margin; // Extra space for watermark
           return true;
         }
         return false;
@@ -133,7 +134,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const barBg = rgb(224 / 255, 224 / 255, 224 / 255);
       const borderColor = rgb(0.9, 0.9, 0.9);
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
-      const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
+      const headerBgColor = rgb(240 / 255, 248 / 255, 253 / 255);
       const containerRadius = 8;
       const barHeight = 6;
 
@@ -174,8 +175,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           color,
         });
       };
-
-      // --- Draw Header ---
+      
       const headerHeight = 120;
       if (checkPageBreak(headerHeight + 20)) y = height - margin;
       const headerStartY = y;
@@ -194,14 +194,14 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         y,
         font: boldFont,
         size: 16,
-        color: textPrimary,
+        color: rgb(0,0,0),
       });
       y -= 25;
       if (client_name) {
         page.drawText(client_name, {
           x: margin + 20,
           y,
-          font: boldFont,
+          font: font,
           size: 14,
           color: textSecondary,
         });
@@ -227,6 +227,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: textSecondary,
       });
 
+      // --- Draw Header ---
       const status = overall_status.toLowerCase();
       const statusText = overall_status;
       const statusTextWidth = boldFont.widthOfTextAtSize(statusText, 12);
@@ -255,7 +256,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: status === 'pass' ? passPillText : failPillText,
       });
 
-      y = headerStartY - headerHeight - 20;
+      y = headerStartY - headerHeight - 30;
 
       // --- Draw Interview Summary ---
       const summaryTitle = 'AI Interview Summary';
@@ -265,13 +266,14 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         10,
         contentWidth - 40
       );
-      const PADDING_V_SUMMARY = 20;
+      const PADDING_V_SUMMARY_TOP = 20;
+      const PADDING_V_SUMMARY_BOTTOM = 20;
       const summaryHeight =
-        PADDING_V_SUMMARY +
+        PADDING_V_SUMMARY_TOP +
         20 + // Title height and space
         15 + // Space after title
         summaryLines.length * 14 +
-        PADDING_V_SUMMARY;
+        PADDING_V_SUMMARY_BOTTOM;
 
       if (checkPageBreak(summaryHeight + 20)) y = height - margin;
       const summaryStartY = y;
@@ -286,13 +288,13 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         borderRadius: containerRadius,
       });
 
-      y -= PADDING_V_SUMMARY + 10;
+      y -= PADDING_V_SUMMARY_TOP + 10;
       page.drawText(summaryTitle, {
         x: margin + 20,
         y,
         font: boldFont,
         size: 16,
-        color: textPrimary,
+        color: rgb(0,0,0),
       });
       y -= 25;
 
@@ -322,19 +324,20 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           10,
           contentWidth - 40
         );
-        const PADDING_V_BLOCK = 20;
-        const SPACE_TITLE_BAR = 12;
-        const SPACE_BAR_TEXT = 12;
+        const PADDING_V_BLOCK_TOP = 20;
+        const PADDING_V_BLOCK_BOTTOM = 20;
+        const SPACE_TITLE_BAR = 15;
+        const SPACE_BAR_TEXT = 15;
         const blockHeight =
-          PADDING_V_BLOCK +
+          PADDING_V_BLOCK_TOP +
           12 + // title height
           SPACE_TITLE_BAR +
           barHeight +
           SPACE_BAR_TEXT +
           assessmentLines.length * 14 +
-          PADDING_V_BLOCK;
+          PADDING_V_BLOCK_BOTTOM;
 
-        if (checkPageBreak(blockHeight)) y = height - margin - 50;
+        if (checkPageBreak(blockHeight)) y = height - margin;
 
         const startBlockY = y;
 
@@ -348,7 +351,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           borderRadius: containerRadius,
         });
 
-        y -= PADDING_V_BLOCK; // top padding
+        y -= PADDING_V_BLOCK_TOP;
 
         // Draw title and score
         y -= 12; // Height of title text
@@ -387,8 +390,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
 
         // Draw assessment text
         for (const line of assessmentLines) {
-          if (checkPageBreak(14)) y = height - margin - 50;
-          y -= 14;
+          if (checkPageBreak(14)) y = height - margin;
           page.drawText(line, {
             x: margin + 20,
             y,
@@ -397,6 +399,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
             color: textSecondary,
             lineHeight: 14,
           });
+          y -= 14;
         }
         y = startBlockY - blockHeight - 20;
       }
@@ -513,12 +516,12 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           ))}
         </div>
       </CardContent>
-      <CardFooter className="p-6 bg-primary/10 flex justify-end gap-4">
+      {showFooter && (<CardFooter className="p-6 bg-primary/10 flex justify-end gap-4">
         <Button onClick={handleDownloadPdf} disabled={isPdfDownloading}>
           <Download className="mr-2 h-4 w-4" />
           {isPdfDownloading ? 'Generating PDF...' : 'Download as PDF'}
         </Button>
-      </CardFooter>
+      </CardFooter>)}
     </Card>
   );
 }

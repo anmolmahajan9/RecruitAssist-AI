@@ -73,7 +73,7 @@ export default function ReportGeneratorPage() {
 
       {assessment && !error && (
         <div className="mt-8">
-          <CallSummaryDisplay assessment={assessment} />
+          <CallSummaryDisplay assessment={assessment} showFooter={false} />
         </div>
       )}
     </div>
