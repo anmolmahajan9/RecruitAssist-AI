@@ -19,6 +19,8 @@ interface CallSummaryDisplayProps {
   assessment: InterviewAssessmentOutput;
 }
 
+const DEFAULT_LOGO_URL = 'https://recruitassist-ai-knbnk.web.app/logo.png';
+
 export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
   if (!assessment) return null;
   const {
@@ -81,18 +83,41 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
     setIsPdfDownloading(true);
     try {
       const pdfDoc = await PDFDocument.create();
+      
+      const addWatermark = async (doc: PDFDocument) => {
+          const response = await fetch(DEFAULT_LOGO_URL);
+          if (!response.ok) {
+             throw new Error(`Failed to load default logo: ${response.statusText}`);
+          }
+          const imageBytes = await response.arrayBuffer();
+          const watermarkImage = await doc.embedPng(imageBytes);
+          const pages = doc.getPages();
+
+          for (const page of pages) {
+            const { width, height } = page.getSize();
+            const logoDims = watermarkImage.scale(0.08);
+            page.drawImage(watermarkImage, {
+              x: width - logoDims.width - 20,
+              y: height - logoDims.height - 20,
+              width: logoDims.width,
+              height: logoDims.height,
+              opacity: 0.5,
+            });
+          }
+      };
+      
       let page = pdfDoc.addPage();
       const { width, height } = page.getSize();
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const margin = 50;
       const contentWidth = width - margin * 2;
-      let y = height - margin;
+      let y = height - margin - 50; // Extra space for watermark
 
       const checkPageBreak = (spaceNeeded: number) => {
         if (y - spaceNeeded < margin) {
           page = pdfDoc.addPage();
-          y = height - margin;
+          y = height - margin - 50; // Extra space for watermark
           return true;
         }
         return false;
@@ -252,7 +277,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       y -= 20;
 
       for (const line of summaryLines) {
-        if (checkPageBreak(14)) y = height - margin;
+        if (checkPageBreak(14)) y = height - margin - 50;
         page.drawText(line, {
           x: margin + 20,
           y,
@@ -266,7 +291,11 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       y = summaryStartY - summaryHeight - 20;
 
       // --- Draw Detailed Assessment ---
-      for (const item of assessment_criteria) {
+      const filteredCriteria = assessment_criteria.filter(
+        (item) => item.criterion.toLowerCase() !== 'job fit'
+      );
+      
+      for (const item of filteredCriteria) {
         const assessmentLines = wrapText(
           item.assessment,
           font,
@@ -275,7 +304,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         );
         const blockHeight =
           20 + 20 + barHeight + 10 + assessmentLines.length * 14 + 20;
-        if (checkPageBreak(blockHeight)) y = height - margin;
+        if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
         const startBlockY = y;
 
@@ -320,7 +349,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         y -= 10 + barHeight;
 
         for (const line of assessmentLines) {
-          if (checkPageBreak(14)) y = height - margin;
+          if (checkPageBreak(14)) y = height - margin - 50;
           page.drawText(line, {
             x: margin + 20,
             y,
@@ -333,6 +362,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         }
         y = startBlockY - blockHeight - 20;
       }
+      
+      await addWatermark(pdfDoc);
 
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -441,3 +472,5 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
     </Card>
   );
 }
+
+    
