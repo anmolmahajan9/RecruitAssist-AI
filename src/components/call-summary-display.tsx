@@ -14,7 +14,6 @@ import { Video, Download, FileText, Star, User, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
 import { useState } from 'react';
-import Image from 'next/image';
 
 interface CallSummaryDisplayProps {
   assessment: InterviewAssessmentOutput;
@@ -89,6 +88,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const margin = 50;
 
       // Helper to add a new page if needed
+      let y = height;
       const checkPageBreak = (spaceNeeded: number) => {
         if (y - spaceNeeded < margin) {
           page = pdfDoc.addPage();
@@ -96,10 +96,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         }
       };
       
-       const pastelBlue = { r: 0.9, g: 0.95, b: 1 };
+      const pastelBlue = { r: 235/255, g: 245/255, b: 255/255 };
 
       // === Header Section ===
-      const headerHeight = 120;
+      const headerHeight = 100;
       page.drawRectangle({
         x: 0,
         y: height - headerHeight,
@@ -108,11 +108,11 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: rgb(pastelBlue.r, pastelBlue.g, pastelBlue.b),
       });
 
-      let y = height - 40;
+      y = height - 40;
       
       // Candidate Name
       page.drawText(candidate_name, { x: margin, y, font: boldFont, size: 24 });
-      y -= 25;
+      y -= 20;
       
       // Role and Date
       page.drawText(`${interviewed_role}`, {
@@ -133,32 +133,31 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       
       // Status
       const statusText = `Status: ${overall_status}`;
-      const statusWidth = boldFont.widthOfTextAtSize(statusText, 12);
+      const statusWidth = boldFont.widthOfTextAtSize(statusText, 10);
       const statusColorVal =
         overall_status.toLowerCase() === 'pass'
-          ? { r: 0.2, g: 0.6, b: 0.2 }
-          : { r: 0.8, g: 0.2, b: 0.2 };
+          ? { r: 0.2, g: 0.6, b: 0.2, bg_r: 229/255, bg_g: 245/255, bg_b: 233/255 }
+          : { r: 0.8, g: 0.2, b: 0.2, bg_r: 254/255, bg_g: 226/255, bg_b: 226/255 };
 
+      const statusBoxWidth = statusWidth + 20;
       page.drawRectangle({
-        x: width - margin - statusWidth - 20,
-        y: height - 65,
-        width: statusWidth + 20,
+        x: width - margin - statusBoxWidth,
+        y: height - 60,
+        width: statusBoxWidth,
         height: 25,
-        color: rgb(statusColorVal.r, statusColorVal.g, statusColorVal.b),
-        opacity: 0.1,
+        color: rgb(statusColorVal.bg_r, statusColorVal.bg_g, statusColorVal.bg_b),
         borderRadius: 12.5,
       });
 
       page.drawText(statusText, {
         x: width - margin - statusWidth - 10,
-        y: height - 60,
+        y: height - 55,
         font: boldFont,
-        size: 12,
+        size: 10,
         color: rgb(statusColorVal.r, statusColorVal.g, statusColorVal.b),
       });
       
-
-      y = height - headerHeight - 30; // Reset Y for main content
+      y = height - headerHeight - 40; // Reset Y for main content
 
       // === Summary Section ===
       checkPageBreak(80);
@@ -166,7 +165,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         x: margin,
         y,
         font: boldFont,
-        size: 16,
+        size: 18,
       });
       y -= 25;
       const summaryLines = wrapText(
@@ -186,7 +185,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         });
         y -= 14;
       }
-      y -= 20;
+      y -= 30;
 
       // === Assessment Criteria Section ===
       checkPageBreak(40);
@@ -194,9 +193,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         x: margin,
         y,
         font: boldFont,
-        size: 16,
+        size: 18,
       });
-      y -= 25;
+      y -= 30;
       for (const item of assessment_criteria) {
         checkPageBreak(60);
 
@@ -222,7 +221,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         for (const line of assessmentLines) {
           checkPageBreak(14);
           page.drawText(line, {
-            x: margin + 10,
+            x: margin,
             y,
             font: font,
             size: 10,
@@ -230,7 +229,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           });
           y -= 14;
         }
-        y -= 15; // Space after each criteria block
+        y -= 25; // Space after each criteria block
       }
 
       const pdfBytes = await pdfDoc.save();
