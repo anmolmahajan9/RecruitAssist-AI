@@ -87,7 +87,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const margin = 50;
-      let y = height - margin;
 
       // Helper to add a new page if needed
       const checkPageBreak = (spaceNeeded: number) => {
@@ -96,65 +95,53 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           y = height - margin;
         }
       };
+      
+       const pastelBlue = { r: 0.9, g: 0.95, b: 1 };
 
-      // Logo and Header
-      const logoUrl = '/logo.png';
-      const logoBytes = await fetch(logoUrl).then((res) => res.arrayBuffer());
-      const logoImage = await pdfDoc.embedPng(logoBytes);
-      const logoDims = logoImage.scale(0.25);
-      page.drawImage(logoImage, {
-        x: margin,
-        y: y - logoDims.height + 15,
-        width: logoDims.width,
-        height: logoDims.height,
+      // === Header Section ===
+      const headerHeight = 120;
+      page.drawRectangle({
+        x: 0,
+        y: height - headerHeight,
+        width,
+        height: headerHeight,
+        color: rgb(pastelBlue.r, pastelBlue.g, pastelBlue.b),
       });
 
-      page.drawText('Candidate Assessment Report', {
-        x: width - margin - 220,
-        y: y,
-        font: boldFont,
-        size: 16,
-        color: rgb(0.1, 0.1, 0.1),
-      });
-
-      y -= logoDims.height + 10;
-      page.drawLine({
-        start: { x: margin, y },
-        end: { x: width - margin, y },
-        thickness: 1,
-        color: rgb(0.8, 0.8, 0.8),
-      });
-      y -= 30;
-
-      // Candidate Info
+      let y = height - 40;
+      
+      // Candidate Name
       page.drawText(candidate_name, { x: margin, y, font: boldFont, size: 24 });
-      y -= 20;
-      page.drawText(interviewed_role, {
-        x: margin,
-        y,
-        font: font,
-        size: 14,
-        color: rgb(0.4, 0.4, 0.4),
-      });
-      y -= 15;
-      page.drawText(`Interview Date: ${interview_datetime}`, {
+      y -= 25;
+      
+      // Role and Date
+      page.drawText(`${interviewed_role}`, {
         x: margin,
         y,
         font: font,
         size: 12,
         color: rgb(0.4, 0.4, 0.4),
       });
-
+      y-= 15;
+      page.drawText(`${interview_datetime}`, {
+        x: margin,
+        y,
+        font: font,
+        size: 12,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+      
+      // Status
       const statusText = `Status: ${overall_status}`;
       const statusWidth = boldFont.widthOfTextAtSize(statusText, 12);
       const statusColorVal =
         overall_status.toLowerCase() === 'pass'
-          ? { r: 0.1, g: 0.8, b: 0.1 }
-          : { r: 0.8, g: 0.1, b: 0.1 };
+          ? { r: 0.2, g: 0.6, b: 0.2 }
+          : { r: 0.8, g: 0.2, b: 0.2 };
 
       page.drawRectangle({
         x: width - margin - statusWidth - 20,
-        y: y - 5,
+        y: height - 65,
         width: statusWidth + 20,
         height: 25,
         color: rgb(statusColorVal.r, statusColorVal.g, statusColorVal.b),
@@ -164,15 +151,16 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
 
       page.drawText(statusText, {
         x: width - margin - statusWidth - 10,
-        y: y,
+        y: height - 60,
         font: boldFont,
         size: 12,
         color: rgb(statusColorVal.r, statusColorVal.g, statusColorVal.b),
       });
+      
 
-      y -= 40;
+      y = height - headerHeight - 30; // Reset Y for main content
 
-      // Summary
+      // === Summary Section ===
       checkPageBreak(80);
       page.drawText('Interview Summary', {
         x: margin,
@@ -200,7 +188,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       }
       y -= 20;
 
-      // Assessment Criteria
+      // === Assessment Criteria Section ===
       checkPageBreak(40);
       page.drawText('Detailed Assessment', {
         x: margin,
@@ -224,7 +212,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           color: rgb(0.1, 0.4, 0.7),
         });
 
-        y -= 18;
+        y -= 20; // Space before assessment text
         const assessmentLines = wrapText(
           item.assessment,
           font,
@@ -242,7 +230,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           });
           y -= 14;
         }
-        y -= 10;
+        y -= 15; // Space after each criteria block
       }
 
       const pdfBytes = await pdfDoc.save();
@@ -303,7 +291,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       <CardContent className="p-6 space-y-8">
         <div>
           <h3 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <Star className="h-6 w-6 text-primary" />
+            <FileText className="h-6 w-6 text-primary" />
             Interview Summary
           </h3>
           <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-line">
@@ -312,7 +300,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         </div>
         <div>
           <h3 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" />
+            <Star className="h-6 w-6 text-primary" />
             Detailed Assessment
           </h3>
           <div className="space-y-6">
