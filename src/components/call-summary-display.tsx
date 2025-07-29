@@ -15,6 +15,24 @@ interface CallSummaryDisplayProps {
   assessment: InterviewAssessmentOutput;
 }
 
+const StarRating = ({ score }: { score: number }) => {
+  const rating = Math.max(1, Math.ceil(score / 20)); // Convert 0-100 to 1-5
+  return (
+    <div className="flex items-center gap-1">
+      {[...Array(5)].map((_, i) => (
+        <Star
+          key={i}
+          className={cn(
+            'h-5 w-5',
+            i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
+          )}
+        />
+      ))}
+       <p className="text-xs font-bold text-muted-foreground ml-2">({rating}/5)</p>
+    </div>
+  );
+};
+
 export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
   if (!assessment) return null;
   const {
@@ -76,6 +94,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const { width, height } = page.getSize();
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const symbolFont = await pdfDoc.embedFont(StandardFonts.Symbol);
       const margin = 50;
       let y = height - margin;
 
@@ -117,14 +136,14 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       
       const statusText = `Status: ${overall_status}`;
       const statusWidth = boldFont.widthOfTextAtSize(statusText, 12);
-      const statusColor = overall_status.toLowerCase() === 'pass' ? {r: 0.1, g:0.8, b:0.1} : {r:0.8,g:0.1,b:0.1};
+      const statusColorVal = overall_status.toLowerCase() === 'pass' ? {r: 0.1, g:0.8, b:0.1} : {r:0.8,g:0.1,b:0.1};
       
       page.drawRectangle({
         x: width - margin - statusWidth - 20,
         y: y - 5,
         width: statusWidth + 20,
         height: 25,
-        color: rgb(statusColor.r, statusColor.g, statusColor.b),
+        color: rgb(statusColorVal.r, statusColorVal.g, statusColorVal.b),
         opacity: 0.1,
         borderRadius: 12.5,
       });
@@ -134,9 +153,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         y: y,
         font: boldFont,
         size: 12,
-        color: rgb(statusColor.r, statusColor.g, statusColor.b),
+        color: rgb(statusColorVal.r, statusColorVal.g, statusColorVal.b),
       });
-
 
       y -= 40;
 
@@ -145,6 +163,22 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       y -= 25;
       for (const item of assessment_criteria) {
         page.drawText(item.criteria, { x: margin, y, font: boldFont, size: 12 });
+        
+        // Star Rating in PDF
+        const rating = Math.max(1, Math.ceil(item.score / 20));
+        let stars = '';
+        for (let i = 0; i < 5; i++) {
+          stars += i < rating ? '★' : '☆';
+        }
+        const starsWidth = boldFont.widthOfTextAtSize(stars, 12);
+        page.drawText(stars, {
+          x: width - margin - starsWidth,
+          y,
+          font: boldFont,
+          size: 12,
+          color: rgb(0.9, 0.6, 0),
+        });
+
         y -= 18;
         const assessmentLines = wrapText(item.assessment, font, 10, width - margin * 2);
         for (const line of assessmentLines) {
@@ -212,12 +246,11 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           <div className="space-y-6">
             {assessment_criteria.map((item, index) => (
               <div key={index} className="pl-4 border-l-2 border-primary/50">
-                <h4 className="font-bold text-lg">{item.criteria}</h4>
-                <p className="text-muted-foreground mt-1">{item.assessment}</p>
-                <div className="mt-2">
-                    <Progress value={item.score} className="h-1.5" />
-                    <p className="text-xs text-right font-bold text-muted-foreground mt-1">{item.score}%</p>
+                 <div className="flex justify-between items-center">
+                    <h4 className="font-bold text-lg">{item.criteria}</h4>
+                    <StarRating score={item.score} />
                 </div>
+                <p className="text-muted-foreground mt-1">{item.assessment}</p>
               </div>
             ))}
           </div>
@@ -245,3 +278,5 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
     </Card>
   );
 }
+
+    
