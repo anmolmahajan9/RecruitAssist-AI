@@ -2,7 +2,7 @@
 'use client';
 
 import type { InterviewAssessmentOutput } from '@/ai/schemas/interview-assessment-schema';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Video, Download, FileText, Star, User, Calendar } from 'lucide-react';
