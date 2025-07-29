@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Loader2,
   XCircle,
@@ -37,6 +38,7 @@ const DEFAULT_LOGO_URL = 'https://recruitassist-ai-knbnk.web.app/logo.png';
 export function ReportGenerator() {
   const [assessmentText, setAssessmentText] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [includeResume, setIncludeResume] = useState<'yes' | 'no'>('yes');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -94,11 +96,12 @@ export function ReportGenerator() {
     setResumeFile(null);
     setIsLoading(false);
     setError(null);
+    setIncludeResume('yes');
   };
 
   const handleProcessRequest = async () => {
-    if (!assessmentText || !resumeFile) {
-      setError('Please provide both the assessment text and a resume PDF.');
+    if (!assessmentText || (includeResume === 'yes' && !resumeFile)) {
+      setError('Please provide the assessment text and a resume PDF.');
       return;
     }
     setIsLoading(true);
@@ -109,24 +112,31 @@ export function ReportGenerator() {
       const assessmentResult = await assessInterview({ callAssessmentText: assessmentText });
       const assessmentPdfBytes = await createAssessmentPdf(assessmentResult);
 
-      // Step 2: Watermark Resume
-      const resumeBytes = await resumeFile.arrayBuffer();
-      const watermarkedResumeBytes = await watermarkPdf(resumeBytes);
+      let finalPdfBytes: Uint8Array;
 
-      // Step 3: Combine PDFs
-      const assessmentPdfDoc = await PDFDocument.load(assessmentPdfBytes);
-      const resumePdfDoc = await PDFDocument.load(watermarkedResumeBytes);
-      
-      const combinedPdfDoc = await PDFDocument.create();
+      if (includeResume === 'yes' && resumeFile) {
+        // Step 2: Watermark Resume
+        const resumeBytes = await resumeFile.arrayBuffer();
+        const watermarkedResumeBytes = await watermarkPdf(resumeBytes);
 
-      const assessmentPages = await combinedPdfDoc.copyPages(assessmentPdfDoc, assessmentPdfDoc.getPageIndices());
-      assessmentPages.forEach(page => combinedPdfDoc.addPage(page));
+        // Step 3: Combine PDFs
+        const assessmentPdfDoc = await PDFDocument.load(assessmentPdfBytes);
+        const resumePdfDoc = await PDFDocument.load(watermarkedResumeBytes);
+        
+        const combinedPdfDoc = await PDFDocument.create();
 
-      const resumePages = await combinedPdfDoc.copyPages(resumePdfDoc, resumePdfDoc.getPageIndices());
-      resumePages.forEach(page => combinedPdfDoc.addPage(page));
-      
+        const assessmentPages = await combinedPdfDoc.copyPages(assessmentPdfDoc, assessmentPdfDoc.getPageIndices());
+        assessmentPages.forEach(page => combinedPdfDoc.addPage(page));
+
+        const resumePages = await combinedPdfDoc.copyPages(resumePdfDoc, resumePdfDoc.getPageIndices());
+        resumePages.forEach(page => combinedPdfDoc.addPage(page));
+        
+        finalPdfBytes = await combinedPdfDoc.save();
+      } else {
+        finalPdfBytes = assessmentPdfBytes;
+      }
+
       // Step 4: Download
-      const finalPdfBytes = await combinedPdfDoc.save();
       const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -134,6 +144,8 @@ export function ReportGenerator() {
       const jobName = assessmentResult.interviewed_role.replace(/\s+/g, '_');
       link.download = `${candidateName}-${jobName}-suitable-ai.pdf`;
       link.click();
+      URL.revokeObjectURL(link.href);
+
 
     } catch (err) {
       console.error(err);
@@ -384,7 +396,7 @@ export function ReportGenerator() {
       10,
       contentWidth - 40
     );
-    const summaryHeight = 25 + 20 + summaryLines.length * 14;
+    const summaryHeight = 25 + 10 + summaryLines.length * 14;
 
     if (checkPageBreak(summaryHeight + 20)) y = height - margin;
     const summaryStartY = y;
@@ -407,7 +419,7 @@ export function ReportGenerator() {
       size: 16,
       color: textPrimary,
     });
-    y -= 20;
+    y -= 10;
 
     for (const line of summaryLines) {
       if (checkPageBreak(14)) y = height - margin - 50;
@@ -436,7 +448,7 @@ export function ReportGenerator() {
         contentWidth - 40
       );
       const blockHeight =
-        20 + 20 + barHeight + 10 + assessmentLines.length * 14;
+        20 + 20 + barHeight + 10 + assessmentLines.length * 14 - (assessmentLines.length > 0 ? 0 : 14) + 10;
       if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
       const startBlockY = y;
@@ -480,7 +492,7 @@ export function ReportGenerator() {
       drawPill(margin + 20, y, barWidth, barHeight, barBg);
       drawPill(margin + 20, y, filledWidth, barHeight, barColor);
       
-      y -= 10 + barHeight;
+      y -= 10;
 
       for (const line of assessmentLines) {
         if (checkPageBreak(14)) y = height - margin - 50;
@@ -508,14 +520,32 @@ export function ReportGenerator() {
           Enter Assessment and Resume
         </CardTitle>
         <CardDescription>
-          Provide the assessment text and upload the candidate's resume to
+          Provide the assessment text and optionally upload a resume to
           generate a combined report.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
+            <Label className="font-semibold">1. Report Type</Label>
+            <RadioGroup
+                value={includeResume}
+                onValueChange={(value) => setIncludeResume(value as 'yes' | 'no')}
+                className="flex gap-4"
+            >
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="yes" id="r-yes" />
+                    <Label htmlFor="r-yes">Assessment + Resume</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="no" id="r-no" />
+                    <Label htmlFor="r-no">Assessment Only</Label>
+                </div>
+            </RadioGroup>
+        </div>
+      
+        <div className="space-y-2">
           <Label htmlFor="callAssessmentText" className="font-semibold">
-            1. Assessment Text
+            2. Assessment Text
           </Label>
           <Textarea
             id="callAssessmentText"
@@ -527,47 +557,51 @@ export function ReportGenerator() {
             className="min-h-[200px] font-mono text-sm"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="resumeFile" className="font-semibold">
-            2. Candidate Resume
-          </Label>
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={handleUploadClick}
-            className={cn(
-              'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
-              dragging ? 'border-primary bg-accent' : 'border-border',
-              'hover:border-primary hover:bg-primary/10 cursor-pointer'
-            )}
-          >
-            <Input
-              id="resumeFile"
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-              className="hidden"
-            />
-            {resumeFile ? (
-              <div className="flex items-center justify-center gap-2 text-foreground">
-                <FileIcon className="h-6 w-6" />
-                <span className="font-medium">{resumeFile.name}</span>
+        
+        {includeResume === 'yes' && (
+            <div className="space-y-2">
+              <Label htmlFor="resumeFile" className="font-semibold">
+                3. Candidate Resume
+              </Label>
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={handleUploadClick}
+                className={cn(
+                  'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+                  dragging ? 'border-primary bg-accent' : 'border-border',
+                  'hover:border-primary hover:bg-primary/10 cursor-pointer'
+                )}
+              >
+                <Input
+                  id="resumeFile"
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
+                  className="hidden"
+                />
+                {resumeFile ? (
+                  <div className="flex items-center justify-center gap-2 text-foreground">
+                    <FileIcon className="h-6 w-6" />
+                    <span className="font-medium">{resumeFile.name}</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-semibold text-primary">
+                        Click to upload
+                      </span>{' '}
+                      or drag and drop resume PDF
+                    </p>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-primary">
-                    Click to upload
-                  </span>{' '}
-                  or drag and drop resume PDF
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+        )}
+
         {error && (
           <p className="text-sm text-destructive text-center">{error}</p>
         )}
@@ -575,7 +609,7 @@ export function ReportGenerator() {
       <CardFooter className="flex flex-col sm:flex-row gap-4">
         <Button
           onClick={handleProcessRequest}
-          disabled={isLoading || !assessmentText || !resumeFile}
+          disabled={isLoading || !assessmentText || (includeResume === 'yes' && !resumeFile)}
           className="w-full text-lg py-6 font-bold"
           size="lg"
         >
@@ -600,5 +634,3 @@ export function ReportGenerator() {
     </Card>
   );
 }
-
-    
