@@ -327,6 +327,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           color: textPrimary,
         });
 
+        const barColor =
+          item.score >= 3 ? green : item.score >= 2 ? yellow : red;
+
         const scoreText = `${item.score}/5`;
         const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
         page.drawText(scoreText, {
@@ -334,15 +337,13 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           y,
           font: boldFont,
           size: 12,
-          color: textPrimary,
+          color: barColor,
         });
         y -= 20;
 
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
-        const barColor =
-          item.score >= 3 ? green : item.score >= 2 ? yellow : red;
-
+        
         drawPill(margin + 20, y, barWidth, barHeight, barBg);
         drawPill(margin + 20, y, filledWidth, barHeight, barColor);
         
@@ -377,6 +378,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       setIsPdfDownloading(false);
     }
   };
+  
+  const filteredCriteria = assessment_criteria.filter(
+    (item) => item.criterion.toLowerCase() !== 'job fit'
+  );
   
   return (
     <Card className="overflow-hidden">
@@ -430,7 +435,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           </div>
         </div>
         <div className="space-y-6">
-          {assessment_criteria.map((item, index) => (
+          {filteredCriteria.map((item, index) => (
             <div
               key={index}
               className="p-4 border rounded-lg bg-background shadow-sm"
@@ -473,4 +478,5 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
   );
 }
 
+    
     

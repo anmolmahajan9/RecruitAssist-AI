@@ -460,6 +460,9 @@ export function ReportGenerator() {
         color: textPrimary,
       });
 
+      const barColor =
+        item.score >= 3 ? green : item.score >= 2 ? yellow : red;
+
       const scoreText = `${item.score}/5`;
       const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
       page.drawText(scoreText, {
@@ -467,14 +470,12 @@ export function ReportGenerator() {
         y,
         font: boldFont,
         size: 12,
-        color: textPrimary,
+        color: barColor,
       });
       y -= 20;
 
       const barWidth = contentWidth - 40;
       const filledWidth = (item.score / 5) * barWidth;
-      const barColor =
-        item.score >= 3 ? green : item.score >= 2 ? yellow : red;
 
       drawPill(margin + 20, y, barWidth, barHeight, barBg);
       drawPill(margin + 20, y, filledWidth, barHeight, barColor);
@@ -599,3 +600,5 @@ export function ReportGenerator() {
     </Card>
   );
 }
+
+    
