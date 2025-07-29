@@ -41,9 +41,10 @@ interface ReportGeneratorFormProps {
     onReset: () => void;
     isLoading: boolean;
     hasResults: boolean;
+    logQuery: (flowName: string, data: any) => Promise<void>;
 }
 
-export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults }: ReportGeneratorFormProps) {
+export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults, logQuery }: ReportGeneratorFormProps) {
   const [assessmentText, setAssessmentText] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [reportType, setReportType] = useState<'combined' | 'separate' | 'assessment_only'>('combined');
@@ -125,6 +126,12 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
       return;
     }
     setError(null);
+
+    // Log the usage
+    await logQuery('reportGenerator', {
+      reportType,
+      assessmentText,
+    });
 
     // Call the parent to handle AI processing
     const assessmentResult = await onGenerate(assessmentText);

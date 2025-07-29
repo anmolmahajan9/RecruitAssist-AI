@@ -3,14 +3,14 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
  * Logs a query to Firestore.
- * @param flowName The name of the AI flow being executed.
- * @param input The input object for the flow.
+ * @param flowName The name of the AI flow or action being executed.
+ * @param data The data object to log.
  */
-export async function logQuery(flowName: string, input: any): Promise<void> {
+export async function logQuery(flowName: string, data: any): Promise<void> {
   try {
     await addDoc(collection(firestore, 'queries'), {
       flowName,
-      input,
+      ...data,
       timestamp: serverTimestamp(),
     });
   } catch (error) {

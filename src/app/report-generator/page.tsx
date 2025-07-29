@@ -14,6 +14,7 @@ import {
 } from '@/ai/schemas/interview-assessment-schema';
 import { assessInterview } from '@/ai/flows/interview-assessment-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { logQuery } from '@/services/loggingService';
 
 export default function ReportGeneratorPage() {
   const [assessment, setAssessment] = useState<InterviewAssessmentOutput | null>(null);
@@ -85,6 +86,7 @@ export default function ReportGeneratorPage() {
         onReset={handleReset}
         isLoading={isLoading}
         hasResults={!!assessment || !!error}
+        logQuery={logQuery}
       />
 
       {error && !isLoading && (
