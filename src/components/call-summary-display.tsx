@@ -108,6 +108,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
       const containerRadius = 40;
       const barHeight = 6;
+      const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
+
 
       const drawPill = (
         x: number,
@@ -158,6 +160,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         borderColor: borderColor,
         borderWidth: 1,
         borderRadius: containerRadius,
+        color: headerBgColor,
       });
 
       y -= 35;
