@@ -1,13 +1,27 @@
 
 'use client';
 
+import { useState } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { ReportGenerator } from '@/components/report-generator';
+import { ReportGeneratorForm } from '@/components/report-generator-form';
+import { CallSummaryDisplay } from '@/components/call-summary-display';
+import type { InterviewAssessmentOutput } from '@/ai/schemas/interview-assessment-schema';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function ReportGeneratorPage() {
+  const [assessment, setAssessment] = useState<InterviewAssessmentOutput | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleReset = () => {
+    setAssessment(null);
+    setError(null);
+    setIsLoading(false);
+  };
+
   return (
     <div className="mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
       <header className="mb-8">
@@ -37,7 +51,31 @@ export default function ReportGeneratorPage() {
           </p>
         </div>
       </header>
-      <ReportGenerator />
+      <ReportGeneratorForm
+        setAssessment={setAssessment}
+        setIsLoading={setIsLoading}
+        setError={setError}
+        onReset={handleReset}
+        isLoading={isLoading}
+        hasResults={!!assessment || !!error}
+      />
+
+      {error && (
+        <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
+          <CardHeader>
+            <CardTitle>An Error Occurred</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{error}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {assessment && !error && (
+        <div className="mt-8">
+          <CallSummaryDisplay assessment={assessment} />
+        </div>
+      )}
     </div>
   );
 }

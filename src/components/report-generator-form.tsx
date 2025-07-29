@@ -29,7 +29,6 @@ import {
   rgb,
   StandardFonts,
   PDFFont,
-  PDFPage,
 } from 'pdf-lib';
 import { assessInterview } from '@/ai/flows/interview-assessment-flow';
 import type { InterviewAssessmentOutput } from '@/ai/schemas/interview-assessment-schema';
@@ -37,12 +36,19 @@ import { cn } from '@/lib/utils';
 
 const DEFAULT_LOGO_URL = 'https://recruitassist-ai-knbnk.web.app/logo.png';
 
-export function ReportGenerator() {
+interface ReportGeneratorFormProps {
+    setAssessment: (assessment: InterviewAssessmentOutput | null) => void;
+    setIsLoading: (isLoading: boolean) => void;
+    setError: (error: string | null) => void;
+    onReset: () => void;
+    isLoading: boolean;
+    hasResults: boolean;
+}
+
+export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onReset, isLoading, hasResults }: ReportGeneratorFormProps) {
   const [assessmentText, setAssessmentText] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [includeResume, setIncludeResume] = useState<'yes' | 'no'>('yes');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,9 +102,8 @@ export function ReportGenerator() {
   const handleReset = () => {
     setAssessmentText('');
     setResumeFile(null);
-    setIsLoading(false);
-    setError(null);
     setIncludeResume('yes');
+    onReset();
   };
 
   const handleProcessRequest = async () => {
@@ -108,25 +113,24 @@ export function ReportGenerator() {
     }
     setIsLoading(true);
     setError(null);
+    setAssessment(null);
 
     try {
-      // Step 1: Generate Assessment PDF
       const assessmentResult = await assessInterview({
         callAssessmentText: assessmentText,
       });
+      setAssessment(assessmentResult);
+
       const assessmentPdfBytes = await createAssessmentPdf(assessmentResult);
 
       let finalPdfBytes: Uint8Array;
 
       if (includeResume === 'yes' && resumeFile) {
-        // Step 2: Watermark Resume
         const resumeBytes = await resumeFile.arrayBuffer();
         const watermarkedResumeBytes = await watermarkPdf(resumeBytes);
 
-        // Step 3: Combine PDFs
         const assessmentPdfDoc = await PDFDocument.load(assessmentPdfBytes);
         const resumePdfDoc = await PDFDocument.load(watermarkedResumeBytes);
-
         const combinedPdfDoc = await PDFDocument.create();
 
         const assessmentPages = await combinedPdfDoc.copyPages(
@@ -146,25 +150,19 @@ export function ReportGenerator() {
         finalPdfBytes = assessmentPdfBytes;
       }
 
-      // Step 4: Download
       const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      const candidateName = assessmentResult.candidate_name.replace(
-        /\s+/g,
-        '_'
-      );
+      const candidateName = assessmentResult.candidate_name.replace(/\s+/g, '_');
       const jobName = assessmentResult.interviewed_role.replace(/\s+/g, '_');
       link.download = `${candidateName}-${jobName}-suitable-ai.pdf`;
       link.click();
       URL.revokeObjectURL(link.href);
     } catch (err) {
       console.error(err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'An unexpected error occurred. Please try again.'
-      );
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
+      setAssessment(null);
     } finally {
       setIsLoading(false);
     }
@@ -236,7 +234,7 @@ export function ReportGenerator() {
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const margin = 50;
     const contentWidth = width - margin * 2;
-    let y = height - margin - 50; // Extra space for watermark
+    let y = height - margin - 50;
 
     const wrapText = (
       text: string,
@@ -246,7 +244,6 @@ export function ReportGenerator() {
     ): string[] => {
       const lines: string[] = [];
       if (!text) return lines;
-
       const paragraphs = text.split('\n');
       for (const paragraph of paragraphs) {
         if (paragraph.trim() === '') {
@@ -256,10 +253,8 @@ export function ReportGenerator() {
         let currentLine = '';
         const words = paragraph.split(' ');
         for (const word of words) {
-          const potentialLine =
-            currentLine === '' ? word : `${currentLine} ${word}`;
+          const potentialLine = currentLine === '' ? word : `${currentLine} ${word}`;
           const width = font.widthOfTextAtSize(potentialLine, fontSize);
-
           if (width > maxWidth) {
             lines.push(currentLine);
             currentLine = word;
@@ -275,7 +270,7 @@ export function ReportGenerator() {
     const checkPageBreak = (spaceNeeded: number) => {
       if (y - spaceNeeded < margin) {
         page = pdfDoc.addPage();
-        y = height - margin - 50; // Extra space for watermark
+        y = height - margin - 50;
         return true;
       }
       return false;
@@ -291,7 +286,6 @@ export function ReportGenerator() {
     const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
     const containerRadius = 8;
     const barHeight = 6;
-
     const passPillFill = rgb(217 / 255, 249 / 255, 230 / 255);
     const passPillBorder = rgb(52 / 255, 211 / 255, 153 / 255);
     const passPillText = rgb(5 / 255, 150 / 255, 105 / 255);
@@ -299,260 +293,90 @@ export function ReportGenerator() {
     const failPillBorder = rgb(150 / 255, 30 / 255, 30 / 255);
     const failPillText = rgb(100 / 255, 0 / 255, 0 / 255);
 
-    const drawPill = (
-      x: number,
-      y: number,
-      pillWidth: number,
-      pillHeight: number,
-      color: any
-    ) => {
+    const drawPill = (x: number, y: number, pillWidth: number, pillHeight: number, color: any) => {
       const radius = pillHeight / 2;
-
       if (pillWidth < pillHeight) {
-        if (pillWidth > 0)
-          page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+        if (pillWidth > 0) page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
         return;
       }
-
       page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
-      page.drawCircle({
-        x: x + pillWidth - radius,
-        y: y + radius,
-        size: radius,
-        color,
-      });
-      page.drawRectangle({
-        x: x + radius,
-        y: y,
-        width: pillWidth - 2 * radius,
-        height: pillHeight,
-        color,
-      });
+      page.drawCircle({ x: x + pillWidth - radius, y: y + radius, size: radius, color });
+      page.drawRectangle({ x: x + radius, y: y, width: pillWidth - 2 * radius, height: pillHeight, color });
     };
 
-    // --- Draw Header ---
     const headerHeight = 120;
     if (checkPageBreak(headerHeight + 20)) y = height - margin;
     const headerStartY = y;
-
-    page.drawRectangle({
-      x: margin,
-      y: y - headerHeight,
-      width: contentWidth,
-      height: headerHeight,
-      color: headerBgColor,
-    });
-
+    page.drawRectangle({ x: margin, y: y - headerHeight, width: contentWidth, height: headerHeight, color: headerBgColor });
     y -= 40;
-    page.drawText(candidate_name, {
-      x: margin + 20,
-      y,
-      font: boldFont,
-      size: 30,
-      color: textPrimary,
-    });
+    page.drawText(candidate_name, { x: margin + 20, y, font: boldFont, size: 30, color: textPrimary });
     y -= 25;
     if (client_name) {
-      page.drawText(client_name, {
-        x: margin + 20,
-        y,
-        font: boldFont,
-        size: 14,
-        color: textSecondary,
-      });
+      page.drawText(client_name, { x: margin + 20, y, font: boldFont, size: 14, color: textSecondary });
       y -= 18;
     }
-    page.drawText(interviewed_role, {
-      x: margin + 20,
-      y,
-      font: font,
-      size: 14,
-      color: textSecondary,
-    });
-
+    page.drawText(interviewed_role, { x: margin + 20, y, font: font, size: 14, color: textSecondary });
     const today = new Date();
     const month = today.toLocaleString('default', { month: 'short' });
     const currentDate = `${today.getDate()} ${month}, ${today.getFullYear()}`;
     y -= 18;
-    page.drawText(currentDate, {
-      x: margin + 20,
-      y,
-      font: font,
-      size: 14,
-      color: textSecondary,
-    });
-
-
+    page.drawText(currentDate, { x: margin + 20, y, font: font, size: 14, color: textSecondary });
     const status = overall_status.toLowerCase();
     const statusText = overall_status;
     const statusTextWidth = boldFont.widthOfTextAtSize(statusText, 12);
-
     const pillWidth = statusTextWidth + 40;
     const pillHeight = 25;
     const pillX = width - margin - pillWidth - 30;
     const pillY = headerStartY - headerHeight / 2 - pillHeight / 2;
-
-    page.drawRectangle({
-      x: pillX,
-      y: pillY,
-      width: pillWidth,
-      height: pillHeight,
-      color: status === 'pass' ? passPillFill : failPillFill,
-      borderColor: status === 'pass' ? passPillBorder : failPillBorder,
-      borderWidth: 1.5,
-      borderRadius: pillHeight / 2,
-    });
-
-    page.drawText(statusText, {
-      x: pillX + (pillWidth - statusTextWidth) / 2,
-      y: pillY + (pillHeight - 10) / 2,
-      font: boldFont,
-      size: 12,
-      color: status === 'pass' ? passPillText : failPillText,
-    });
-
+    page.drawRectangle({ x: pillX, y: pillY, width: pillWidth, height: pillHeight, color: status === 'pass' ? passPillFill : failPillFill, borderColor: status === 'pass' ? passPillBorder : failPillBorder, borderWidth: 1.5, borderRadius: pillHeight / 2 });
+    page.drawText(statusText, { x: pillX + (pillWidth - statusTextWidth) / 2, y: pillY + (pillHeight - 10) / 2, font: boldFont, size: 12, color: status === 'pass' ? passPillText : failPillText });
     y = headerStartY - headerHeight - 20;
 
-    // --- Draw Interview Summary ---
     const summaryTitle = 'Interview Summary';
-    const summaryLines = wrapText(
-      interview_summary,
-      font,
-      10,
-      contentWidth - 40
-    );
+    const summaryLines = wrapText(interview_summary, font, 10, contentWidth - 40);
     const PADDING_V_SUMMARY = 20;
-    const summaryHeight =
-      PADDING_V_SUMMARY + // top
-      20 + // Title height and space
-      15 + // Space after title
-      summaryLines.length * 14 +
-      PADDING_V_SUMMARY; // bottom
-
+    const summaryHeight = PADDING_V_SUMMARY + 20 + 15 + summaryLines.length * 14 + PADDING_V_SUMMARY;
     if (checkPageBreak(summaryHeight + 20)) y = height - margin;
     const summaryStartY = y;
-
-    page.drawRectangle({
-      x: margin,
-      y: summaryStartY - summaryHeight,
-      width: contentWidth,
-      height: summaryHeight,
-      borderColor: borderColor,
-      borderWidth: 1,
-      borderRadius: containerRadius,
-    });
-
+    page.drawRectangle({ x: margin, y: summaryStartY - summaryHeight, width: contentWidth, height: summaryHeight, borderColor: borderColor, borderWidth: 1, borderRadius: containerRadius });
     y -= PADDING_V_SUMMARY + 10;
-    page.drawText(summaryTitle, {
-      x: margin + 20,
-      y,
-      font: boldFont,
-      size: 16,
-      color: textPrimary,
-    });
+    page.drawText(summaryTitle, { x: margin + 20, y, font: boldFont, size: 16, color: textPrimary });
     y -= 25;
-
     for (const line of summaryLines) {
       if (checkPageBreak(14)) y = height - margin - 50;
-      page.drawText(line, {
-        x: margin + 20,
-        y,
-        font: font,
-        size: 10,
-        color: textSecondary,
-        lineHeight: 14,
-      });
+      page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary, lineHeight: 14 });
       y -= 14;
     }
     y = summaryStartY - summaryHeight - 20;
 
-    // --- Draw Detailed Assessment ---
-    const filteredCriteria = assessment_criteria.filter(
-      (item) => item.criterion.toLowerCase() !== 'job fit'
-    );
-
+    const filteredCriteria = assessment_criteria.filter((item) => item.criterion.toLowerCase() !== 'job fit');
     for (const item of filteredCriteria) {
-      const assessmentLines = wrapText(
-        item.assessment,
-        font,
-        10,
-        contentWidth - 40
-      );
+      const assessmentLines = wrapText(item.assessment, font, 10, contentWidth - 40);
       const PADDING_V_BLOCK = 20;
       const SPACE_TITLE_BAR = 12;
       const SPACE_BAR_TEXT = 12;
-      const blockHeight =
-        PADDING_V_BLOCK + // top
-        12 + // title height
-        SPACE_TITLE_BAR +
-        barHeight +
-        SPACE_BAR_TEXT +
-        assessmentLines.length * 14 +
-        PADDING_V_BLOCK; // bottom
-
+      const blockHeight = PADDING_V_BLOCK + 12 + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + assessmentLines.length * 14 + PADDING_V_BLOCK;
       if (checkPageBreak(blockHeight)) y = height - margin - 50;
-
       const startBlockY = y;
-
-      page.drawRectangle({
-        x: margin,
-        y: startBlockY - blockHeight,
-        width: contentWidth,
-        height: blockHeight,
-        borderColor: borderColor,
-        borderWidth: 1,
-        borderRadius: containerRadius,
-      });
-
-      y -= PADDING_V_BLOCK; // top padding
-
-      // Draw title and score
-      y -= 12; // Height of title text
-      page.drawText(item.criterion, {
-        x: margin + 20,
-        y,
-        font: boldFont,
-        size: 12,
-        color: textPrimary,
-      });
-
-      const barColor =
-        item.score >= 3 ? green : item.score >= 2 ? yellow : red;
-
+      page.drawRectangle({ x: margin, y: startBlockY - blockHeight, width: contentWidth, height: blockHeight, borderColor: borderColor, borderWidth: 1, borderRadius: containerRadius });
+      y -= PADDING_V_BLOCK;
+      y -= 12;
+      page.drawText(item.criterion, { x: margin + 20, y, font: boldFont, size: 12, color: textPrimary });
+      const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
       const scoreText = `${item.score}/5`;
       const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
-      page.drawText(scoreText, {
-        x: width - margin - scoreWidth - 20,
-        y,
-        font: boldFont,
-        size: 12,
-        color: barColor,
-      });
-
+      page.drawText(scoreText, { x: width - margin - scoreWidth - 20, y, font: boldFont, size: 12, color: barColor });
       y -= SPACE_TITLE_BAR;
-
-      // Draw progress bar
       const barWidth = contentWidth - 40;
       const filledWidth = (item.score / 5) * barWidth;
-
       y -= barHeight;
       drawPill(margin + 20, y, barWidth, barHeight, barBg);
       drawPill(margin + 20, y, filledWidth, barHeight, barColor);
-
       y -= SPACE_BAR_TEXT;
-
-      // Draw assessment text
       for (const line of assessmentLines) {
         if (checkPageBreak(14)) y = height - margin - 50;
         y -= 14;
-        page.drawText(line, {
-          x: margin + 20,
-          y,
-          font: font,
-          size: 10,
-          color: textSecondary,
-          lineHeight: 14,
-        });
+        page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary, lineHeight: 14 });
       }
       y = startBlockY - blockHeight - 20;
     }
@@ -675,10 +499,6 @@ export function ReportGenerator() {
             </div>
           </div>
         )}
-
-        {error && (
-          <p className="text-sm text-destructive text-center">{error}</p>
-        )}
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row gap-4">
         <Button
@@ -696,6 +516,7 @@ export function ReportGenerator() {
           )}
           {isLoading ? 'Generating Report...' : 'Generate and Download'}
         </Button>
+        {hasResults && (
         <Button
           type="button"
           variant="outline"
@@ -706,6 +527,7 @@ export function ReportGenerator() {
           <XCircle className="mr-2 h-5 w-5" />
           Clear
         </Button>
+        )}
       </CardFooter>
     </Card>
   );
