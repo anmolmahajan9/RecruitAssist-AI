@@ -130,8 +130,9 @@ export function ReportGenerator() {
       const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      const candidateName = assessmentResult.candidate_name.replace(/ /g, '_');
-      link.download = `Report-${candidateName}.pdf`;
+      const candidateName = assessmentResult.candidate_name.replace(/\s+/g, '_');
+      const jobName = assessmentResult.interviewed_role.replace(/\s+/g, '_');
+      link.download = `${candidateName}-${jobName}-suitable-ai.pdf`;
       link.click();
 
     } catch (err) {
