@@ -76,7 +76,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
     }
     return lines;
   };
-
+  
   const handleDownloadPdf = async () => {
     setIsPdfDownloading(true);
     try {
@@ -106,9 +106,16 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const white = rgb(1, 1, 1);
       const borderColor = rgb(0.9, 0.9, 0.9);
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
+      const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
       const containerRadius = 40;
       const barHeight = 6;
-      const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
+      
+      const passPillFill = rgb(200 / 255, 255 / 255, 200 / 255);
+      const passPillBorder = rgb(30 / 255, 150 / 255, 30 / 255);
+      const passPillText = rgb(0 / 255, 100 / 255, 0 / 255);
+      const failPillFill = rgb(255 / 255, 200 / 255, 200 / 255);
+      const failPillBorder = rgb(150 / 255, 30 / 255, 30 / 255);
+      const failPillText = rgb(100 / 255, 0 / 255, 0 / 255);
 
 
       const drawPill = (
@@ -172,7 +179,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: textPrimary,
       });
       y -= 20;
-      page.drawText(interviewed_role, {
+      page.drawText(`👤 ${interviewed_role}`, {
         x: margin + 20,
         y,
         font: font,
@@ -180,7 +187,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: textSecondary,
       });
       y -= 15;
-      page.drawText(`Interview Date: ${interview_datetime}`, {
+      page.drawText(`📅 ${interview_datetime}`, {
         x: margin + 20,
         y,
         font: font,
@@ -189,23 +196,31 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       });
 
       const status = overall_status.toLowerCase();
-      const statusColorVal = status === 'pass' ? green : red;
       const statusText = overall_status;
       const statusTextWidth = boldFont.widthOfTextAtSize(statusText, 12);
-      const statusCircleDiameter = Math.max(statusTextWidth + 30, 50);
-
-      page.drawCircle({
-          x: width - margin - statusCircleDiameter/2 - 10,
-          y: headerStartY - headerHeight / 2,
-          size: statusCircleDiameter / 2,
-          color: statusColorVal,
+      
+      const pillWidth = statusTextWidth + 40;
+      const pillHeight = 25;
+      const pillX = width - margin - pillWidth - 20;
+      const pillY = headerStartY - headerHeight / 2 - pillHeight / 2;
+      
+      page.drawRectangle({
+        x: pillX,
+        y: pillY,
+        width: pillWidth,
+        height: pillHeight,
+        color: status === 'pass' ? passPillFill : failPillFill,
+        borderColor: status === 'pass' ? passPillBorder : failPillBorder,
+        borderWidth: 1.5,
+        borderRadius: pillHeight / 2,
       });
+
       page.drawText(statusText, {
-        x: width - margin - statusCircleDiameter/2 - 10 - statusTextWidth/2,
-        y: headerStartY - headerHeight / 2 - 5,
+        x: pillX + (pillWidth - statusTextWidth) / 2,
+        y: pillY + (pillHeight - 10) / 2,
         font: boldFont,
         size: 12,
-        color: white,
+        color: status === 'pass' ? passPillText : failPillText,
       });
 
       y = headerStartY - headerHeight - 20;
