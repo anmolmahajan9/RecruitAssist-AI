@@ -121,12 +121,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         width: contentWidth,
         height: headerHeight,
         color: headerBg,
-        borderColor: borderColor,
-        borderWidth: 1,
         borderRadius: containerRadius,
       });
 
-      y -= 25;
+      y -= 35;
       page.drawText(candidate_name, {
         x: margin + 20,
         y,
@@ -273,8 +271,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         const barHeight = 6;
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
-        const barColor =
-          item.score >= 3 ? green : item.score >= 2 ? yellow : red;
+        const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
 
         page.drawRectangle({
           x: margin + 20,
