@@ -97,8 +97,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         }
         return false;
       };
-
-      const headerBg = rgb(228 / 255, 241 / 255, 254 / 255);
+      
       const textPrimary = rgb(0.1, 0.1, 0.1);
       const textSecondary = rgb(0.4, 0.4, 0.4);
       const green = rgb(34 / 255, 197 / 255, 94 / 255);
@@ -118,17 +117,29 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: any
       ) => {
         const radius = pillHeight / 2;
+
+        if (pillWidth < pillHeight) {
+           // If width is less than height, just draw a circle
+           page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+           return;
+        }
+
+        // Left circle
         page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+      
+        // Right circle
         page.drawCircle({
           x: x + pillWidth - radius,
           y: y + radius,
           size: radius,
           color,
         });
+      
+        // Center rectangle (between circles)
         page.drawRectangle({
-          x,
-          y,
-          width: pillWidth,
+          x: x + radius,
+          y: y,
+          width: pillWidth - 2 * radius,
           height: pillHeight,
           color,
         });
@@ -144,10 +155,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         y: y - headerHeight,
         width: contentWidth,
         height: headerHeight,
-        color: headerBg,
-        borderRadius: containerRadius,
         borderColor: borderColor,
         borderWidth: 1,
+        borderRadius: containerRadius,
       });
 
       y -= 35;
@@ -179,23 +189,17 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const statusColorVal = status === 'pass' ? green : red;
       const statusText = overall_status;
       const statusTextWidth = boldFont.widthOfTextAtSize(statusText, 12);
+      const statusCircleDiameter = Math.max(statusTextWidth + 30, 50);
 
-      const statusBoxWidth = statusTextWidth + 20;
-      const statusBoxHeight = 22;
-      const statusBoxX = width - margin - 20 - statusBoxWidth;
-      const statusBoxY = headerStartY - 35 - statusBoxHeight / 2;
-
-      page.drawRectangle({
-        x: statusBoxX,
-        y: statusBoxY,
-        width: statusBoxWidth,
-        height: statusBoxHeight,
-        color: statusColorVal,
-        borderRadius: 11,
+      page.drawCircle({
+          x: width - margin - statusCircleDiameter/2 - 10,
+          y: headerStartY - headerHeight / 2,
+          size: statusCircleDiameter / 2,
+          color: statusColorVal,
       });
       page.drawText(statusText, {
-        x: statusBoxX + 10,
-        y: statusBoxY + 7,
+        x: width - margin - statusCircleDiameter/2 - 10 - statusTextWidth/2,
+        y: headerStartY - headerHeight / 2 - 5,
         font: boldFont,
         size: 12,
         color: white,
@@ -237,13 +241,14 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       y -= 20;
 
       for (const line of summaryLines) {
-        checkPageBreak(14);
+        if (checkPageBreak(14)) y = height - margin;
         page.drawText(line, {
           x: margin + 20,
           y,
           font: font,
           size: 10,
           color: textSecondary,
+          lineHeight: 14,
         });
         y -= 14;
       }
@@ -311,6 +316,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
             font: font,
             size: 10,
             color: textSecondary,
+            lineHeight: 14,
           });
           y -= 14;
         }
