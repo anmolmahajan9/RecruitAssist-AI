@@ -109,12 +109,34 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
       const containerRadius = 20;
       const barHeight = 6;
-      const barRadius = barHeight / 2;
+
+      const drawPill = (
+        x: number,
+        y: number,
+        pillWidth: number,
+        pillHeight: number,
+        color: any
+      ) => {
+        const radius = pillHeight / 2;
+        page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+        page.drawCircle({
+          x: x + pillWidth - radius,
+          y: y + radius,
+          size: radius,
+          color,
+        });
+        page.drawRectangle({
+          x,
+          y,
+          width: pillWidth,
+          height: pillHeight,
+          color,
+        });
+      };
 
       // --- Draw Header ---
       const headerHeight = 90;
       if (checkPageBreak(headerHeight + 20)) y = height - margin;
-
       const headerStartY = y;
 
       page.drawRectangle({
@@ -192,7 +214,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const summaryHeight = 25 + 20 + summaryLines.length * 14 + 20;
 
       if (checkPageBreak(summaryHeight + 20)) y = height - margin;
-
       const summaryStartY = y;
 
       page.drawRectangle({
@@ -236,8 +257,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           10,
           contentWidth - 40
         );
-        const blockHeight = 20 + 20 + 6 + 10 + assessmentLines.length * 14 + 20; // top-pad + title/score + bar-h + bar-margin + text + bottom-pad
-        if (checkPageBreak(blockHeight + 20)) y = height - margin;
+        const blockHeight =
+          20 + 20 + barHeight + 10 + assessmentLines.length * 14 + 20;
+        if (checkPageBreak(blockHeight)) y = height - margin;
 
         const startBlockY = y;
 
@@ -276,22 +298,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         const barColor =
           item.score >= 3 ? green : item.score >= 2 ? yellow : red;
 
-        page.drawRectangle({
-          x: margin + 20,
-          y,
-          width: barWidth,
-          height: barHeight,
-          color: barBg,
-          borderRadius: barRadius,
-        });
-        page.drawRectangle({
-          x: margin + 20,
-          y,
-          width: filledWidth,
-          height: barHeight,
-          color: barColor,
-          borderRadius: barRadius,
-        });
+        drawPill(margin + 20, y, barWidth, barHeight, barBg);
+        drawPill(margin + 20, y, filledWidth, barHeight, barColor);
+        
         y -= 10 + barHeight;
 
         for (const line of assessmentLines) {
