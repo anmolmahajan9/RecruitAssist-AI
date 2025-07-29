@@ -251,7 +251,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         10,
         contentWidth - 40
       );
-      const summaryHeight = 25 + 20 + summaryLines.length * 14;
+      const summaryHeight = 20 + 20 + 5 + summaryLines.length * 14;
 
       if (checkPageBreak(summaryHeight + 20)) y = height - margin;
       const summaryStartY = y;
@@ -302,8 +302,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           10,
           contentWidth - 40
         );
-        const blockHeight =
-          20 + 20 + barHeight + 10 + assessmentLines.length * 14;
+        const blockHeight = 20 + 15 + barHeight + 2 + assessmentLines.length * 14 + 15;
+
         if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
         const startBlockY = y;
@@ -339,7 +339,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           size: 12,
           color: barColor,
         });
-        y -= 20;
+        y -= 15;
 
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
@@ -347,7 +347,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         drawPill(margin + 20, y, barWidth, barHeight, barBg);
         drawPill(margin + 20, y, filledWidth, barHeight, barColor);
         
-        y -= 10 + barHeight;
+        y -= (barHeight + 2);
 
         for (const line of assessmentLines) {
           if (checkPageBreak(14)) y = height - margin - 50;
