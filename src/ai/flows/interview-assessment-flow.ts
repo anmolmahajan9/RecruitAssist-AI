@@ -61,7 +61,7 @@ Carefully analyze the provided call assessment text for the following informatio
       "assessment": "<As provided in the assessment text restructured without negative points>",
       "score": <as provided in the assessment text>
     }
-    // Repeat for each criterion separately
+    // Repeat for each criterion separately. Do not show “Job Fit” as a separate criterion.
   ],
   "interview_summary": "<Comprehensive positive summary including notes and observations without any negative points and without comments on CTCor notice>",
   "overall_status": "<Pass | Fail>"
