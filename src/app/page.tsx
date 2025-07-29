@@ -1,3 +1,4 @@
+
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import {
@@ -14,6 +15,7 @@ import {
   Phone,
   Mail,
   FileEdit,
+  Combine,
 } from 'lucide-react';
 
 export default function Home() {
@@ -114,6 +116,22 @@ export default function Home() {
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Draft Email <ArrowRight className="ml-2 h-5 w-5" />
+            </div>
+          </Card>
+        </Link>
+        <Link href="/report-generator">
+          <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
+            <CardHeader className="flex-grow">
+              <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                <Combine className="w-7 h-7 text-primary" />
+                Report Generator
+              </CardTitle>
+              <CardDescription className="pt-2 text-base">
+                Create a single PDF with a call assessment and a watermarked resume
+              </CardDescription>
+            </CardHeader>
+            <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
+              Generate Report <ArrowRight className="ml-2 h-5 w-5" />
             </div>
           </Card>
         </Link>
