@@ -18,8 +18,8 @@ export const InterviewAssessmentInputSchema = z.object({
 export type InterviewAssessmentInput = z.infer<typeof InterviewAssessmentInputSchema>;
 
 const AssessmentCriterionSchema = z.object({
-  criteria: z.string().describe('The name of the criterion being assessed.'),
-  assessment: z.string().describe("The restructured, positive assessment for the criterion."),
+  criteria: z.string().describe('The restructured name of the criterion being assessed (e.g., "Technical Skills" instead of "must have technical skills").'),
+  assessment: z.string().describe("The restructured, positive-only assessment for the criterion."),
   score: z.number().describe("The numerical score for the criterion as found in the text.")
 });
 
@@ -30,7 +30,7 @@ export const InterviewAssessmentOutputSchema = z.object({
   interview_datetime: z.string().describe("The date and time of the interview in 'DD MMM, YYYY HH:MM' format."),
   call_recording_link: z.string().describe("The URL to the call recording."),
   assessment_criteria: z.array(AssessmentCriterionSchema).describe("An array of assessment criteria, scores, and restructured positive feedback."),
-  interview_summary: z.string().describe("A comprehensive summary of the candidate's performance, rephrased to be positive."),
+  interview_summary: z.string().describe("A comprehensive summary of the candidate's performance, rephrased to be positive and without mentioning CTC or notice period."),
   overall_status: z.enum(['Pass', 'Fail']).describe("The final interview outcome."),
 });
 export type InterviewAssessmentOutput = z.infer<typeof InterviewAssessmentOutputSchema>;

@@ -28,24 +28,24 @@ const interviewAssessmentPrompt = ai.definePrompt({
   prompt: `## Objective
 To share a call interview summary and analysis of a candidate with the client.
 
-## Assessment 
+## Assessment text
 
-This is the assessment of a call interview of a candidate. Assessment has been done against various must have and good to have criteria.
+This is the assessment of a call interview of a candidate. Assessment has been done against various criteria.
 
 {{{callAssessmentText}}}
 
 ## Task
 
-Carefully analyze the provided call assessment text. Extract the following information along with restructuring wherever asked:
+Carefully analyze the provided call assessment text for the following information:
 
 - Candidate's full name.
-- The role they interviewed for.
+- The job role they interviewed for.
 - The date and time of the interview based on start time. Standardize the format to 'DD MMM, YYYY HH:MM'.
 - Call recording link 
-- Criteria that are assessed without mentioning "must have" or "good to have".
-- Score for each criteria
-- Assessment of each criteria. Now, it’s important that restructure the assessment text without the negative points. I cannot share any negative points to the client. 
-- A comprehensive summary of the interview, including all notes and observations.
+- Criteria without mentioning "must have" or "good to have". Restructure the language of the criteria to show the skill / area / criteria assessed.
+- Score for each criteria as given in the assessment text
+- Detailed assessment score of each criteria as given in the assessment text. Now, it’s important that restructure the assessment text without the negative points. I cannot share any negative points to the client. 
+- A comprehensive summary of the interview, including all notes and observations without comments on CTC or notice.
 - The overall status (Pass or Fail).
 
 ## Output Format
