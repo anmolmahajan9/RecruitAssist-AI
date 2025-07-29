@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { CallSummaryForm } from '@/components/call-summary-form';
 import { CallSummaryDisplay } from '@/components/call-summary-display';
 import {
-  type CallSummaryInput,
-  type CallSummaryOutput,
-} from '@/ai/schemas/call-summary-schema';
-import { generateCallSummary } from '@/ai/flows/call-summary-flow';
+  type InterviewAssessmentInput,
+  type InterviewAssessmentOutput,
+} from '@/ai/schemas/interview-assessment-schema';
+import { assessInterview } from '@/ai/flows/interview-assessment-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
@@ -15,18 +15,20 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
 export default function NancyAiCallSummaryPage() {
-  const [summary, setSummary] = useState<CallSummaryOutput | null>(null);
+  const [assessment, setAssessment] = useState<InterviewAssessmentOutput | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFormSubmit = async (data: CallSummaryInput) => {
+  const handleFormSubmit = async (data: InterviewAssessmentInput) => {
     setIsLoading(true);
     setError(null);
-    setSummary(null);
+    setAssessment(null);
 
     try {
-      const result = await generateCallSummary(data);
-      setSummary(result);
+      const result = await assessInterview({ assessmentText: data.callAssessmentText });
+      setAssessment(result);
     } catch (err) {
       setError(
         err instanceof Error
@@ -39,7 +41,7 @@ export default function NancyAiCallSummaryPage() {
   };
 
   const handleReset = () => {
-    setSummary(null);
+    setAssessment(null);
     setError(null);
     setIsLoading(false);
   };
@@ -69,7 +71,7 @@ export default function NancyAiCallSummaryPage() {
             Nancy AI Call Summary
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Generate a summary of a candidate call assessment.
+            Generate a structured summary of a candidate call assessment.
           </p>
         </div>
       </header>
@@ -78,7 +80,7 @@ export default function NancyAiCallSummaryPage() {
         onSubmit={handleFormSubmit}
         isLoading={isLoading}
         onReset={handleReset}
-        hasResults={!!summary || !!error}
+        hasResults={!!assessment || !!error}
       />
 
       {error && (
@@ -92,9 +94,9 @@ export default function NancyAiCallSummaryPage() {
         </Card>
       )}
 
-      {summary && (
+      {assessment && (
         <div className="mt-8">
-          <CallSummaryDisplay summary={summary} />
+          <CallSummaryDisplay assessment={assessment} />
         </div>
       )}
     </div>
