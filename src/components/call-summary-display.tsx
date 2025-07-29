@@ -98,6 +98,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       };
 
       // Define colors
+      const headerBg = rgb(239 / 255, 246 / 255, 255 / 255); // A light blue color, e.g., blue-50 from Tailwind
       const textPrimary = rgb(0.1, 0.1, 0.1);
       const textSecondary = rgb(0.4, 0.4, 0.4);
       const green = rgb(34 / 255, 197 / 255, 94 / 255);
@@ -107,6 +108,16 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
 
       // === 1. Header Section ===
       checkPageBreak(80);
+      const headerHeight = 90;
+      page.drawRectangle({
+        x: 0,
+        y: height - headerHeight,
+        width,
+        height: headerHeight,
+        color: headerBg,
+      });
+
+      y = height - 40;
       const status = overall_status.toLowerCase();
       const statusColorVal = status === 'pass' ? green : red;
       const statusCircleRadius = 25;
@@ -120,7 +131,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
 
       // Status Circle
       const statusCircleX = width - margin - statusCircleRadius;
-      const statusCircleY = height - margin - statusCircleRadius - 10;
+      const statusCircleY = height - 65;
       page.drawCircle({ x: statusCircleX, y: statusCircleY, size: statusCircleRadius, color: statusColorVal });
 
       const statusText = overall_status;
@@ -132,8 +143,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         size: 12,
         color: white,
       });
-
-      y -= 50; // Space after header
+      
+      y = height - headerHeight - 40; // Reset y to be below the header
 
       // === 2. Interview Summary Section ===
       checkPageBreak(40);
@@ -156,17 +167,17 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         checkPageBreak(100);
 
         // Criteria Title and Score
-        const scoreText = `${item.score}/5`;
-        const scoreWidth = font.widthOfTextAtSize(scoreText, 10);
         page.drawText(item.criteria, { x: margin, y, font: boldFont, size: 12, color: textPrimary });
-        page.drawText(scoreText, { x: width - margin - scoreWidth, y, font: font, size: 10, color: textSecondary });
+        const scoreText = `${item.score}/5`;
+        const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
+        page.drawText(scoreText, { x: width - margin - scoreWidth, y, font: boldFont, size: 12, color: textPrimary });
         y -= 20;
 
         // Score Bar
         const barHeight = 8;
         const barWidth = contentWidth;
         const filledWidth = (item.score / 5) * barWidth;
-        const barColor = item.score >= 4 ? green : item.score >= 3 ? rgb(253, 186, 116) : red;
+        const barColor = item.score >= 4 ? green : item.score >= 3 ? rgb(253 / 255, 186 / 255, 116 / 255) : red;
 
         page.drawRectangle({ x: margin, y, width: barWidth, height: barHeight, color: barBg, });
         page.drawRectangle({ x: margin, y, width: filledWidth, height: barHeight, color: barColor });
