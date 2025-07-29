@@ -206,7 +206,7 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
           y: height - logoDims.height - 20,
           width: logoDims.width,
           height: logoDims.height,
-          opacity: 1.0,
+          opacity: 0.5,
         });
       }
     } catch (e) {
@@ -229,6 +229,8 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
     const pdfDoc = await PDFDocument.create();
     
     let logoHeight = 0;
+    let initialY = 0;
+    
     const addWatermark = async (doc: PDFDocument) => {
       try {
           const response = await fetch(DEFAULT_LOGO_URL);
@@ -241,6 +243,7 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
           const pages = doc.getPages();
           const logoDims = watermarkImage.scale(0.08);
           logoHeight = logoDims.height;
+          initialY = doc.getPage(0).getHeight() - 50 - logoHeight - 20;
     
           for (const page of pages) {
             const { width, height } = page.getSize();
@@ -249,7 +252,7 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
               y: height - logoDims.height - 20,
               width: logoDims.width,
               height: logoDims.height,
-              opacity: 1.0,
+              opacity: 0.5,
             });
           }
       } catch(e) {
@@ -265,7 +268,6 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const margin = 50;
     const contentWidth = width - margin * 2;
-    const initialY = height - margin - logoHeight - 30;
     let y = initialY;
 
     const checkPageBreak = (spaceNeeded: number) => {
@@ -364,14 +366,15 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
 
     const summaryTitle = 'AI Interview Summary';
     const summaryLines = wrapText(interview_summary, font, 10, contentWidth - 40);
-    const PADDING_V_SUMMARY = 20;
-    const summaryHeight = PADDING_V_SUMMARY + 20 + 15 + summaryLines.length * 14 + PADDING_V_SUMMARY;
+    const PADDING_V_SUMMARY_TOP = 20;
+    const PADDING_V_SUMMARY_BOTTOM = 20;
+    const summaryHeight = PADDING_V_SUMMARY_TOP + 20 + 15 + summaryLines.length * 14 + PADDING_V_SUMMARY_BOTTOM;
     if (checkPageBreak(summaryHeight + 20)) {
         y = initialY;
     }
     const summaryStartY = y;
     page.drawRectangle({ x: margin, y: summaryStartY - summaryHeight, width: contentWidth, height: summaryHeight, borderColor: borderColor, borderWidth: 1, borderRadius: containerRadius });
-    y -= PADDING_V_SUMMARY + 10;
+    y -= PADDING_V_SUMMARY_TOP + 10;
     page.drawText(summaryTitle, { x: margin + 20, y, font: boldFont, size: 16, color: textPrimary });
     y -= 25;
     for (const line of summaryLines) {
@@ -382,6 +385,8 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
       y -= 14;
     }
     y = summaryStartY - summaryHeight - 20;
+    y = Math.min(y, summaryStartY - summaryHeight - 20, height - margin - PADDING_V_SUMMARY_BOTTOM);
+
 
     const filteredCriteria = assessment_criteria.filter((item) => item.criterion.toLowerCase() !== 'job fit');
     for (const item of filteredCriteria) {
@@ -391,45 +396,45 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
       const titleLines = wrapText(item.criterion, boldFont, 12, titleMaxWidth);
 
       const assessmentLines = wrapText(item.assessment, font, 10, contentWidth - 40);
-      const PADDING_V_BLOCK = 20;
+      const PADDING_V_BLOCK_TOP = 20;
+      const PADDING_V_BLOCK_BOTTOM = 20;
       const SPACE_TITLE_BAR = 12;
       const SPACE_BAR_TEXT = 12;
-      const blockHeight = PADDING_V_BLOCK + (titleLines.length * 14) + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + assessmentLines.length * 14 + PADDING_V_BLOCK;
+      const blockHeight = PADDING_V_BLOCK_TOP + (titleLines.length * 14) + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + assessmentLines.length * 14 + PADDING_V_BLOCK_BOTTOM;
       if (checkPageBreak(blockHeight)) {
           y = initialY;
       }
       const startBlockY = y;
       page.drawRectangle({ x: margin, y: startBlockY - blockHeight, width: contentWidth, height: blockHeight, borderColor: borderColor, borderWidth: 1, borderRadius: containerRadius });
-      y -= PADDING_V_BLOCK;
+      y -= PADDING_V_BLOCK_TOP;
       
       const titleYStart = y;
       let currentTitleY = y;
       for (const line of titleLines) {
+        y -= 14;
         if (checkPageBreak(14)) {
-            currentTitleY = initialY;
+          y = initialY;
         };
-        page.drawText(line, { x: margin + 20, y: currentTitleY, font: boldFont, size: 12, color: textPrimary, lineHeight: 14 });
-        currentTitleY -= 14;
+        page.drawText(line, { x: margin + 20, y, font: boldFont, size: 12, color: textPrimary, lineHeight: 14 });
       }
-      y = currentTitleY + 14;
       
 
       const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
       
-      page.drawText(scoreText, { x: width - margin - scoreWidth - 20, y: titleYStart, font: boldFont, size: 12, color: barColor });
+      page.drawText(scoreText, { x: width - margin - scoreWidth - 20, y: titleYStart - 14, font: boldFont, size: 12, color: barColor });
       
-      y -= (titleLines.length * 14) + SPACE_TITLE_BAR;
+      y -= SPACE_TITLE_BAR;
       
       const barWidth = contentWidth - 40;
       const filledWidth = (item.score / 5) * barWidth;
       
-      if (checkPageBreak(barHeight)) {
+      if (checkPageBreak(barHeight + SPACE_BAR_TEXT)) {
           y = initialY;
       }
+      y -= barHeight;
       drawPill(margin + 20, y, barWidth, barHeight, barBg);
       drawPill(margin + 20, y, filledWidth, barHeight, barColor);
-      y -= barHeight;
-
+      
       y -= SPACE_BAR_TEXT;
 
       for (const line of assessmentLines) {
@@ -440,6 +445,7 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
         y -= 14;
       }
       y = startBlockY - blockHeight - 20;
+      y = Math.min(y, startBlockY - blockHeight - 20, height - margin - PADDING_V_BLOCK_BOTTOM);
     }
     
     await addWatermark(pdfDoc);

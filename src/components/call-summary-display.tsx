@@ -86,6 +86,8 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       const pdfDoc = await PDFDocument.create();
 
       let logoHeight = 0;
+      let initialY = 0;
+
       const addWatermark = async (doc: PDFDocument) => {
         try {
             const response = await fetch(DEFAULT_LOGO_URL);
@@ -98,6 +100,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
             const pages = doc.getPages();
             const logoDims = watermarkImage.scale(0.08);
             logoHeight = logoDims.height;
+            initialY = doc.getPage(0).getHeight() - 50 - logoHeight - 20;
 
             for (const page of pages) {
               const { width, height } = page.getSize();
@@ -106,7 +109,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
                 y: height - logoDims.height - 20,
                 width: logoDims.width,
                 height: logoDims.height,
-                opacity: 1, 
+                opacity: 0.5, 
               });
             }
         } catch (e) {
@@ -122,7 +125,6 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const margin = 50;
       const contentWidth = width - margin * 2;
-      const initialY = height - margin - logoHeight - 30;
       let y = initialY;
 
       const checkPageBreak = (spaceNeeded: number) => {
@@ -315,6 +317,8 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         y -= 14;
       }
       y = summaryStartY - summaryHeight - 20;
+      y = Math.min(y, summaryStartY - summaryHeight - 20, height - margin - PADDING_V_SUMMARY_BOTTOM);
+
 
       // --- Draw Detailed Assessment ---
       const filteredCriteria = assessment_criteria.filter(
@@ -366,19 +370,20 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
 
         const titleYStart = y;
         
+        let currentTitleY = y;
         for (const line of titleLines) {
-          y -= 14;
-           if (checkPageBreak(14)) {
+            y -= 14;
+            if (checkPageBreak(14)) {
                 y = initialY;
             }
-          page.drawText(line, {
-            x: margin + 20,
-            y,
-            font: boldFont,
-            size: 12,
-            color: textPrimary,
-            lineHeight: 14,
-          });
+            page.drawText(line, {
+                x: margin + 20,
+                y: y,
+                font: boldFont,
+                size: 12,
+                color: textPrimary,
+                lineHeight: 14,
+            });
         }
         
         const barColor =
@@ -386,7 +391,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
 
         page.drawText(scoreText, {
           x: width - margin - scoreWidth - 20,
-          y: titleYStart - 12, // Align with the first line of the title
+          y: titleYStart - 14, // Align with the first line of the title
           font: boldFont,
           size: 12,
           color: barColor,
@@ -419,6 +424,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
           y -= 14;
         }
         y = startBlockY - blockHeight - 20;
+        y = Math.min(y, startBlockY - blockHeight - 20, height - margin - PADDING_V_BLOCK_BOTTOM);
       }
 
       await addWatermark(pdfDoc);
