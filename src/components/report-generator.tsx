@@ -92,7 +92,7 @@ export function ReportGenerator() {
       fileInputRef.current.click();
     }
   };
-  
+
   const handleReset = () => {
     setAssessmentText('');
     setResumeFile(null);
@@ -111,7 +111,9 @@ export function ReportGenerator() {
 
     try {
       // Step 1: Generate Assessment PDF
-      const assessmentResult = await assessInterview({ callAssessmentText: assessmentText });
+      const assessmentResult = await assessInterview({
+        callAssessmentText: assessmentText,
+      });
       const assessmentPdfBytes = await createAssessmentPdf(assessmentResult);
 
       let finalPdfBytes: Uint8Array;
@@ -124,15 +126,21 @@ export function ReportGenerator() {
         // Step 3: Combine PDFs
         const assessmentPdfDoc = await PDFDocument.load(assessmentPdfBytes);
         const resumePdfDoc = await PDFDocument.load(watermarkedResumeBytes);
-        
+
         const combinedPdfDoc = await PDFDocument.create();
 
-        const assessmentPages = await combinedPdfDoc.copyPages(assessmentPdfDoc, assessmentPdfDoc.getPageIndices());
-        assessmentPages.forEach(page => combinedPdfDoc.addPage(page));
+        const assessmentPages = await combinedPdfDoc.copyPages(
+          assessmentPdfDoc,
+          assessmentPdfDoc.getPageIndices()
+        );
+        assessmentPages.forEach((page) => combinedPdfDoc.addPage(page));
 
-        const resumePages = await combinedPdfDoc.copyPages(resumePdfDoc, resumePdfDoc.getPageIndices());
-        resumePages.forEach(page => combinedPdfDoc.addPage(page));
-        
+        const resumePages = await combinedPdfDoc.copyPages(
+          resumePdfDoc,
+          resumePdfDoc.getPageIndices()
+        );
+        resumePages.forEach((page) => combinedPdfDoc.addPage(page));
+
         finalPdfBytes = await combinedPdfDoc.save();
       } else {
         finalPdfBytes = assessmentPdfBytes;
@@ -142,13 +150,14 @@ export function ReportGenerator() {
       const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      const candidateName = assessmentResult.candidate_name.replace(/\s+/g, '_');
+      const candidateName = assessmentResult.candidate_name.replace(
+        /\s+/g,
+        '_'
+      );
       const jobName = assessmentResult.interviewed_role.replace(/\s+/g, '_');
       link.download = `${candidateName}-${jobName}-suitable-ai.pdf`;
       link.click();
       URL.revokeObjectURL(link.href);
-
-
     } catch (err) {
       console.error(err);
       setError(
@@ -165,7 +174,7 @@ export function ReportGenerator() {
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const response = await fetch(DEFAULT_LOGO_URL);
     if (!response.ok) {
-       throw new Error(`Failed to load default logo: ${response.statusText}`);
+      throw new Error(`Failed to load default logo: ${response.statusText}`);
     }
     const imageBytes = await response.arrayBuffer();
     const watermarkImage = await pdfDoc.embedPng(imageBytes);
@@ -184,8 +193,10 @@ export function ReportGenerator() {
     }
     return pdfDoc.save();
   };
-  
-  const createAssessmentPdf = async (assessment: InterviewAssessmentOutput): Promise<Uint8Array> => {
+
+  const createAssessmentPdf = async (
+    assessment: InterviewAssessmentOutput
+  ): Promise<Uint8Array> => {
     const {
       candidate_name,
       interviewed_role,
@@ -197,29 +208,29 @@ export function ReportGenerator() {
     } = assessment;
 
     const pdfDoc = await PDFDocument.create();
-    
-    const addWatermark = async (doc: PDFDocument) => {
-        const response = await fetch(DEFAULT_LOGO_URL);
-        if (!response.ok) {
-           throw new Error(`Failed to load default logo: ${response.statusText}`);
-        }
-        const imageBytes = await response.arrayBuffer();
-        const watermarkImage = await doc.embedPng(imageBytes);
-        const pages = doc.getPages();
 
-        for (const page of pages) {
-          const { width, height } = page.getSize();
-          const logoDims = watermarkImage.scale(0.08);
-          page.drawImage(watermarkImage, {
-            x: width - logoDims.width - 20,
-            y: height - logoDims.height - 20,
-            width: logoDims.width,
-            height: logoDims.height,
-            opacity: 0.5,
-          });
-        }
+    const addWatermark = async (doc: PDFDocument) => {
+      const response = await fetch(DEFAULT_LOGO_URL);
+      if (!response.ok) {
+        throw new Error(`Failed to load default logo: ${response.statusText}`);
+      }
+      const imageBytes = await response.arrayBuffer();
+      const watermarkImage = await doc.embedPng(imageBytes);
+      const pages = doc.getPages();
+
+      for (const page of pages) {
+        const { width, height } = page.getSize();
+        const logoDims = watermarkImage.scale(0.08);
+        page.drawImage(watermarkImage, {
+          x: width - logoDims.width - 20,
+          y: height - logoDims.height - 20,
+          width: logoDims.width,
+          height: logoDims.height,
+          opacity: 0.5,
+        });
+      }
     };
-    
+
     let page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -236,7 +247,7 @@ export function ReportGenerator() {
     ): string[] => {
       const lines: string[] = [];
       if (!text) return lines;
-  
+
       const paragraphs = text.split('\n');
       for (const paragraph of paragraphs) {
         if (paragraph.trim() === '') {
@@ -249,7 +260,7 @@ export function ReportGenerator() {
           const potentialLine =
             currentLine === '' ? word : `${currentLine} ${word}`;
           const width = font.widthOfTextAtSize(potentialLine, fontSize);
-  
+
           if (width > maxWidth) {
             lines.push(currentLine);
             currentLine = word;
@@ -261,7 +272,7 @@ export function ReportGenerator() {
       }
       return lines;
     };
-    
+
     const checkPageBreak = (spaceNeeded: number) => {
       if (y - spaceNeeded < margin) {
         page = pdfDoc.addPage();
@@ -270,7 +281,7 @@ export function ReportGenerator() {
       }
       return false;
     };
-    
+
     const textPrimary = rgb(0.1, 0.1, 0.1);
     const textSecondary = rgb(0.4, 0.4, 0.4);
     const green = rgb(34 / 255, 197 / 255, 94 / 255);
@@ -279,9 +290,9 @@ export function ReportGenerator() {
     const borderColor = rgb(0.9, 0.9, 0.9);
     const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
     const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
-    const containerRadius = 40;
+    const containerRadius = 8;
     const barHeight = 6;
-    
+
     const passPillFill = rgb(217 / 255, 249 / 255, 230 / 255);
     const passPillBorder = rgb(52 / 255, 211 / 255, 153 / 255);
     const passPillText = rgb(5 / 255, 150 / 255, 105 / 255);
@@ -290,37 +301,38 @@ export function ReportGenerator() {
     const failPillText = rgb(100 / 255, 0 / 255, 0 / 255);
 
     const drawPill = (
-        x: number,
-        y: number,
-        pillWidth: number,
-        pillHeight: number,
-        color: any
-      ) => {
-        const radius = pillHeight / 2;
+      x: number,
+      y: number,
+      pillWidth: number,
+      pillHeight: number,
+      color: any
+    ) => {
+      const radius = pillHeight / 2;
 
-        if (pillWidth < pillHeight) {
-           if (pillWidth > 0) page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
-           return;
-        }
-      
-        page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
-        page.drawCircle({
-          x: x + pillWidth - radius,
-          y: y + radius,
-          size: radius,
-          color,
-        });
-        page.drawRectangle({
-          x: x + radius,
-          y: y,
-          width: pillWidth - 2 * radius,
-          height: pillHeight,
-          color,
-        });
+      if (pillWidth < pillHeight) {
+        if (pillWidth > 0)
+          page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+        return;
+      }
+
+      page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+      page.drawCircle({
+        x: x + pillWidth - radius,
+        y: y + radius,
+        size: radius,
+        color,
+      });
+      page.drawRectangle({
+        x: x + radius,
+        y: y,
+        width: pillWidth - 2 * radius,
+        height: pillHeight,
+        color,
+      });
     };
-    
+
     // --- Draw Header ---
-    const headerHeight = 110;
+    const headerHeight = 120;
     if (checkPageBreak(headerHeight + 20)) y = height - margin;
     const headerStartY = y;
 
@@ -329,56 +341,54 @@ export function ReportGenerator() {
       y: y - headerHeight,
       width: contentWidth,
       height: headerHeight,
-      borderColor: borderColor,
-      borderWidth: 1,
-      borderRadius: containerRadius,
       color: headerBgColor,
+      // No border for this style
     });
 
-    y -= 35;
+    y -= 40;
     page.drawText(candidate_name, {
       x: margin + 20,
       y,
       font: boldFont,
-      size: 24,
+      size: 30,
       color: textPrimary,
     });
-    y -= 20;
+    y -= 25;
     if (client_name) {
       page.drawText(client_name, {
         x: margin + 20,
         y,
         font: boldFont,
-        size: 12,
+        size: 14,
         color: textSecondary,
       });
-      y -= 15;
+      y -= 18;
     }
     page.drawText(interviewed_role, {
       x: margin + 20,
       y,
       font: font,
-      size: 12,
+      size: 14,
       color: textSecondary,
     });
-    y -= 15;
+    y -= 18;
     page.drawText(interview_datetime, {
       x: margin + 20,
       y,
       font: font,
-      size: 12,
+      size: 14,
       color: textSecondary,
     });
 
     const status = overall_status.toLowerCase();
     const statusText = overall_status;
     const statusTextWidth = boldFont.widthOfTextAtSize(statusText, 12);
-    
+
     const pillWidth = statusTextWidth + 40;
     const pillHeight = 25;
-    const pillX = width - margin - pillWidth - 20;
+    const pillX = width - margin - pillWidth - 30;
     const pillY = headerStartY - headerHeight / 2 - pillHeight / 2;
-    
+
     page.drawRectangle({
       x: pillX,
       y: pillY,
@@ -408,7 +418,7 @@ export function ReportGenerator() {
       10,
       contentWidth - 40
     );
-    const summaryHeight = 20 + 20 + 5 + summaryLines.length * 14 + 15;
+    const summaryHeight = 20 + 20 + 15 + summaryLines.length * 14 + 15;
 
     if (checkPageBreak(summaryHeight + 20)) y = height - margin;
     const summaryStartY = y;
@@ -451,7 +461,7 @@ export function ReportGenerator() {
     const filteredCriteria = assessment_criteria.filter(
       (item) => item.criterion.toLowerCase() !== 'job fit'
     );
-    
+
     for (const item of filteredCriteria) {
       const assessmentLines = wrapText(
         item.assessment,
@@ -462,8 +472,14 @@ export function ReportGenerator() {
       const PADDING_V = 20;
       const SPACE_TITLE_BAR = 12;
       const SPACE_BAR_TEXT = 12;
-
-      const blockHeight = PADDING_V + 12 + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + (assessmentLines.length * 14) + PADDING_V;
+      const blockHeight =
+        PADDING_V +
+        12 +
+        SPACE_TITLE_BAR +
+        barHeight +
+        SPACE_BAR_TEXT +
+        assessmentLines.length * 14 +
+        PADDING_V;
 
       if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
@@ -480,7 +496,7 @@ export function ReportGenerator() {
       });
 
       y -= PADDING_V; // top padding
-      
+
       // Draw title and score
       y -= 12; // Height of title text
       page.drawText(item.criterion, {
@@ -503,17 +519,17 @@ export function ReportGenerator() {
         size: 12,
         color: barColor,
       });
-      
+
       y -= SPACE_TITLE_BAR;
-      
+
       // Draw progress bar
       const barWidth = contentWidth - 40;
       const filledWidth = (item.score / 5) * barWidth;
-      
+
       y -= barHeight;
       drawPill(margin + 20, y, barWidth, barHeight, barBg);
       drawPill(margin + 20, y, filledWidth, barHeight, barColor);
-      
+
       y -= SPACE_BAR_TEXT;
 
       // Draw assessment text
@@ -531,7 +547,7 @@ export function ReportGenerator() {
       }
       y = startBlockY - blockHeight - 20;
     }
-    
+
     await addWatermark(pdfDoc);
     return pdfDoc.save();
   };
@@ -549,31 +565,49 @@ export function ReportGenerator() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-            <Label className="font-semibold">1. Report Type</Label>
-             <RadioGroup
-                value={includeResume}
-                onValueChange={(value) => setIncludeResume(value as 'yes' | 'no')}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
-            >
-                <Label htmlFor="r-yes">
-                    <Card className={cn("cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2", includeResume === 'yes' ? "border-primary bg-primary/5" : "hover:border-primary/50")}>
-                        <RadioGroupItem value="yes" id="r-yes" className="sr-only"/>
-                        <Combine className="w-10 h-10 mb-2 text-primary"/>
-                        <span className="font-semibold">Assessment + Resume</span>
-                        <span className="text-xs text-muted-foreground mt-1">Generates a full report.</span>
-                    </Card>
-                </Label>
-                <Label htmlFor="r-no">
-                    <Card className={cn("cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2", includeResume === 'no' ? "border-primary bg-primary/5" : "hover:border-primary/50")}>
-                        <RadioGroupItem value="no" id="r-no" className="sr-only"/>
-                        <FileText className="w-10 h-10 mb-2 text-primary"/>
-                        <span className="font-semibold">Assessment Only</span>
-                        <span className="text-xs text-muted-foreground mt-1">Generates the assessment PDF.</span>
-                    </Card>
-                </Label>
-            </RadioGroup>
+          <Label className="font-semibold">1. Report Type</Label>
+          <RadioGroup
+            value={includeResume}
+            onValueChange={(value) => setIncludeResume(value as 'yes' | 'no')}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          >
+            <Label htmlFor="r-yes">
+              <Card
+                className={cn(
+                  'cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2',
+                  includeResume === 'yes'
+                    ? 'border-primary bg-primary/5'
+                    : 'hover:border-primary/50'
+                )}
+              >
+                <RadioGroupItem value="yes" id="r-yes" className="sr-only" />
+                <Combine className="w-10 h-10 mb-2 text-primary" />
+                <span className="font-semibold">Assessment + Resume</span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  Generates a full report.
+                </span>
+              </Card>
+            </Label>
+            <Label htmlFor="r-no">
+              <Card
+                className={cn(
+                  'cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2',
+                  includeResume === 'no'
+                    ? 'border-primary bg-primary/5'
+                    : 'hover:border-primary/50'
+                )}
+              >
+                <RadioGroupItem value="no" id="r-no" className="sr-only" />
+                <FileText className="w-10 h-10 mb-2 text-primary" />
+                <span className="font-semibold">Assessment Only</span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  Generates the assessment PDF.
+                </span>
+              </Card>
+            </Label>
+          </RadioGroup>
         </div>
-      
+
         <div className="space-y-2">
           <Label htmlFor="callAssessmentText" className="font-semibold">
             2. Assessment Text
@@ -588,49 +622,49 @@ export function ReportGenerator() {
             className="min-h-[200px] font-mono text-sm"
           />
         </div>
-        
+
         {includeResume === 'yes' && (
-            <div className="space-y-2">
-              <Label htmlFor="resumeFile" className="font-semibold">
-                3. Candidate Resume
-              </Label>
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={handleUploadClick}
-                className={cn(
-                  'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
-                  dragging ? 'border-primary bg-accent' : 'border-border',
-                  'hover:border-primary hover:bg-primary/10 cursor-pointer'
-                )}
-              >
-                <Input
-                  id="resumeFile"
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                  ref={fileInputRef}
-                  className="hidden"
-                />
-                {resumeFile ? (
-                  <div className="flex items-center justify-center gap-2 text-foreground">
-                    <FileIcon className="h-6 w-6" />
-                    <span className="font-medium">{resumeFile.name}</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center space-y-2">
-                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-semibold text-primary">
-                        Click to upload
-                      </span>{' '}
-                      or drag and drop resume PDF
-                    </p>
-                  </div>
-                )}
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="resumeFile" className="font-semibold">
+              3. Candidate Resume
+            </Label>
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={handleUploadClick}
+              className={cn(
+                'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
+                dragging ? 'border-primary bg-accent' : 'border-border',
+                'hover:border-primary hover:bg-primary/10 cursor-pointer'
+              )}
+            >
+              <Input
+                id="resumeFile"
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className="hidden"
+              />
+              {resumeFile ? (
+                <div className="flex items-center justify-center gap-2 text-foreground">
+                  <FileIcon className="h-6 w-6" />
+                  <span className="font-medium">{resumeFile.name}</span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center space-y-2">
+                  <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-primary">
+                      Click to upload
+                    </span>{' '}
+                    or drag and drop resume PDF
+                  </p>
+                </div>
+              )}
             </div>
+          </div>
         )}
 
         {error && (
@@ -640,7 +674,9 @@ export function ReportGenerator() {
       <CardFooter className="flex flex-col sm:flex-row gap-4">
         <Button
           onClick={handleProcessRequest}
-          disabled={isLoading || !assessmentText || (includeResume === 'yes' && !resumeFile)}
+          disabled={
+            isLoading || !assessmentText || (includeResume === 'yes' && !resumeFile)
+          }
           className="w-full text-lg py-6 font-bold"
           size="lg"
         >

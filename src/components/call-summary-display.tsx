@@ -79,34 +79,36 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
     }
     return lines;
   };
-  
+
   const handleDownloadPdf = async () => {
     setIsPdfDownloading(true);
     try {
       const pdfDoc = await PDFDocument.create();
-      
-      const addWatermark = async (doc: PDFDocument) => {
-          const response = await fetch(DEFAULT_LOGO_URL);
-          if (!response.ok) {
-             throw new Error(`Failed to load default logo: ${response.statusText}`);
-          }
-          const imageBytes = await response.arrayBuffer();
-          const watermarkImage = await doc.embedPng(imageBytes);
-          const pages = doc.getPages();
 
-          for (const page of pages) {
-            const { width, height } = page.getSize();
-            const logoDims = watermarkImage.scale(0.08);
-            page.drawImage(watermarkImage, {
-              x: width - logoDims.width - 20,
-              y: height - logoDims.height - 20,
-              width: logoDims.width,
-              height: logoDims.height,
-              opacity: 0.5,
-            });
-          }
+      const addWatermark = async (doc: PDFDocument) => {
+        const response = await fetch(DEFAULT_LOGO_URL);
+        if (!response.ok) {
+          throw new Error(
+            `Failed to load default logo: ${response.statusText}`
+          );
+        }
+        const imageBytes = await response.arrayBuffer();
+        const watermarkImage = await doc.embedPng(imageBytes);
+        const pages = doc.getPages();
+
+        for (const page of pages) {
+          const { width, height } = page.getSize();
+          const logoDims = watermarkImage.scale(0.08);
+          page.drawImage(watermarkImage, {
+            x: width - logoDims.width - 20,
+            y: height - logoDims.height - 20,
+            width: logoDims.width,
+            height: logoDims.height,
+            opacity: 0.5,
+          });
+        }
       };
-      
+
       let page = pdfDoc.addPage();
       const { width, height } = page.getSize();
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -123,7 +125,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         }
         return false;
       };
-      
+
       const textPrimary = rgb(0.1, 0.1, 0.1);
       const textSecondary = rgb(0.4, 0.4, 0.4);
       const green = rgb(34 / 255, 197 / 255, 94 / 255);
@@ -132,9 +134,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const borderColor = rgb(0.9, 0.9, 0.9);
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
       const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
-      const containerRadius = 40;
+      const containerRadius = 8;
       const barHeight = 6;
-      
+
       const passPillFill = rgb(217 / 255, 249 / 255, 230 / 255);
       const passPillBorder = rgb(52 / 255, 211 / 255, 153 / 255);
       const passPillText = rgb(5 / 255, 150 / 255, 105 / 255);
@@ -152,10 +154,11 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         const radius = pillHeight / 2;
 
         if (pillWidth < pillHeight) {
-           if (pillWidth > 0) page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
-           return;
+          if (pillWidth > 0)
+            page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+          return;
         }
-      
+
         page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
         page.drawCircle({
           x: x + pillWidth - radius,
@@ -171,9 +174,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           color,
         });
       };
-      
+
       // --- Draw Header ---
-      const headerHeight = 110;
+      const headerHeight = 120;
       if (checkPageBreak(headerHeight + 20)) y = height - margin;
       const headerStartY = y;
 
@@ -182,56 +185,54 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         y: y - headerHeight,
         width: contentWidth,
         height: headerHeight,
-        borderColor: borderColor,
-        borderWidth: 1,
-        borderRadius: containerRadius,
         color: headerBgColor,
+        // No border for this style
       });
 
-      y -= 35;
+      y -= 40;
       page.drawText(candidate_name, {
         x: margin + 20,
         y,
         font: boldFont,
-        size: 24,
+        size: 30,
         color: textPrimary,
       });
-      y -= 20;
-       if (client_name) {
+      y -= 25;
+      if (client_name) {
         page.drawText(client_name, {
           x: margin + 20,
           y,
           font: boldFont,
-          size: 12,
+          size: 14,
           color: textSecondary,
         });
-        y -= 15;
+        y -= 18;
       }
       page.drawText(interviewed_role, {
         x: margin + 20,
         y,
         font: font,
-        size: 12,
+        size: 14,
         color: textSecondary,
       });
-      y -= 15;
+      y -= 18;
       page.drawText(interview_datetime, {
         x: margin + 20,
         y,
         font: font,
-        size: 12,
+        size: 14,
         color: textSecondary,
       });
 
       const status = overall_status.toLowerCase();
       const statusText = overall_status;
       const statusTextWidth = boldFont.widthOfTextAtSize(statusText, 12);
-      
+
       const pillWidth = statusTextWidth + 40;
       const pillHeight = 25;
-      const pillX = width - margin - pillWidth - 20;
+      const pillX = width - margin - pillWidth - 30;
       const pillY = headerStartY - headerHeight / 2 - pillHeight / 2;
-      
+
       page.drawRectangle({
         x: pillX,
         y: pillY,
@@ -261,7 +262,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         10,
         contentWidth - 40
       );
-      const summaryHeight = 20 + 20 + 5 + summaryLines.length * 14 + 15;
+      const summaryHeight = 20 + 20 + 15 + summaryLines.length * 14 + 15;
 
       if (checkPageBreak(summaryHeight + 20)) y = height - margin;
       const summaryStartY = y;
@@ -304,7 +305,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const filteredCriteria = assessment_criteria.filter(
         (item) => item.criterion.toLowerCase() !== 'job fit'
       );
-      
+
       for (const item of filteredCriteria) {
         const assessmentLines = wrapText(
           item.assessment,
@@ -315,8 +316,14 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         const PADDING_V = 20;
         const SPACE_TITLE_BAR = 12;
         const SPACE_BAR_TEXT = 12;
-
-        const blockHeight = PADDING_V + 12 + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + (assessmentLines.length * 14) + PADDING_V;
+        const blockHeight =
+          PADDING_V +
+          12 +
+          SPACE_TITLE_BAR +
+          barHeight +
+          SPACE_BAR_TEXT +
+          assessmentLines.length * 14 +
+          PADDING_V;
 
         if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
@@ -333,7 +340,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         });
 
         y -= PADDING_V; // top padding
-        
+
         // Draw title and score
         y -= 12; // Height of title text
         page.drawText(item.criterion, {
@@ -356,17 +363,17 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           size: 12,
           color: barColor,
         });
-        
+
         y -= SPACE_TITLE_BAR;
-        
+
         // Draw progress bar
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
-        
+
         y -= barHeight;
         drawPill(margin + 20, y, barWidth, barHeight, barBg);
         drawPill(margin + 20, y, filledWidth, barHeight, barColor);
-        
+
         y -= SPACE_BAR_TEXT;
 
         // Draw assessment text
@@ -384,7 +391,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         }
         y = startBlockY - blockHeight - 20;
       }
-      
+
       await addWatermark(pdfDoc);
 
       const pdfBytes = await pdfDoc.save();
@@ -399,11 +406,11 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       setIsPdfDownloading(false);
     }
   };
-  
+
   const filteredCriteria = assessment_criteria.filter(
     (item) => item.criterion.toLowerCase() !== 'job fit'
   );
-  
+
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-6 bg-primary/10">
@@ -414,10 +421,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
             </h2>
             <div className="flex flex-col mt-2 text-muted-foreground gap-1">
               {client_name && (
-                 <div className="flex items-center gap-2 font-semibold">
-                    <Building className="h-4 w-4" />
-                    <span>{client_name}</span>
-                  </div>
+                <div className="flex items-center gap-2 font-semibold">
+                  <Building className="h-4 w-4" />
+                  <span>{client_name}</span>
+                </div>
               )}
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -439,16 +446,18 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
             >
               {overall_status}
             </div>
-            {call_recording_link && (<a
-              href={call_recording_link}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline">
-                <Video className="mr-2 h-4 w-4" />
-                Listen to Call
-              </Button>
-            </a>)}
+            {call_recording_link && (
+              <a
+                href={call_recording_link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline">
+                  <Video className="mr-2 h-4 w-4" />
+                  Listen to Call
+                </Button>
+              </a>
+            )}
           </div>
         </div>
       </CardHeader>
