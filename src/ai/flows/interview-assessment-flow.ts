@@ -43,13 +43,29 @@ Carefully analyze the provided call assessment text for the following informatio
 - The date and time of the interview based on start time. Standardize the format to 'DD MMM, YYYY HH:MM'.
 - Call recording link 
 - Criteria without mentioning "must have" or "good to have". Restructure the language of the criteria to show the skill / area / criteria assessed.
-- Score for each criteria as given in the assessment text. Do not convert this score to a 0-100 scale; keep the original score (e.g., 4 out of 5).
+- Score for each criteria as given in the assessment text
 - Detailed assessment score of each criteria as given in the assessment text. Now, it’s important that restructure the assessment text without the negative points. I cannot share any negative points to the client. 
 - A comprehensive summary of the interview, including all notes and observations without comments on CTC or notice.
 - The overall status (Pass or Fail).
 
-## Output Format
-Return a single JSON object that strictly adheres to the defined output schema.
+ Output Format:
+ 
+{
+  "candidate_name": "<Full Name>",
+  "interviewed_role": "<Role Interviewed For>",
+  "interview_datetime": "<DD MMM, YYYY HH:MM>",
+  "call_recording_link": "<Call Recording Link>",
+  "assessment_criteria": [
+    {
+      "criteria": "<Criteria Name>",
+      "assessment": "<As provided in the assessment text restructured without negative points>",
+      "score": <as provided in the assessment text>
+    }
+    // Repeat for all criteria
+  ],
+  "interview_summary": "<Comprehensive positive summary including notes and observations without any negative points and without comments on CTCor notice>",
+  "overall_status": "<Pass | Fail>"
+}
 `,
 });
 
