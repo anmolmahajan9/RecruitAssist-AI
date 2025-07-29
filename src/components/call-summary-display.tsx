@@ -157,7 +157,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const statusBoxWidth = statusTextWidth + 20;
       const statusBoxHeight = 22;
       const statusBoxX = width - margin - 20 - statusBoxWidth;
-      const statusBoxY = headerStartY - 25 - statusBoxHeight / 2;
+      const statusBoxY = headerStartY - 35 - statusBoxHeight / 2;
 
       page.drawRectangle({
         x: statusBoxX,
