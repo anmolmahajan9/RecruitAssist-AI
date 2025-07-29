@@ -2,7 +2,7 @@
 'use client';
 
 import type { InterviewAssessmentOutput } from '@/ai/schemas/interview-assessment-schema';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Video, Download, FileText, Star, User, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -170,7 +170,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         checkPageBreak(60);
         
         // Criteria Title and Score
-        const scoreText = `Score: ${item.score}/5`;
+        const scoreText = `${item.score}/5`;
         const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
         page.drawText(item.criteria, { x: margin, y, font: boldFont, size: 12 });
         page.drawText(scoreText, {
@@ -253,20 +253,22 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           <div className="space-y-6">
             {assessment_criteria.map((item, index) => (
               <div key={index} className="p-4 border rounded-lg bg-background shadow-sm">
-                 <h4 className="font-bold text-lg text-foreground">{item.criteria}</h4>
-                 <p className="font-bold text-primary mt-1">Score: {item.score}/5</p>
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-bold text-lg text-foreground">{item.criteria}</h4>
+                  <span className="font-bold text-xl text-primary">{item.score}/5</span>
+                </div>
                  <p className="text-muted-foreground mt-2 whitespace-pre-line">{item.assessment}</p>
               </div>
             ))}
           </div>
         </div>
       </CardContent>
-       <CardContent className="p-6 bg-muted/30 flex justify-end gap-4">
+       <CardFooter className="p-6 bg-muted/30 flex justify-end gap-4">
           <Button onClick={handleDownloadPdf} disabled={isPdfDownloading}>
             <Download className="mr-2 h-4 w-4" />
             {isPdfDownloading ? 'Generating PDF...' : 'Download as PDF'}
           </Button>
-       </CardContent>
+       </CardFooter>
     </Card>
   );
 }
