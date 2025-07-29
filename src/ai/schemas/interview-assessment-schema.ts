@@ -18,7 +18,7 @@ export const InterviewAssessmentInputSchema = z.object({
 export type InterviewAssessmentInput = z.infer<typeof InterviewAssessmentInputSchema>;
 
 const AssessmentCriterionSchema = z.object({
-  criteria: z.string().describe('The restructured name of the criterion being assessed (e.g., "Technical Skills" instead of "must have technical skills").'),
+  criterion: z.string().describe('The restructured name of the criterion being assessed (e.g., "Technical Skills" instead of "must have technical skills").'),
   assessment: z.string().describe("The restructured, positive-only assessment for the criterion."),
   score: z.number().describe("The numerical score for the criterion as found in the text.")
 });

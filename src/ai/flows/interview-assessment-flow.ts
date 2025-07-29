@@ -42,9 +42,9 @@ Carefully analyze the provided call assessment text for the following informatio
 - The job role they interviewed for.
 - The date and time of the interview based on start time. Standardize the format to 'DD MMM, YYYY HH:MM'.
 - Call recording link 
-- Criteria without mentioning "must have" or "good to have". Restructure the language of the criteria to show the skill / area / criteria assessed.
-- Score for each criteria as given in the assessment text
-- Detailed assessment score of each criteria as given in the assessment text. Now, it’s important that restructure the assessment text without the negative points. I cannot share any negative points to the client. 
+- Each criterion without mentioning "must have" or "good to have". Restructure the language of the criterion to show the skill / area / criterion assessed.
+- Score for each criterion as given in the assessment text
+- Detailed assessment score of each criterion as given in the assessment text. Now, it’s important that restructure the assessment text without the negative points. I cannot share any negative points to the client. 
 - A comprehensive summary of the interview, including all notes and observations without comments on CTC or notice.
 - The overall status (Pass or Fail).
 
@@ -57,11 +57,11 @@ Carefully analyze the provided call assessment text for the following informatio
   "call_recording_link": "<Call Recording Link>",
   "assessment_criteria": [
     {
-      "criteria": "<Criteria Name>",
+      "criterion": "<Criteria Name>",
       "assessment": "<As provided in the assessment text restructured without negative points>",
       "score": <as provided in the assessment text>
     }
-    // Repeat for all criteria
+    // Repeat for each criterion separately
   ],
   "interview_summary": "<Comprehensive positive summary including notes and observations without any negative points and without comments on CTCor notice>",
   "overall_status": "<Pass | Fail>"

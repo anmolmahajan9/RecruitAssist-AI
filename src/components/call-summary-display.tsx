@@ -109,15 +109,13 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
       const containerRadius = 40;
       const barHeight = 6;
-      const barRadius = 3;
       
-      const passPillFill = rgb(200 / 255, 255 / 255, 200 / 255);
-      const passPillBorder = rgb(30 / 255, 150 / 255, 30 / 255);
-      const passPillText = rgb(0 / 255, 100 / 255, 0 / 255);
+      const passPillFill = rgb(217 / 255, 249 / 255, 230 / 255);
+      const passPillBorder = rgb(52 / 255, 211 / 255, 153 / 255);
+      const passPillText = rgb(5 / 255, 150 / 255, 105 / 255);
       const failPillFill = rgb(255 / 255, 200 / 255, 200 / 255);
       const failPillBorder = rgb(150 / 255, 30 / 255, 30 / 255);
       const failPillText = rgb(100 / 255, 0 / 255, 0 / 255);
-
 
       const drawPill = (
         x: number,
@@ -129,23 +127,17 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         const radius = pillHeight / 2;
 
         if (pillWidth < pillHeight) {
-           // If width is less than height, just draw a circle
            page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
            return;
         }
-
-        // Left circle
-        page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
       
-        // Right circle
+        page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
         page.drawCircle({
           x: x + pillWidth - radius,
           y: y + radius,
           size: radius,
           color,
         });
-      
-        // Center rectangle (between circles)
         page.drawRectangle({
           x: x + radius,
           y: y,
@@ -154,7 +146,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           color,
         });
       };
-
+      
       // --- Draw Header ---
       const headerHeight = 90;
       if (checkPageBreak(headerHeight + 20)) y = height - margin;
@@ -180,7 +172,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: textPrimary,
       });
       y -= 20;
-      page.drawText(interviewed_role, {
+      page.drawText(`${interviewed_role}`, {
         x: margin + 20,
         y,
         font: font,
@@ -188,7 +180,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: textSecondary,
       });
       y -= 15;
-      page.drawText(interview_datetime, {
+      page.drawText(`${interview_datetime}`, {
         x: margin + 20,
         y,
         font: font,
@@ -298,7 +290,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         });
 
         y -= 20; // top padding
-        page.drawText(item.criteria, {
+        page.drawText(item.criterion, {
           x: margin + 20,
           y,
           font: boldFont,
@@ -414,7 +406,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
             >
               <div className="flex justify-between items-center mb-2">
                 <h4 className="font-bold text-lg text-foreground">
-                  {item.criteria}
+                  {item.criterion}
                 </h4>
                 <span className="font-bold text-xl text-primary">
                   {item.score}/5
