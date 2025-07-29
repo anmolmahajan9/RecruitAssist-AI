@@ -265,11 +265,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       }
       y = summaryStartY - summaryHeight - 20;
 
-      const filteredCriteria = assessment_criteria.filter(
-        (item) => item.criterion !== 'Job Fit'
-      );
       // --- Draw Detailed Assessment ---
-      for (const item of filteredCriteria) {
+      for (const item of assessment_criteria) {
         const assessmentLines = wrapText(
           item.assessment,
           font,
@@ -349,9 +346,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       setIsPdfDownloading(false);
     }
   };
-  const filteredCriteria = assessment_criteria.filter(
-    (item) => item.criterion !== 'Job Fit'
-  );
+  
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-6 bg-primary/10">
@@ -404,7 +399,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           </div>
         </div>
         <div className="space-y-6">
-          {filteredCriteria.map((item, index) => (
+          {assessment_criteria.map((item, index) => (
             <div
               key={index}
               className="p-4 border rounded-lg bg-background shadow-sm"

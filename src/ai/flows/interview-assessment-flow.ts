@@ -45,7 +45,7 @@ Carefully analyze the provided call assessment text for the following informatio
 - Each criterion without mentioning "must have" or "good to have". Restructure the language of the criterion to show the skill / area / criterion assessed.
 - Score for each criterion as given in the assessment text
 - Detailed assessment score of each criterion as given in the assessment text. Now, it’s important that restructure the assessment text without the negative points. I cannot share any negative points to the client. 
-- A comprehensive summary of the interview, including all notes and observations without comments on CTC or notice.
+- A comprehensive summary of the interview, including all notes and observations without comments on CTC or notice. Consider the “Job fit” assessment in the interview summary itself, as it is not a separate criterion. Keep things positive.
 - The overall status (Pass or Fail).
 
  Output Format:
@@ -54,14 +54,14 @@ Carefully analyze the provided call assessment text for the following informatio
   "candidate_name": "<Full Name>",
   "interviewed_role": "<Role Interviewed For>",
   "interview_datetime": "<DD MMM, YYYY HH:MM>",
-  "call_recording_link": "<Call Recording Link>",
+  },
   "assessment_criteria": [
     {
       "criterion": "<Criteria Name>",
       "assessment": "<As provided in the assessment text restructured without negative points>",
       "score": <as provided in the assessment text>
     }
-    // Repeat for each criterion separately. Do not show “Job Fit” as a separate criterion.
+    // Repeat for each criterion separately.
   ],
   "interview_summary": "<Comprehensive positive summary including notes and observations without any negative points and without comments on CTCor notice>",
   "overall_status": "<Pass | Fail>"
