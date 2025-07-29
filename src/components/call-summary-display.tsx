@@ -109,6 +109,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
       const containerRadius = 40;
       const barHeight = 6;
+      const barRadius = 3;
       
       const passPillFill = rgb(200 / 255, 255 / 255, 200 / 255);
       const passPillBorder = rgb(30 / 255, 150 / 255, 30 / 255);
@@ -179,7 +180,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: textPrimary,
       });
       y -= 20;
-      page.drawText(`👤 ${interviewed_role}`, {
+      page.drawText(interviewed_role, {
         x: margin + 20,
         y,
         font: font,
@@ -187,7 +188,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: textSecondary,
       });
       y -= 15;
-      page.drawText(`📅 ${interview_datetime}`, {
+      page.drawText(interview_datetime, {
         x: margin + 20,
         y,
         font: font,
