@@ -2,7 +2,7 @@
 'use client';
 
 import type { InterviewAssessmentOutput } from '@/ai/schemas/interview-assessment-schema';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Video, Download, FileText, Star, User, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,24 +13,6 @@ import Image from 'next/image';
 interface CallSummaryDisplayProps {
   assessment: InterviewAssessmentOutput;
 }
-
-const StarRating = ({ score }: { score: number }) => {
-  const rating = Math.round(score / 20); // Convert 0-100 to 0-5
-  return (
-    <div className="flex items-center gap-1">
-      {[...Array(5)].map((_, i) => (
-        <Star
-          key={i}
-          className={cn(
-            'h-5 w-5',
-            i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
-          )}
-        />
-      ))}
-       <p className="text-xs font-bold text-muted-foreground ml-2">({rating}/5)</p>
-    </div>
-  );
-};
 
 export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
   if (!assessment) return null;
@@ -93,12 +75,20 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
     setIsPdfDownloading(true);
     try {
       const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage();
+      let page = pdfDoc.addPage();
       const { width, height } = page.getSize();
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const margin = 50;
       let y = height - margin;
+
+      // Helper to add a new page if needed
+      const checkPageBreak = (spaceNeeded: number) => {
+        if (y - spaceNeeded < margin) {
+          page = pdfDoc.addPage();
+          y = height - margin;
+        }
+      };
 
       // Logo and Header
       const logoUrl = '/logo.png';
@@ -161,51 +151,40 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       y -= 40;
       
       // Summary
+      checkPageBreak(80);
       page.drawText('Interview Summary', { x: margin, y, font: boldFont, size: 16 });
       y -= 25;
       const summaryLines = wrapText(interview_summary, font, 10, width - margin * 2);
       for (const line of summaryLines) {
-        if (y < margin) {
-          page.addPage();
-          y = height - margin;
-        }
+        checkPageBreak(14);
         page.drawText(line, { x: margin, y, font: font, size: 10, color: rgb(0.3, 0.3, 0.3) });
         y -= 14;
       }
       y -= 20;
 
       // Assessment Criteria
+      checkPageBreak(40);
       page.drawText('Detailed Assessment', { x: margin, y, font: boldFont, size: 16 });
       y -= 25;
       for (const item of assessment_criteria) {
-        if (y < margin + 60) {
-          page.addPage();
-          y = height - margin;
-        }
-        page.drawText(item.criteria, { x: margin, y, font: boldFont, size: 12 });
+        checkPageBreak(60);
         
-        // Star Rating in PDF
-        const rating = Math.round(item.score / 20);
-        let stars = '';
-        for (let i = 0; i < 5; i++) {
-          stars += i < rating ? '★' : '☆';
-        }
-        const starsWidth = boldFont.widthOfTextAtSize(stars, 12);
-        page.drawText(stars, {
-          x: width - margin - starsWidth,
+        // Criteria Title and Score
+        const scoreText = `Score: ${item.score}/5`;
+        const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
+        page.drawText(item.criteria, { x: margin, y, font: boldFont, size: 12 });
+        page.drawText(scoreText, {
+          x: width - margin - scoreWidth,
           y,
           font: boldFont,
           size: 12,
-          color: rgb(0.9, 0.6, 0),
+          color: rgb(0.1, 0.4, 0.7)
         });
 
         y -= 18;
         const assessmentLines = wrapText(item.assessment, font, 10, width - margin * 2);
         for (const line of assessmentLines) {
-          if (y < margin) {
-            page.addPage();
-            y = height - margin;
-          }
+          checkPageBreak(14);
           page.drawText(line, { x: margin + 10, y, font: font, size: 10, color: rgb(0.3, 0.3, 0.3) });
           y -= 14;
         }
@@ -274,22 +253,20 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           <div className="space-y-6">
             {assessment_criteria.map((item, index) => (
               <div key={index} className="p-4 border rounded-lg bg-background shadow-sm">
-                 <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-bold text-lg text-foreground">{item.criteria}</h4>
-                    <StarRating score={item.score} />
-                </div>
-                <p className="text-muted-foreground mt-1 whitespace-pre-line">{item.assessment}</p>
+                 <h4 className="font-bold text-lg text-foreground">{item.criteria}</h4>
+                 <p className="font-bold text-primary mt-1">Score: {item.score}/5</p>
+                 <p className="text-muted-foreground mt-2 whitespace-pre-line">{item.assessment}</p>
               </div>
             ))}
           </div>
         </div>
       </CardContent>
-       <CardFooter className="p-6 bg-muted/30 flex justify-end gap-4">
+       <CardContent className="p-6 bg-muted/30 flex justify-end gap-4">
           <Button onClick={handleDownloadPdf} disabled={isPdfDownloading}>
             <Download className="mr-2 h-4 w-4" />
             {isPdfDownloading ? 'Generating PDF...' : 'Download as PDF'}
           </Button>
-       </CardFooter>
+       </CardContent>
     </Card>
   );
 }
