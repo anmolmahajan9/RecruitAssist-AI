@@ -10,7 +10,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Video, Download, FileText, User, Calendar } from 'lucide-react';
+import { Video, Download, User, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
 import { useState } from 'react';
@@ -107,11 +107,12 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const white = rgb(1, 1, 1);
       const borderColor = rgb(0.9, 0.9, 0.9);
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
+      const containerRadius = 12;
 
       // --- Draw Header ---
       const headerHeight = 90;
-      if (checkPageBreak(headerHeight)) y = height - margin;
-      
+      if (checkPageBreak(headerHeight + 20)) y = height - margin;
+
       const headerStartY = y;
 
       page.drawRectangle({
@@ -122,33 +123,51 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: headerBg,
         borderColor: borderColor,
         borderWidth: 1,
-        borderRadius: 8
+        borderRadius: containerRadius,
       });
 
       y -= 25;
-      page.drawText(candidate_name, { x: margin + 20, y, font: boldFont, size: 24, color: textPrimary });
+      page.drawText(candidate_name, {
+        x: margin + 20,
+        y,
+        font: boldFont,
+        size: 24,
+        color: textPrimary,
+      });
       y -= 20;
-      page.drawText(interviewed_role, { x: margin + 20, y, font: font, size: 12, color: textSecondary });
+      page.drawText(interviewed_role, {
+        x: margin + 20,
+        y,
+        font: font,
+        size: 12,
+        color: textSecondary,
+      });
       y -= 15;
-      page.drawText(`Interview Date: ${interview_datetime}`, { x: margin + 20, y, font: font, size: 12, color: textSecondary });
+      page.drawText(`Interview Date: ${interview_datetime}`, {
+        x: margin + 20,
+        y,
+        font: font,
+        size: 12,
+        color: textSecondary,
+      });
 
       const status = overall_status.toLowerCase();
       const statusColorVal = status === 'pass' ? green : red;
       const statusText = overall_status;
       const statusTextWidth = boldFont.widthOfTextAtSize(statusText, 12);
-      
+
       const statusBoxWidth = statusTextWidth + 20;
       const statusBoxHeight = 22;
       const statusBoxX = width - margin - 20 - statusBoxWidth;
-      const statusBoxY = headerStartY - 25 - (statusBoxHeight / 2);
+      const statusBoxY = headerStartY - 25 - statusBoxHeight / 2;
 
       page.drawRectangle({
-          x: statusBoxX,
-          y: statusBoxY,
-          width: statusBoxWidth,
-          height: statusBoxHeight,
-          color: statusColorVal,
-          borderRadius: 11
+        x: statusBoxX,
+        y: statusBoxY,
+        width: statusBoxWidth,
+        height: statusBoxHeight,
+        color: statusColorVal,
+        borderRadius: 11,
       });
       page.drawText(statusText, {
         x: statusBoxX + 10,
@@ -162,42 +181,65 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
 
       // --- Draw Interview Summary ---
       const summaryTitle = 'Interview Summary';
-      const summaryLines = wrapText(interview_summary, font, 10, contentWidth - 40);
+      const summaryLines = wrapText(
+        interview_summary,
+        font,
+        10,
+        contentWidth - 40
+      );
       const summaryHeight = 25 + 20 + summaryLines.length * 14 + 20;
-      
-      if (checkPageBreak(summaryHeight)) y = height - margin;
+
+      if (checkPageBreak(summaryHeight + 20)) y = height - margin;
 
       const summaryStartY = y;
-      
+
       page.drawRectangle({
-          x: margin,
-          y: summaryStartY - summaryHeight,
-          width: contentWidth,
-          height: summaryHeight,
-          borderColor: borderColor,
-          borderWidth: 1,
-          borderRadius: 8
+        x: margin,
+        y: summaryStartY - summaryHeight,
+        width: contentWidth,
+        height: summaryHeight,
+        borderColor: borderColor,
+        borderWidth: 1,
+        borderRadius: containerRadius,
       });
 
       y -= 25;
-      page.drawText(summaryTitle, { x: margin + 20, y, font: boldFont, size: 16, color: textPrimary });
+      page.drawText(summaryTitle, {
+        x: margin + 20,
+        y,
+        font: boldFont,
+        size: 16,
+        color: textPrimary,
+      });
       y -= 20;
 
       for (const line of summaryLines) {
         checkPageBreak(14);
-        page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary });
+        page.drawText(line, {
+          x: margin + 20,
+          y,
+          font: font,
+          size: 10,
+          color: textSecondary,
+        });
         y -= 14;
       }
       y = summaryStartY - summaryHeight - 20;
 
       // --- Draw Detailed Assessment ---
       for (const item of assessment_criteria) {
-        const assessmentLines = wrapText(item.assessment, font, 10, contentWidth - 40);
-        const blockHeight = 20 + 20 + 15 + assessmentLines.length * 14 + 20; // top-pad + title + bar-space + text + bottom-pad
-        if (checkPageBreak(blockHeight)) y = height - margin;
+        const assessmentLines = wrapText(
+          item.assessment,
+          font,
+          10,
+          contentWidth - 40
+        );
+        const blockHeight =
+          20 + 20 + 6 + 10 + assessmentLines.length * 14 + 20; // top-pad + title/score + bar-h + bar-margin + text + bottom-pad
+        if (checkPageBreak(blockHeight + 20)) y = height - margin;
 
         const startBlockY = y;
-        
+
         page.drawRectangle({
           x: margin,
           y: startBlockY - blockHeight,
@@ -205,30 +247,63 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           height: blockHeight,
           borderColor: borderColor,
           borderWidth: 1,
-          borderRadius: 8
+          borderRadius: containerRadius,
         });
-        
+
         y -= 20; // top padding
-        page.drawText(item.criteria, { x: margin + 20, y, font: boldFont, size: 12, color: textPrimary });
-        
+        page.drawText(item.criteria, {
+          x: margin + 20,
+          y,
+          font: boldFont,
+          size: 12,
+          color: textPrimary,
+        });
+
         const scoreText = `${item.score}/5`;
         const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
-        page.drawText(scoreText, { x: width - margin - scoreWidth - 20, y, font: boldFont, size: 12, color: textPrimary });
+        page.drawText(scoreText, {
+          x: width - margin - scoreWidth - 20,
+          y,
+          font: boldFont,
+          size: 12,
+          color: textPrimary,
+        });
         y -= 20;
 
-        const barHeight = 8;
+        const barHeight = 6;
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
-        const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
+        const barColor =
+          item.score >= 3 ? green : item.score >= 2 ? yellow : red;
 
-        page.drawRectangle({ x: margin + 20, y, width: barWidth, height: barHeight, color: barBg, borderRadius: 4 });
-        page.drawRectangle({ x: margin + 20, y, width: filledWidth, height: barHeight, color: barColor, borderRadius: 4 });
-        y -= 15;
+        page.drawRectangle({
+          x: margin + 20,
+          y,
+          width: barWidth,
+          height: barHeight,
+          color: barBg,
+          borderRadius: 3,
+        });
+        page.drawRectangle({
+          x: margin + 20,
+          y,
+          width: filledWidth,
+          height: barHeight,
+          color: barColor,
+          borderRadius: 3,
+        });
+        y -= 10 + barHeight;
 
         for (const line of assessmentLines) {
-           if (checkPageBreak(14)) y = height - margin; // This is a fallback, shouldn't be needed with main block check
-           page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary });
-           y -= 14;
+          if (checkPageBreak(14)) y = height - margin; // This is a fallback, shouldn't be needed with main block check
+          page.drawText(line, {
+            x: margin + 20,
+            y,
+            font: font,
+            size: 10,
+            color: textSecondary,
+          });
+          y -= 14;
         }
         y = startBlockY - blockHeight - 20;
       }
@@ -245,7 +320,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       setIsPdfDownloading(false);
     }
   };
-
 
   return (
     <Card className="overflow-hidden">
@@ -291,8 +365,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       </CardHeader>
       <CardContent className="p-6 space-y-8">
         <div>
-          <h3 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <FileText className="h-6 w-6 text-primary" />
+          <h3 className="text-2xl font-bold text-foreground mb-4">
             Interview Summary
           </h3>
           <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-line">
@@ -300,31 +373,38 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           </div>
         </div>
         <div className="space-y-6">
-            {assessment_criteria.map((item, index) => (
-              <div
-                key={index}
-                className="p-4 border rounded-lg bg-background shadow-sm"
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-bold text-lg text-foreground">
-                    {item.criteria}
-                  </h4>
-                  <span className="font-bold text-xl text-primary">
-                    {item.score}/5
-                  </span>
-                </div>
-                <div className="w-full bg-secondary rounded-full h-1.5 mb-3">
-                  <div
-                    className={cn('h-1.5 rounded-full', item.score >= 3 ? 'bg-green-500' : item.score >=2 ? 'bg-yellow-400' : 'bg-red-500')}
-                    style={{ width: `${(item.score / 5) * 100}%` }}
-                  ></div>
-                </div>
-                <p className="text-muted-foreground mt-2 whitespace-pre-line">
-                  {item.assessment}
-                </p>
+          {assessment_criteria.map((item, index) => (
+            <div
+              key={index}
+              className="p-4 border rounded-lg bg-background shadow-sm"
+            >
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-bold text-lg text-foreground">
+                  {item.criteria}
+                </h4>
+                <span className="font-bold text-xl text-primary">
+                  {item.score}/5
+                </span>
               </div>
-            ))}
-          </div>
+              <div className="w-full bg-secondary rounded-full h-1.5 mb-3">
+                <div
+                  className={cn(
+                    'h-1.5 rounded-full',
+                    item.score >= 3
+                      ? 'bg-green-500'
+                      : item.score >= 2
+                        ? 'bg-yellow-400'
+                        : 'bg-red-500'
+                  )}
+                  style={{ width: `${(item.score / 5) * 100}%` }}
+                ></div>
+              </div>
+              <p className="text-muted-foreground mt-2 whitespace-pre-line">
+                {item.assessment}
+              </p>
+            </div>
+          ))}
+        </div>
       </CardContent>
       <CardFooter className="p-6 bg-primary/10 flex justify-end gap-4">
         <Button onClick={handleDownloadPdf} disabled={isPdfDownloading}>
