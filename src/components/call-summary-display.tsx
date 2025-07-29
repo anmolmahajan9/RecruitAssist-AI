@@ -67,6 +67,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
   
     const paragraphs = text.split('\n');
     for (const paragraph of paragraphs) {
+      if (paragraph.trim() === '') {
+        lines.push('');
+        continue;
+      }
       let currentLine = '';
       const words = paragraph.split(' ');
       for (const word of words) {
@@ -81,9 +85,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         }
       }
       lines.push(currentLine);
-      if (paragraphs.length > 1) {
-        lines.push(''); // Add a blank line for paragraph spacing
-      }
     }
     return lines;
   };
@@ -272,12 +273,12 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           </h3>
           <div className="space-y-6">
             {assessment_criteria.map((item, index) => (
-              <div key={index} className="pl-4 border-l-2 border-primary/50">
-                 <div className="flex justify-between items-center">
-                    <h4 className="font-bold text-lg">{item.criteria}</h4>
+              <div key={index} className="p-4 border rounded-lg bg-background shadow-sm">
+                 <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-bold text-lg text-foreground">{item.criteria}</h4>
                     <StarRating score={item.score} />
                 </div>
-                <p className="text-muted-foreground mt-1">{item.assessment}</p>
+                <p className="text-muted-foreground mt-1 whitespace-pre-line">{item.assessment}</p>
               </div>
             ))}
           </div>
