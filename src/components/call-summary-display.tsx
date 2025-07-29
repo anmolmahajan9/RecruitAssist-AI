@@ -106,7 +106,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const white = rgb(1, 1, 1);
       const borderColor = rgb(0.9, 0.9, 0.9);
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
-      const containerRadius = 20;
+      const containerRadius = 30;
       const barHeight = 6;
 
       const drawPill = (
