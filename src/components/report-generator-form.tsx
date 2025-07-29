@@ -239,22 +239,18 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       }
     };
 
-    let page = pdfDoc.getPage(0);
-    if (!page) {
-       page = pdfDoc.addPage();
-    }
-    
+    let page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const margin = 50;
     const contentWidth = width - margin * 2;
-    let y = height - margin;
+    let y = height - margin - 50;
 
     const checkPageBreak = (spaceNeeded: number) => {
       if (y - spaceNeeded < margin) {
         page = pdfDoc.addPage();
-        y = height - margin;
+        y = height - margin - 50;
         return true;
       }
       return false;
@@ -362,21 +358,32 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
 
     const filteredCriteria = assessment_criteria.filter((item) => item.criterion.toLowerCase() !== 'job fit');
     for (const item of filteredCriteria) {
+      const scoreText = `${item.score}/5`;
+      const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
+      const titleMaxWidth = contentWidth - 40 - scoreWidth - 10; // 10 for padding
+      const titleLines = wrapText(item.criterion, boldFont, 12, titleMaxWidth);
+
       const assessmentLines = wrapText(item.assessment, font, 10, contentWidth - 40);
       const PADDING_V_BLOCK = 20;
       const SPACE_TITLE_BAR = 12;
       const SPACE_BAR_TEXT = 12;
-      const blockHeight = PADDING_V_BLOCK + 12 + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + assessmentLines.length * 14 + PADDING_V_BLOCK;
+      const blockHeight = PADDING_V_BLOCK + (titleLines.length * 14) + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + assessmentLines.length * 14 + PADDING_V_BLOCK;
       if (checkPageBreak(blockHeight)) y = height - margin;
       const startBlockY = y;
       page.drawRectangle({ x: margin, y: startBlockY - blockHeight, width: contentWidth, height: blockHeight, borderColor: borderColor, borderWidth: 1, borderRadius: containerRadius });
       y -= PADDING_V_BLOCK;
-      y -= 12;
-      page.drawText(item.criterion, { x: margin + 20, y, font: boldFont, size: 12, color: textPrimary });
+      
+      const titleYStart = y;
+      for (const line of titleLines) {
+        y -= 14;
+        if (checkPageBreak(14)) y = height - margin;
+        page.drawText(line, { x: margin + 20, y, font: boldFont, size: 12, color: textPrimary, lineHeight: 14 });
+      }
+
       const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
-      const scoreText = `${item.score}/5`;
-      const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
-      page.drawText(scoreText, { x: width - margin - scoreWidth - 20, y, font: boldFont, size: 12, color: barColor });
+      
+      page.drawText(scoreText, { x: width - margin - scoreWidth - 20, y: titleYStart - 12, font: boldFont, size: 12, color: barColor });
+      
       y -= SPACE_TITLE_BAR;
       const barWidth = contentWidth - 40;
       const filledWidth = (item.score / 5) * barWidth;

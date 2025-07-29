@@ -109,26 +109,22 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
           });
         }
       };
-      
-      let page = pdfDoc.getPage(0);
-      if (!page) {
-        page = pdfDoc.addPage();
-      }
 
+      const page = pdfDoc.addPage();
       const { width, height } = page.getSize();
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
       const margin = 50;
       const contentWidth = width - margin * 2;
-      let y = height - margin;
+      let y = height - margin - 50;
 
       const checkPageBreak = (spaceNeeded: number) => {
         if (y - spaceNeeded < margin) {
-          page = pdfDoc.addPage();
-          y = height - margin; // Extra space for watermark
-          return true;
+          const newPage = pdfDoc.addPage();
+          y = newPage.getHeight() - margin - 50;
+          return newPage;
         }
-        return false;
+        return page;
       };
 
       const textPrimary = rgb(0.1, 0.1, 0.1);
@@ -154,24 +150,25 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         y: number,
         pillWidth: number,
         pillHeight: number,
-        color: any
+        color: any,
+        currentPage: any
       ) => {
         const radius = pillHeight / 2;
 
         if (pillWidth < pillHeight) {
           if (pillWidth > 0)
-            page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+            currentPage.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
           return;
         }
 
-        page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
-        page.drawCircle({
+        currentPage.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+        currentPage.drawCircle({
           x: x + pillWidth - radius,
           y: y + radius,
           size: radius,
           color,
         });
-        page.drawRectangle({
+        currentPage.drawRectangle({
           x: x + radius,
           y: y,
           width: pillWidth - 2 * radius,
@@ -181,10 +178,11 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       };
       
       const headerHeight = 120;
-      if (checkPageBreak(headerHeight + 20)) y = height - margin;
+      let currentPage = checkPageBreak(headerHeight + 20);
+      if (currentPage !== page) y = currentPage.getHeight() - margin - 50;
       const headerStartY = y;
 
-      page.drawRectangle({
+      currentPage.drawRectangle({
         x: margin,
         y: y - headerHeight,
         width: contentWidth,
@@ -193,7 +191,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       });
 
       y -= 40;
-      page.drawText(`${candidate_name} - AI Interview Report`, {
+      currentPage.drawText(`${candidate_name} - AI Interview Report`, {
         x: margin + 20,
         y,
         font: boldFont,
@@ -201,7 +199,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         color: rgb(0,0,0),
       });
       y -= 25;
-      page.drawText(interviewed_role, {
+      currentPage.drawText(interviewed_role, {
         x: margin + 20,
         y,
         font: font,
@@ -213,7 +211,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       const month = today.toLocaleString('default', { month: 'short' });
       const currentDate = `${today.getDate()} ${month}, ${today.getFullYear()}`;
       y -= 18;
-      page.drawText(currentDate, {
+      currentPage.drawText(currentDate, {
         x: margin + 20,
         y,
         font: font,
@@ -231,7 +229,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       const pillX = width - margin - pillWidth - 30;
       const pillY = headerStartY - headerHeight / 2 - pillHeight / 2;
 
-      page.drawRectangle({
+      currentPage.drawRectangle({
         x: pillX,
         y: pillY,
         width: pillWidth,
@@ -242,7 +240,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         borderRadius: pillHeight / 2,
       });
 
-      page.drawText(statusText, {
+      currentPage.drawText(statusText, {
         x: pillX + (pillWidth - statusTextWidth) / 2,
         y: pillY + (pillHeight - 10) / 2,
         font: boldFont,
@@ -269,10 +267,11 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         summaryLines.length * 14 +
         PADDING_V_SUMMARY_BOTTOM;
 
-      if (checkPageBreak(summaryHeight + 20)) y = height - margin;
+      currentPage = checkPageBreak(summaryHeight + 20);
+      if (currentPage !== page) y = currentPage.getHeight() - margin - 50;
       const summaryStartY = y;
 
-      page.drawRectangle({
+      currentPage.drawRectangle({
         x: margin,
         y: summaryStartY - summaryHeight,
         width: contentWidth,
@@ -283,7 +282,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       });
 
       y -= PADDING_V_SUMMARY_TOP + 10;
-      page.drawText(summaryTitle, {
+      currentPage.drawText(summaryTitle, {
         x: margin + 20,
         y,
         font: boldFont,
@@ -293,8 +292,9 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       y -= 25;
 
       for (const line of summaryLines) {
-        if (checkPageBreak(14)) y = height - margin;
-        page.drawText(line, {
+        currentPage = checkPageBreak(14);
+        if (currentPage !== page) y = currentPage.getHeight() - margin - 50;
+        currentPage.drawText(line, {
           x: margin + 20,
           y,
           font: font,
@@ -312,6 +312,11 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       );
 
       for (const item of filteredCriteria) {
+        const scoreText = `${item.score}/5`;
+        const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
+        const titleMaxWidth = contentWidth - 40 - scoreWidth - 10;
+        const titleLines = wrapText(item.criterion, boldFont, 12, titleMaxWidth);
+
         const assessmentLines = wrapText(
           item.assessment,
           font,
@@ -324,18 +329,19 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         const SPACE_BAR_TEXT = 15;
         const blockHeight =
           PADDING_V_BLOCK_TOP +
-          12 + // title height
+          (titleLines.length * 14) + // title height
           SPACE_TITLE_BAR +
           barHeight +
           SPACE_BAR_TEXT +
           assessmentLines.length * 14 +
           PADDING_V_BLOCK_BOTTOM;
 
-        if (checkPageBreak(blockHeight)) y = height - margin;
-
+        currentPage = checkPageBreak(blockHeight);
+        if (currentPage !== page) y = currentPage.getHeight() - margin - 50;
+        
         const startBlockY = y;
 
-        page.drawRectangle({
+        currentPage.drawRectangle({
           x: margin,
           y: startBlockY - blockHeight,
           width: contentWidth,
@@ -347,45 +353,49 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
 
         y -= PADDING_V_BLOCK_TOP;
 
-        // Draw title and score
-        y -= 12; // Height of title text
-        page.drawText(item.criterion, {
-          x: margin + 20,
-          y,
-          font: boldFont,
-          size: 12,
-          color: textPrimary,
-        });
-
+        const titleYStart = y;
+        
+        for (const line of titleLines) {
+          y -= 14;
+          currentPage = checkPageBreak(14);
+          if (currentPage !== page) y = currentPage.getHeight() - margin - 50;
+          currentPage.drawText(line, {
+            x: margin + 20,
+            y,
+            font: boldFont,
+            size: 12,
+            color: textPrimary,
+            lineHeight: 14,
+          });
+        }
+        
         const barColor =
           item.score >= 3 ? green : item.score >= 2 ? yellow : red;
 
-        const scoreText = `${item.score}/5`;
-        const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
-        page.drawText(scoreText, {
+        currentPage.drawText(scoreText, {
           x: width - margin - scoreWidth - 20,
-          y,
+          y: titleYStart - 12, // Align with the first line of the title
           font: boldFont,
           size: 12,
           color: barColor,
         });
-
+        
         y -= SPACE_TITLE_BAR;
-
-        // Draw progress bar
+        
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
-
+        
         y -= barHeight;
-        drawPill(margin + 20, y, barWidth, barHeight, barBg);
-        drawPill(margin + 20, y, filledWidth, barHeight, barColor);
+        drawPill(margin + 20, y, barWidth, barHeight, barBg, currentPage);
+        drawPill(margin + 20, y, filledWidth, barHeight, barColor, currentPage);
 
         y -= SPACE_BAR_TEXT;
 
         // Draw assessment text
         for (const line of assessmentLines) {
-          if (checkPageBreak(14)) y = height - margin;
-          page.drawText(line, {
+          currentPage = checkPageBreak(14);
+          if (currentPage !== page) y = currentPage.getHeight() - margin - 50;
+          currentPage.drawText(line, {
             x: margin + 20,
             y,
             font: font,
