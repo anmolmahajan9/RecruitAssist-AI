@@ -189,11 +189,11 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       });
 
       y -= 40;
-      page.drawText(candidate_name, {
+      page.drawText(`${candidate_name} - AI Interview Report`, {
         x: margin + 20,
         y,
         font: boldFont,
-        size: 30,
+        size: 16,
         color: textPrimary,
       });
       y -= 25;
@@ -258,7 +258,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       y = headerStartY - headerHeight - 20;
 
       // --- Draw Interview Summary ---
-      const summaryTitle = 'Interview Summary';
+      const summaryTitle = 'AI Interview Summary';
       const summaryLines = wrapText(
         interview_summary,
         font,
@@ -473,7 +473,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       <CardContent className="p-6 space-y-8">
         <div>
           <h3 className="text-2xl font-bold text-foreground mb-4">
-            Interview Summary
+            AI Interview Summary
           </h3>
           <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground whitespace-pre-line">
             {interview_summary}

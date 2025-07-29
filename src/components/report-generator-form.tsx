@@ -276,8 +276,8 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       return false;
     };
 
-    const textPrimary = rgb(0, 0, 0);
-    const textSecondary = rgb(0.3, 0.3, 0.3);
+    const textPrimary = rgb(0.1, 0.1, 0.1);
+    const textSecondary = rgb(0.4, 0.4, 0.4);
     const green = rgb(34 / 255, 197 / 255, 94 / 255);
     const red = rgb(239 / 255, 68 / 255, 68 / 255);
     const barBg = rgb(224 / 255, 224 / 255, 224 / 255);
@@ -309,7 +309,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     const headerStartY = y;
     page.drawRectangle({ x: margin, y: y - headerHeight, width: contentWidth, height: headerHeight, color: headerBgColor });
     y -= 40;
-    page.drawText(candidate_name, { x: margin + 20, y, font: boldFont, size: 30, color: textPrimary });
+    page.drawText(`${candidate_name} - AI Interview Report`, { x: margin + 20, y, font: boldFont, size: 16, color: textPrimary });
     y -= 25;
     if (client_name) {
       page.drawText(client_name, { x: margin + 20, y, font: boldFont, size: 14, color: textSecondary });
@@ -332,7 +332,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     page.drawText(statusText, { x: pillX + (pillWidth - statusTextWidth) / 2, y: pillY + (pillHeight - 10) / 2, font: boldFont, size: 12, color: status === 'pass' ? passPillText : failPillText });
     y = headerStartY - headerHeight - 20;
 
-    const summaryTitle = 'Interview Summary';
+    const summaryTitle = 'AI Interview Summary';
     const summaryLines = wrapText(interview_summary, font, 10, contentWidth - 40);
     const PADDING_V_SUMMARY = 20;
     const summaryHeight = PADDING_V_SUMMARY + 20 + 15 + summaryLines.length * 14 + PADDING_V_SUMMARY;
