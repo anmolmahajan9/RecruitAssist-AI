@@ -189,24 +189,28 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
 
   const watermarkPdf = async (pdfBytes: ArrayBuffer): Promise<Uint8Array> => {
     const pdfDoc = await PDFDocument.load(pdfBytes);
-    const response = await fetch(DEFAULT_LOGO_URL);
-    if (!response.ok) {
-      throw new Error(`Failed to load default logo: ${response.statusText}`);
-    }
-    const imageBytes = await response.arrayBuffer();
-    const watermarkImage = await pdfDoc.embedPng(imageBytes);
-    const pages = pdfDoc.getPages();
-
-    for (const page of pages) {
-      const { width, height } = page.getSize();
-      const logoDims = watermarkImage.scale(0.08);
-      page.drawImage(watermarkImage, {
-        x: width - logoDims.width - 20,
-        y: height - logoDims.height - 20,
-        width: logoDims.width,
-        height: logoDims.height,
-        opacity: 0.5,
-      });
+    try {
+      const response = await fetch(DEFAULT_LOGO_URL);
+      if (!response.ok) {
+        throw new Error(`Failed to load default logo: ${response.statusText}`);
+      }
+      const imageBytes = await response.arrayBuffer();
+      const watermarkImage = await pdfDoc.embedPng(imageBytes);
+      const pages = pdfDoc.getPages();
+  
+      for (const page of pages) {
+        const { width, height } = page.getSize();
+        const logoDims = watermarkImage.scale(0.08);
+        page.drawImage(watermarkImage, {
+          x: width - logoDims.width - 20,
+          y: height - logoDims.height - 20,
+          width: logoDims.width,
+          height: logoDims.height,
+          opacity: 1.0,
+        });
+      }
+    } catch (e) {
+      console.error("Could not apply watermark", e);
     }
     return pdfDoc.save();
   };
@@ -224,40 +228,50 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
 
     const pdfDoc = await PDFDocument.create();
     
+    let logoHeight = 0;
     const addWatermark = async (doc: PDFDocument) => {
-      const response = await fetch(DEFAULT_LOGO_URL);
-      if (!response.ok) {
-        throw new Error(`Failed to load default logo: ${response.statusText}`);
-      }
-      const imageBytes = await response.arrayBuffer();
-      const watermarkImage = await doc.embedPng(imageBytes);
-      const pages = doc.getPages();
-
-      for (const page of pages) {
-        const { width, height } = page.getSize();
-        const logoDims = watermarkImage.scale(0.08);
-        page.drawImage(watermarkImage, {
-          x: width - logoDims.width - 20,
-          y: height - logoDims.height - 20,
-          width: logoDims.width,
-          height: logoDims.height,
-          opacity: 0.5,
-        });
+      try {
+          const response = await fetch(DEFAULT_LOGO_URL);
+          if (!response.ok) {
+            console.error(`Failed to load default logo: ${response.statusText}`);
+            return;
+          }
+          const imageBytes = await response.arrayBuffer();
+          const watermarkImage = await doc.embedPng(imageBytes);
+          const pages = doc.getPages();
+          const logoDims = watermarkImage.scale(0.08);
+          logoHeight = logoDims.height;
+    
+          for (const page of pages) {
+            const { width, height } = page.getSize();
+            page.drawImage(watermarkImage, {
+              x: width - logoDims.width - 20,
+              y: height - logoDims.height - 20,
+              width: logoDims.width,
+              height: logoDims.height,
+              opacity: 1.0,
+            });
+          }
+      } catch(e) {
+          console.error("Error loading watermark image: ", e)
       }
     };
-
+    
     let page = pdfDoc.addPage();
+    await addWatermark(pdfDoc);
+
     const { width, height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const margin = 50;
     const contentWidth = width - margin * 2;
-    let y = height - margin - 50;
+    const initialY = height - margin - logoHeight - 30;
+    let y = initialY;
 
     const checkPageBreak = (spaceNeeded: number) => {
       if (y - spaceNeeded < margin) {
         page = pdfDoc.addPage();
-        y = height - margin - 50;
+        y = initialY;
         return true;
       }
       return false;
@@ -323,7 +337,9 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
     };
 
     const headerHeight = 120;
-    if (checkPageBreak(headerHeight + 20)) y = height - margin;
+    if (checkPageBreak(headerHeight + 20)) {
+        y = initialY;
+    }
     const headerStartY = y;
     page.drawRectangle({ x: margin, y: y - headerHeight, width: contentWidth, height: headerHeight, color: headerBgColor });
     y -= 40;
@@ -350,14 +366,18 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
     const summaryLines = wrapText(interview_summary, font, 10, contentWidth - 40);
     const PADDING_V_SUMMARY = 20;
     const summaryHeight = PADDING_V_SUMMARY + 20 + 15 + summaryLines.length * 14 + PADDING_V_SUMMARY;
-    if (checkPageBreak(summaryHeight + 20)) y = height - margin;
+    if (checkPageBreak(summaryHeight + 20)) {
+        y = initialY;
+    }
     const summaryStartY = y;
     page.drawRectangle({ x: margin, y: summaryStartY - summaryHeight, width: contentWidth, height: summaryHeight, borderColor: borderColor, borderWidth: 1, borderRadius: containerRadius });
     y -= PADDING_V_SUMMARY + 10;
     page.drawText(summaryTitle, { x: margin + 20, y, font: boldFont, size: 16, color: textPrimary });
     y -= 25;
     for (const line of summaryLines) {
-      if (checkPageBreak(14)) y = height - margin;
+      if (checkPageBreak(14)) {
+          y = initialY;
+      }
       page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary, lineHeight: 14 });
       y -= 14;
     }
@@ -375,7 +395,9 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
       const SPACE_TITLE_BAR = 12;
       const SPACE_BAR_TEXT = 12;
       const blockHeight = PADDING_V_BLOCK + (titleLines.length * 14) + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + assessmentLines.length * 14 + PADDING_V_BLOCK;
-      if (checkPageBreak(blockHeight)) y = height - margin;
+      if (checkPageBreak(blockHeight)) {
+          y = initialY;
+      }
       const startBlockY = y;
       page.drawRectangle({ x: margin, y: startBlockY - blockHeight, width: contentWidth, height: blockHeight, borderColor: borderColor, borderWidth: 1, borderRadius: containerRadius });
       y -= PADDING_V_BLOCK;
@@ -384,33 +406,42 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
       let currentTitleY = y;
       for (const line of titleLines) {
         if (checkPageBreak(14)) {
-            y = height-margin;
-            currentTitleY = y;
+            currentTitleY = initialY;
         };
-        currentTitleY -= 14;
         page.drawText(line, { x: margin + 20, y: currentTitleY, font: boldFont, size: 12, color: textPrimary, lineHeight: 14 });
+        currentTitleY -= 14;
       }
-      y = currentTitleY;
+      y = currentTitleY + 14;
+      
 
       const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
       
-      page.drawText(scoreText, { x: width - margin - scoreWidth - 20, y: titleYStart - 12, font: boldFont, size: 12, color: barColor });
+      page.drawText(scoreText, { x: width - margin - scoreWidth - 20, y: titleYStart, font: boldFont, size: 12, color: barColor });
       
-      y -= SPACE_TITLE_BAR;
+      y -= (titleLines.length * 14) + SPACE_TITLE_BAR;
+      
       const barWidth = contentWidth - 40;
       const filledWidth = (item.score / 5) * barWidth;
-      y -= barHeight;
+      
+      if (checkPageBreak(barHeight)) {
+          y = initialY;
+      }
       drawPill(margin + 20, y, barWidth, barHeight, barBg);
       drawPill(margin + 20, y, filledWidth, barHeight, barColor);
+      y -= barHeight;
+
       y -= SPACE_BAR_TEXT;
+
       for (const line of assessmentLines) {
-        if (checkPageBreak(14)) y = height - margin;
-        y -= 14;
+        if (checkPageBreak(14)) {
+            y = initialY;
+        }
         page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary, lineHeight: 14 });
+        y -= 14;
       }
       y = startBlockY - blockHeight - 20;
     }
-
+    
     await addWatermark(pdfDoc);
     return pdfDoc.save();
   };
