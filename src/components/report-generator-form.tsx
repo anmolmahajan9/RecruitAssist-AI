@@ -198,7 +198,6 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     const {
       candidate_name,
       interviewed_role,
-      client_name,
       overall_status,
       assessment_criteria,
       interview_summary,
@@ -311,10 +310,6 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     y -= 40;
     page.drawText(`${candidate_name} - AI Interview Report`, { x: margin + 20, y, font: boldFont, size: 16, color: textPrimary });
     y -= 25;
-    if (client_name) {
-      page.drawText(client_name, { x: margin + 20, y, font: boldFont, size: 14, color: textSecondary });
-      y -= 18;
-    }
     page.drawText(interviewed_role, { x: margin + 20, y, font: font, size: 14, color: textSecondary });
     const today = new Date();
     const month = today.toLocaleString('default', { month: 'short' });
