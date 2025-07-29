@@ -176,7 +176,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       };
 
       // --- Draw Header ---
-      const headerHeight = client_name ? 120 : 100;
+      const headerHeight = 120;
       if (checkPageBreak(headerHeight + 20)) y = height - margin;
       const headerStartY = y;
 
@@ -186,7 +186,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         width: contentWidth,
         height: headerHeight,
         color: headerBgColor,
-        // No border for this style
       });
 
       y -= 40;
@@ -209,6 +208,18 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         y -= 18;
       }
       page.drawText(interviewed_role, {
+        x: margin + 20,
+        y,
+        font: font,
+        size: 14,
+        color: textSecondary,
+      });
+      
+      const today = new Date();
+      const month = today.toLocaleString('default', { month: 'short' });
+      const currentDate = `${today.getDate()} ${month}, ${today.getFullYear()}`;
+      y -= 18;
+      page.drawText(currentDate, {
         x: margin + 20,
         y,
         font: font,
@@ -511,5 +522,3 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
     </Card>
   );
 }
-
-    

@@ -201,7 +201,6 @@ export function ReportGenerator() {
       candidate_name,
       interviewed_role,
       client_name,
-      interview_datetime,
       overall_status,
       assessment_criteria,
       interview_summary,
@@ -332,7 +331,7 @@ export function ReportGenerator() {
     };
 
     // --- Draw Header ---
-    const headerHeight = client_name ? 120 : 100;
+    const headerHeight = 120;
     if (checkPageBreak(headerHeight + 20)) y = height - margin;
     const headerStartY = y;
 
@@ -342,7 +341,6 @@ export function ReportGenerator() {
       width: contentWidth,
       height: headerHeight,
       color: headerBgColor,
-      // No border for this style
     });
 
     y -= 40;
@@ -371,6 +369,19 @@ export function ReportGenerator() {
       size: 14,
       color: textSecondary,
     });
+
+    const today = new Date();
+    const month = today.toLocaleString('default', { month: 'short' });
+    const currentDate = `${today.getDate()} ${month}, ${today.getFullYear()}`;
+    y -= 18;
+    page.drawText(currentDate, {
+      x: margin + 20,
+      y,
+      font: font,
+      size: 14,
+      color: textSecondary,
+    });
+
 
     const status = overall_status.toLowerCase();
     const statusText = overall_status;
@@ -699,5 +710,3 @@ export function ReportGenerator() {
     </Card>
   );
 }
-
-    
