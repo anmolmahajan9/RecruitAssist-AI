@@ -27,7 +27,7 @@ export default function NancyAiCallSummaryPage() {
     setAssessment(null);
 
     try {
-      const result = await assessInterview({ assessmentText: data.callAssessmentText });
+      const result = await assessInterview(data);
       setAssessment(result);
     } catch (err) {
       setError(

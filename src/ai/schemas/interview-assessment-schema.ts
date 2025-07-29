@@ -11,26 +11,25 @@ import { z } from 'zod';
 
 // Input Schema
 export const InterviewAssessmentInputSchema = z.object({
-  assessmentText: z
+  callAssessmentText: z
     .string()
     .describe('The full text of the call assessment, including scores and notes.'),
 });
 export type InterviewAssessmentInput = z.infer<typeof InterviewAssessmentInputSchema>;
 
-const SkillScoreSchema = z.object({
-  skill: z.string().describe('The name of the skill being assessed (e.g., "Technical Skills").'),
-  score: z.number().min(0).max(100).describe('The numerical score from 0 to 100.'),
-  rating: z.string().describe('The qualitative rating (e.g., "Excellent", "Good", "Poor").'),
+const AssessmentCriterionSchema = z.object({
+  criteria: z.string().describe('The name of the criterion being assessed.'),
+  assessment: z.string().describe("The positive assessment for the criterion."),
+  score: z.number().describe("The numerical score for the criterion.")
 });
 
 // Output Schema
 export const InterviewAssessmentOutputSchema = z.object({
-  candidateName: z.string().describe("The full name of the candidate."),
-  role: z.string().describe("The job role the candidate interviewed for."),
-  email: z.string().describe("The candidate's email address."),
-  interviewDate: z.string().describe("The date and time of the interview in 'DD MMM, YYYY HH:MM' format."),
-  overallStatus: z.enum(['Pass', 'Fail', 'Hold']).describe("The final interview outcome."),
-  scores: z.array(SkillScoreSchema).describe("An array of scores for different skills."),
-  summary: z.string().describe("A detailed summary of the candidate's performance, covering both strengths and weaknesses."),
+  candidate_name: z.string().describe("The full name of the candidate."),
+  interviewed_role: z.string().describe("The job role the candidate interviewed for."),
+  interview_datetime: z.string().describe("The date and time of the interview in 'DD MMM, YYYY HH:MM' format."),
+  assessment_criteria: z.array(AssessmentCriterionSchema).describe("An array of assessment criteria, scores, and positive feedback."),
+  interview_summary: z.string().describe("A comprehensive positive summary of the candidate's performance."),
+  overall_status: z.enum(['Pass', 'Fail']).describe("The final interview outcome."),
 });
 export type InterviewAssessmentOutput = z.infer<typeof InterviewAssessmentOutputSchema>;

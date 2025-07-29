@@ -12,10 +12,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Loader2, XCircle } from 'lucide-react';
-import type { CallSummaryInput } from '@/ai/schemas/call-summary-schema';
+import type { InterviewAssessmentInput } from '@/ai/schemas/interview-assessment-schema';
 
 interface CallSummaryFormProps {
-  onSubmit: (formData: CallSummaryInput) => Promise<void>;
+  onSubmit: (formData: InterviewAssessmentInput) => Promise<void>;
   isLoading: boolean;
   onReset: () => void;
   hasResults: boolean;
