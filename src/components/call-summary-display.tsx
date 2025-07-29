@@ -109,8 +109,12 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
           });
         }
       };
+      
+      let page = pdfDoc.getPage(0);
+      if (!page) {
+        page = pdfDoc.addPage();
+      }
 
-      let page = pdfDoc.addPage();
       const { width, height } = page.getSize();
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -197,16 +201,6 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         color: rgb(0,0,0),
       });
       y -= 25;
-      if (client_name) {
-        page.drawText(client_name, {
-          x: margin + 20,
-          y,
-          font: font,
-          size: 14,
-          color: textSecondary,
-        });
-        y -= 18;
-      }
       page.drawText(interviewed_role, {
         x: margin + 20,
         y,
@@ -299,7 +293,7 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
       y -= 25;
 
       for (const line of summaryLines) {
-        if (checkPageBreak(14)) y = height - margin - 50;
+        if (checkPageBreak(14)) y = height - margin;
         page.drawText(line, {
           x: margin + 20,
           y,
@@ -432,12 +426,6 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
               {candidate_name}
             </h2>
             <div className="flex flex-col mt-2 text-muted-foreground gap-1">
-              {client_name && (
-                <div className="flex items-center gap-2 font-semibold">
-                  <Building className="h-4 w-4" />
-                  <span>{client_name}</span>
-                </div>
-              )}
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span>{interviewed_role}</span>

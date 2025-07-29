@@ -216,7 +216,6 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     } = assessment;
 
     const pdfDoc = await PDFDocument.create();
-    pdfDoc.removePage(0);
 
     const addWatermark = async (doc: PDFDocument) => {
       const response = await fetch(DEFAULT_LOGO_URL);
@@ -240,14 +239,44 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       }
     };
 
-    let page = pdfDoc.addPage();
+    let page = pdfDoc.getPage(0);
+    if (!page) {
+       page = pdfDoc.addPage();
+    }
+    
     const { width, height } = page.getSize();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const margin = 50;
     const contentWidth = width - margin * 2;
-    let y = height - margin - 50;
+    let y = height - margin;
 
+    const checkPageBreak = (spaceNeeded: number) => {
+      if (y - spaceNeeded < margin) {
+        page = pdfDoc.addPage();
+        y = height - margin;
+        return true;
+      }
+      return false;
+    };
+
+    const textPrimary = rgb(0.1, 0.1, 0.1);
+    const textSecondary = rgb(0.4, 0.4, 0.4);
+    const green = rgb(34 / 255, 197 / 255, 94 / 255);
+    const red = rgb(239 / 255, 68 / 255, 68 / 255);
+    const barBg = rgb(224 / 255, 224 / 255, 224 / 255);
+    const borderColor = rgb(0.9, 0.9, 0.9);
+    const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
+    const headerBgColor = rgb(240 / 255, 248 / 255, 253 / 255);
+    const containerRadius = 8;
+    const barHeight = 6;
+    const passPillFill = rgb(217 / 255, 249 / 255, 230 / 255);
+    const passPillBorder = rgb(52 / 255, 211 / 255, 153 / 255);
+    const passPillText = rgb(5 / 255, 150 / 255, 105 / 255);
+    const failPillFill = rgb(255 / 255, 200 / 255, 200 / 255);
+    const failPillBorder = rgb(150 / 255, 30 / 255, 30 / 255);
+    const failPillText = rgb(100 / 255, 0 / 255, 0 / 255);
+    
     const wrapText = (
       text: string,
       font: PDFFont,
@@ -278,33 +307,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       }
       return lines;
     };
-
-    const checkPageBreak = (spaceNeeded: number) => {
-      if (y - spaceNeeded < margin) {
-        page = pdfDoc.addPage();
-        y = height - margin - 50;
-        return true;
-      }
-      return false;
-    };
-
-    const textPrimary = rgb(0.1, 0.1, 0.1);
-    const textSecondary = rgb(0.4, 0.4, 0.4);
-    const green = rgb(34 / 255, 197 / 255, 94 / 255);
-    const red = rgb(239 / 255, 68 / 255, 68 / 255);
-    const barBg = rgb(224 / 255, 224 / 255, 224 / 255);
-    const borderColor = rgb(0.9, 0.9, 0.9);
-    const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
-    const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
-    const containerRadius = 8;
-    const barHeight = 6;
-    const passPillFill = rgb(217 / 255, 249 / 255, 230 / 255);
-    const passPillBorder = rgb(52 / 255, 211 / 255, 153 / 255);
-    const passPillText = rgb(5 / 255, 150 / 255, 105 / 255);
-    const failPillFill = rgb(255 / 255, 200 / 255, 200 / 255);
-    const failPillBorder = rgb(150 / 255, 30 / 255, 30 / 255);
-    const failPillText = rgb(100 / 255, 0 / 255, 0 / 255);
-
+    
     const drawPill = (x: number, y: number, pillWidth: number, pillHeight: number, color: any) => {
       const radius = pillHeight / 2;
       if (pillWidth < pillHeight) {
@@ -351,7 +354,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     page.drawText(summaryTitle, { x: margin + 20, y, font: boldFont, size: 16, color: textPrimary });
     y -= 25;
     for (const line of summaryLines) {
-      if (checkPageBreak(14)) y = height - margin - 50;
+      if (checkPageBreak(14)) y = height - margin;
       page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary, lineHeight: 14 });
       y -= 14;
     }
@@ -364,7 +367,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       const SPACE_TITLE_BAR = 12;
       const SPACE_BAR_TEXT = 12;
       const blockHeight = PADDING_V_BLOCK + 12 + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + assessmentLines.length * 14 + PADDING_V_BLOCK;
-      if (checkPageBreak(blockHeight)) y = height - margin - 50;
+      if (checkPageBreak(blockHeight)) y = height - margin;
       const startBlockY = y;
       page.drawRectangle({ x: margin, y: startBlockY - blockHeight, width: contentWidth, height: blockHeight, borderColor: borderColor, borderWidth: 1, borderRadius: containerRadius });
       y -= PADDING_V_BLOCK;
@@ -382,9 +385,9 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       drawPill(margin + 20, y, filledWidth, barHeight, barColor);
       y -= SPACE_BAR_TEXT;
       for (const line of assessmentLines) {
-        if (checkPageBreak(14)) y = height - margin - 50;
-        y -= 14;
+        if (checkPageBreak(14)) y = height - margin;
         page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary, lineHeight: 14 });
+        y -= 14;
       }
       y = startBlockY - blockHeight - 20;
     }
