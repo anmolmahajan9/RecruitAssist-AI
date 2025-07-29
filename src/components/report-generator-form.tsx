@@ -23,6 +23,7 @@ import {
   Download,
   Combine,
   FileText,
+  Server,
 } from 'lucide-react';
 import {
   PDFDocument,
@@ -48,7 +49,7 @@ interface ReportGeneratorFormProps {
 export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onReset, isLoading, hasResults }: ReportGeneratorFormProps) {
   const [assessmentText, setAssessmentText] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [includeResume, setIncludeResume] = useState<'yes' | 'no'>('yes');
+  const [reportType, setReportType] = useState<'combined' | 'separate' | 'assessment_only'>('combined');
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -102,12 +103,24 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
   const handleReset = () => {
     setAssessmentText('');
     setResumeFile(null);
-    setIncludeResume('yes');
+    setReportType('combined');
     onReset();
   };
+  
+  const downloadPdf = (bytes: Uint8Array, fileName: string) => {
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    URL.revokeObjectURL(link.href);
+    document.body.removeChild(link);
+  };
+
 
   const handleProcessRequest = async () => {
-    if (!assessmentText || (includeResume === 'yes' && !resumeFile)) {
+    if (!assessmentText || (reportType !== 'assessment_only' && !resumeFile)) {
       setError('Please provide the assessment text and a resume PDF.');
       return;
     }
@@ -120,12 +133,20 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
         callAssessmentText: assessmentText,
       });
       setAssessment(assessmentResult);
+      
+      const candidateName = assessmentResult.candidate_name.replace(/\s+/g, '_');
+      const jobName = assessmentResult.interviewed_role.replace(/\s+/g, '_');
 
       const assessmentPdfBytes = await createAssessmentPdf(assessmentResult);
 
-      let finalPdfBytes: Uint8Array;
-
-      if (includeResume === 'yes' && resumeFile) {
+      if (reportType === 'assessment_only') {
+        downloadPdf(assessmentPdfBytes, `${candidateName}-${jobName}-Assessment.pdf`);
+      } else if (reportType === 'separate' && resumeFile) {
+         downloadPdf(assessmentPdfBytes, `${candidateName}-${jobName}-Assessment.pdf`);
+         const resumeBytes = await resumeFile.arrayBuffer();
+         const watermarkedResumeBytes = await watermarkPdf(resumeBytes);
+         downloadPdf(watermarkedResumeBytes, `${candidateName}-${jobName}-Resume.pdf`);
+      } else if (reportType === 'combined' && resumeFile) {
         const resumeBytes = await resumeFile.arrayBuffer();
         const watermarkedResumeBytes = await watermarkPdf(resumeBytes);
 
@@ -145,19 +166,10 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
         );
         resumePages.forEach((page) => combinedPdfDoc.addPage(page));
 
-        finalPdfBytes = await combinedPdfDoc.save();
-      } else {
-        finalPdfBytes = assessmentPdfBytes;
+        const finalPdfBytes = await combinedPdfDoc.save();
+        downloadPdf(finalPdfBytes, `${candidateName}-${jobName}-Report.pdf`);
       }
 
-      const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      const candidateName = assessmentResult.candidate_name.replace(/\s+/g, '_');
-      const jobName = assessmentResult.interviewed_role.replace(/\s+/g, '_');
-      link.download = `${candidateName}-${jobName}-suitable-ai.pdf`;
-      link.click();
-      URL.revokeObjectURL(link.href);
     } catch (err) {
       console.error(err);
       const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
@@ -204,6 +216,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     } = assessment;
 
     const pdfDoc = await PDFDocument.create();
+    pdfDoc.removePage(0);
 
     const addWatermark = async (doc: PDFDocument) => {
       const response = await fetch(DEFAULT_LOGO_URL);
@@ -380,6 +393,8 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     return pdfDoc.save();
   };
 
+  const isButtonDisabled = isLoading || !assessmentText || (reportType !== 'assessment_only' && !resumeFile);
+
   return (
     <Card>
       <CardHeader>
@@ -395,37 +410,54 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
         <div className="space-y-2">
           <Label className="font-semibold">1. Report Type</Label>
           <RadioGroup
-            value={includeResume}
-            onValueChange={(value) => setIncludeResume(value as 'yes' | 'no')}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            value={reportType}
+            onValueChange={(value) => setReportType(value as 'combined' | 'separate' | 'assessment_only')}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
           >
-            <Label htmlFor="r-yes">
+            <Label htmlFor="r-combined">
               <Card
                 className={cn(
                   'cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2',
-                  includeResume === 'yes'
+                  reportType === 'combined'
                     ? 'border-primary bg-primary/5'
                     : 'hover:border-primary/50'
                 )}
               >
-                <RadioGroupItem value="yes" id="r-yes" className="sr-only" />
+                <RadioGroupItem value="combined" id="r-combined" className="sr-only" />
                 <Combine className="w-10 h-10 mb-2 text-primary" />
-                <span className="font-semibold">Assessment + Resume</span>
+                <span className="font-semibold">Assessment + Resume (Combined)</span>
                 <span className="text-xs text-muted-foreground mt-1">
-                  Generates a full report.
+                  Generates a single report.
                 </span>
               </Card>
             </Label>
-            <Label htmlFor="r-no">
+             <Label htmlFor="r-separate">
               <Card
                 className={cn(
                   'cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2',
-                  includeResume === 'no'
+                  reportType === 'separate'
                     ? 'border-primary bg-primary/5'
                     : 'hover:border-primary/50'
                 )}
               >
-                <RadioGroupItem value="no" id="r-no" className="sr-only" />
+                <RadioGroupItem value="separate" id="r-separate" className="sr-only" />
+                <Server className="w-10 h-10 mb-2 text-primary" />
+                <span className="font-semibold">Assessment + Resume (Separate)</span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  Downloads two separate PDFs.
+                </span>
+              </Card>
+            </Label>
+            <Label htmlFor="r-assessment-only">
+              <Card
+                className={cn(
+                  'cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2',
+                  reportType === 'assessment_only'
+                    ? 'border-primary bg-primary/5'
+                    : 'hover:border-primary/50'
+                )}
+              >
+                <RadioGroupItem value="assessment_only" id="r-assessment-only" className="sr-only" />
                 <FileText className="w-10 h-10 mb-2 text-primary" />
                 <span className="font-semibold">Assessment Only</span>
                 <span className="text-xs text-muted-foreground mt-1">
@@ -451,7 +483,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
           />
         </div>
 
-        {includeResume === 'yes' && (
+        {reportType !== 'assessment_only' && (
           <div className="space-y-2">
             <Label htmlFor="resumeFile" className="font-semibold">
               3. Candidate Resume
@@ -498,9 +530,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       <CardFooter className="flex flex-col sm:flex-row gap-4">
         <Button
           onClick={handleProcessRequest}
-          disabled={
-            isLoading || !assessmentText || (includeResume === 'yes' && !resumeFile)
-          }
+          disabled={isButtonDisabled}
           className="w-full text-lg py-6 font-bold"
           size="lg"
         >
