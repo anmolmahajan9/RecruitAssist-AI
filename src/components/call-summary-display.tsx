@@ -2,9 +2,8 @@
 'use client';
 
 import type { InterviewAssessmentOutput } from '@/ai/schemas/interview-assessment-schema';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Video, Download, FileText, Star, User, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
@@ -42,6 +41,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
     overall_status,
     assessment_criteria,
     interview_summary,
+    call_recording_link,
   } = assessment;
 
   const [isPdfDownloading, setIsPdfDownloading] = useState(false);
@@ -81,7 +81,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         }
       }
       lines.push(currentLine);
-      lines.push(''); // Add a blank line for paragraph spacing
+      if (paragraphs.length > 1) {
+        lines.push(''); // Add a blank line for paragraph spacing
+      }
     }
     return lines;
   };
@@ -94,7 +96,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const { width, height } = page.getSize();
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-      const symbolFont = await pdfDoc.embedFont(StandardFonts.Symbol);
       const margin = 50;
       let y = height - margin;
 
@@ -163,6 +164,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       y -= 25;
       const summaryLines = wrapText(interview_summary, font, 10, width - margin * 2);
       for (const line of summaryLines) {
+        if (y < margin) {
+          page.addPage();
+          y = height - margin;
+        }
         page.drawText(line, { x: margin, y, font: font, size: 10, color: rgb(0.3, 0.3, 0.3) });
         y -= 14;
       }
@@ -172,6 +177,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       page.drawText('Detailed Assessment', { x: margin, y, font: boldFont, size: 16 });
       y -= 25;
       for (const item of assessment_criteria) {
+        if (y < margin + 60) {
+          page.addPage();
+          y = height - margin;
+        }
         page.drawText(item.criteria, { x: margin, y, font: boldFont, size: 12 });
         
         // Star Rating in PDF
@@ -192,6 +201,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         y -= 18;
         const assessmentLines = wrapText(item.assessment, font, 10, width - margin * 2);
         for (const line of assessmentLines) {
+          if (y < margin) {
+            page.addPage();
+            y = height - margin;
+          }
           page.drawText(line, { x: margin + 10, y, font: font, size: 10, color: rgb(0.3, 0.3, 0.3) });
           y -= 14;
         }
@@ -233,10 +246,12 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
              <div className={cn('px-4 py-1.5 rounded-full font-semibold text-sm border', statusColor, statusColorDark)}>
                 {overall_status}
              </div>
-             <Button variant="outline">
-                <Video className="mr-2 h-4 w-4" />
-                Listen to Call
-             </Button>
+             <a href={call_recording_link} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline">
+                    <Video className="mr-2 h-4 w-4" />
+                    Listen to Call
+                </Button>
+             </a>
           </div>
         </div>
       </CardHeader>
