@@ -97,8 +97,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         }
         return false;
       };
-
-      const headerBg = rgb(224 / 255, 239 / 255, 254 / 255);
+      
+      const headerBg = rgb(228 / 255, 241 / 255, 254 / 255);
       const textPrimary = rgb(0.1, 0.1, 0.1);
       const textSecondary = rgb(0.4, 0.4, 0.4);
       const green = rgb(34 / 255, 197 / 255, 94 / 255);
@@ -112,7 +112,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       // --- Draw Header ---
       const headerHeight = 90;
       if (checkPageBreak(headerHeight + 20)) y = height - margin;
-
+      
       const headerStartY = y;
 
       page.drawRectangle({
@@ -148,7 +148,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         size: 12,
         color: textSecondary,
       });
-
+      
       const status = overall_status.toLowerCase();
       const statusColorVal = status === 'pass' ? green : red;
       const statusText = overall_status;
@@ -176,6 +176,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       });
 
       y = headerStartY - headerHeight - 20;
+
 
       // --- Draw Interview Summary ---
       const summaryTitle = 'Interview Summary';
@@ -232,10 +233,9 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           10,
           contentWidth - 40
         );
-        const blockHeight =
-          20 + 20 + 6 + 10 + assessmentLines.length * 14 + 20; // top-pad + title/score + bar-h + bar-margin + text + bottom-pad
+        const blockHeight = 20 + 20 + 6 + 10 + assessmentLines.length * 14 + 20; // top-pad + title/score + bar-h + bar-margin + text + bottom-pad
         if (checkPageBreak(blockHeight + 20)) y = height - margin;
-
+        
         const startBlockY = y;
 
         page.drawRectangle({
@@ -269,17 +269,18 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         y -= 20;
 
         const barHeight = 6;
+        const barRadius = 3;
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
         const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
-
+        
         page.drawRectangle({
           x: margin + 20,
           y,
           width: barWidth,
           height: barHeight,
           color: barBg,
-          borderRadius: 3,
+          borderRadius: barRadius,
         });
         page.drawRectangle({
           x: margin + 20,
@@ -287,12 +288,12 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           width: filledWidth,
           height: barHeight,
           color: barColor,
-          borderRadius: 3,
+          borderRadius: barRadius,
         });
         y -= 10 + barHeight;
 
         for (const line of assessmentLines) {
-          if (checkPageBreak(14)) y = height - margin; // This is a fallback, shouldn't be needed with main block check
+          if (checkPageBreak(14)) y = height - margin; 
           page.drawText(line, {
             x: margin + 20,
             y,
