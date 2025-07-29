@@ -107,7 +107,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const white = rgb(1, 1, 1);
       const borderColor = rgb(0.9, 0.9, 0.9);
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
-      const containerRadius = 12;
+      const containerRadius = 20;
+      const barHeight = 6;
+      const barRadius = 6;
+
 
       // --- Draw Header ---
       const headerHeight = 90;
@@ -122,6 +125,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         height: headerHeight,
         color: headerBg,
         borderRadius: containerRadius,
+        borderColor: borderColor,
+        borderWidth: 1,
       });
 
       y -= 35;
@@ -268,8 +273,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         });
         y -= 20;
 
-        const barHeight = 6;
-        const barRadius = 3;
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
         const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
