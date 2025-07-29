@@ -398,7 +398,7 @@ export function ReportGenerator() {
       10,
       contentWidth - 40
     );
-    const summaryHeight = 20 + 20 + 5 + summaryLines.length * 14;
+    const summaryHeight = 20 + 20 + 5 + summaryLines.length * 14 + 15;
 
     if (checkPageBreak(summaryHeight + 20)) y = height - margin;
     const summaryStartY = y;
@@ -449,7 +449,7 @@ export function ReportGenerator() {
         10,
         contentWidth - 40
       );
-      const blockHeight = 20 + 15 + barHeight + 2 + assessmentLines.length * 14 + 15;
+      const blockHeight = 20 + 15 + barHeight + 8 + assessmentLines.length * 14 + 15;
 
       if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
@@ -494,7 +494,7 @@ export function ReportGenerator() {
       drawPill(margin + 20, y, barWidth, barHeight, barBg);
       drawPill(margin + 20, y, filledWidth, barHeight, barColor);
       
-      y -= (barHeight + 2);
+      y -= (barHeight + 8);
 
       for (const line of assessmentLines) {
         if (checkPageBreak(14)) y = height - margin - 50;
