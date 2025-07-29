@@ -152,7 +152,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         const radius = pillHeight / 2;
 
         if (pillWidth < pillHeight) {
-           page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+           if (pillWidth > 0) page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
            return;
         }
       
@@ -251,7 +251,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         10,
         contentWidth - 40
       );
-      const summaryHeight = 25 + 20 + summaryLines.length * 14 + 20;
+      const summaryHeight = 25 + 20 + summaryLines.length * 14;
 
       if (checkPageBreak(summaryHeight + 20)) y = height - margin;
       const summaryStartY = y;
@@ -303,7 +303,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           contentWidth - 40
         );
         const blockHeight =
-          20 + 20 + barHeight + 10 + assessmentLines.length * 14 + 20;
+          20 + 20 + barHeight + 10 + assessmentLines.length * 14;
         if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
         const startBlockY = y;
