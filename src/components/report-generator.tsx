@@ -332,7 +332,7 @@ export function ReportGenerator() {
     };
 
     // --- Draw Header ---
-    const headerHeight = 120;
+    const headerHeight = client_name ? 120 : 100;
     if (checkPageBreak(headerHeight + 20)) y = height - margin;
     const headerStartY = y;
 
@@ -365,14 +365,6 @@ export function ReportGenerator() {
       y -= 18;
     }
     page.drawText(interviewed_role, {
-      x: margin + 20,
-      y,
-      font: font,
-      size: 14,
-      color: textSecondary,
-    });
-    y -= 18;
-    page.drawText(interview_datetime, {
       x: margin + 20,
       y,
       font: font,
@@ -418,7 +410,13 @@ export function ReportGenerator() {
       10,
       contentWidth - 40
     );
-    const summaryHeight = 20 + 20 + 15 + summaryLines.length * 14 + 15;
+    const PADDING_V_SUMMARY = 20;
+    const summaryHeight =
+      PADDING_V_SUMMARY +
+      20 + // Title height and space
+      15 + // Space after title
+      summaryLines.length * 14 +
+      PADDING_V_SUMMARY;
 
     if (checkPageBreak(summaryHeight + 20)) y = height - margin;
     const summaryStartY = y;
@@ -433,7 +431,7 @@ export function ReportGenerator() {
       borderRadius: containerRadius,
     });
 
-    y -= 30; // Increased top padding
+    y -= PADDING_V_SUMMARY + 10;
     page.drawText(summaryTitle, {
       x: margin + 20,
       y,
@@ -441,7 +439,7 @@ export function ReportGenerator() {
       size: 16,
       color: textPrimary,
     });
-    y -= 25; // Increased space after title
+    y -= 25;
 
     for (const line of summaryLines) {
       if (checkPageBreak(14)) y = height - margin - 50;
@@ -469,17 +467,17 @@ export function ReportGenerator() {
         10,
         contentWidth - 40
       );
-      const PADDING_V = 20;
+      const PADDING_V_BLOCK = 20;
       const SPACE_TITLE_BAR = 12;
       const SPACE_BAR_TEXT = 12;
       const blockHeight =
-        PADDING_V +
-        12 +
+        PADDING_V_BLOCK +
+        12 + // title height
         SPACE_TITLE_BAR +
         barHeight +
         SPACE_BAR_TEXT +
         assessmentLines.length * 14 +
-        PADDING_V;
+        PADDING_V_BLOCK;
 
       if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
@@ -495,7 +493,7 @@ export function ReportGenerator() {
         borderRadius: containerRadius,
       });
 
-      y -= PADDING_V; // top padding
+      y -= PADDING_V_BLOCK; // top padding
 
       // Draw title and score
       y -= 12; // Height of title text
@@ -701,3 +699,5 @@ export function ReportGenerator() {
     </Card>
   );
 }
+
+    
