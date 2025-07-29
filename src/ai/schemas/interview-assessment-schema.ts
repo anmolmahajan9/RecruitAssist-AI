@@ -27,8 +27,9 @@ const AssessmentCriterionSchema = z.object({
 export const InterviewAssessmentOutputSchema = z.object({
   candidate_name: z.string().describe("The full name of the candidate."),
   interviewed_role: z.string().describe("The job role the candidate interviewed for."),
+  client_name: z.string().describe("The name of the client.").optional(),
   interview_datetime: z.string().describe("The date and time of the interview in 'DD MMM, YYYY HH:MM' format."),
-  call_recording_link: z.string().describe("The URL to the call recording."),
+  call_recording_link: z.string().describe("The URL to the call recording.").optional(),
   assessment_criteria: z.array(AssessmentCriterionSchema).describe("An array of assessment criteria, scores, and restructured positive feedback."),
   interview_summary: z.string().describe("A comprehensive summary of the candidate's performance, rephrased to be positive and without mentioning CTC or notice period."),
   overall_status: z.enum(['Pass', 'Fail']).describe("The final interview outcome."),

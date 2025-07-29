@@ -10,7 +10,7 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Video, Download, User, Calendar } from 'lucide-react';
+import { Video, Download, User, Calendar, Building } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PDFDocument, rgb, StandardFonts, PDFFont } from 'pdf-lib';
 import { useState } from 'react';
@@ -26,6 +26,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
   const {
     candidate_name,
     interviewed_role,
+    client_name,
     interview_datetime,
     overall_status,
     assessment_criteria,
@@ -172,7 +173,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       };
       
       // --- Draw Header ---
-      const headerHeight = 90;
+      const headerHeight = 110;
       if (checkPageBreak(headerHeight + 20)) y = height - margin;
       const headerStartY = y;
 
@@ -196,6 +197,16 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: textPrimary,
       });
       y -= 20;
+       if (client_name) {
+        page.drawText(client_name, {
+          x: margin + 20,
+          y,
+          font: boldFont,
+          size: 12,
+          color: textSecondary,
+        });
+        y -= 15;
+      }
       page.drawText(interviewed_role, {
         x: margin + 20,
         y,
@@ -402,6 +413,12 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
               {candidate_name}
             </h2>
             <div className="flex flex-col mt-2 text-muted-foreground gap-1">
+              {client_name && (
+                 <div className="flex items-center gap-2 font-semibold">
+                    <Building className="h-4 w-4" />
+                    <span>{client_name}</span>
+                  </div>
+              )}
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span>{interviewed_role}</span>

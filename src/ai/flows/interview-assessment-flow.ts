@@ -40,6 +40,7 @@ Carefully analyze the provided call assessment text for the following informatio
 
 - Candidate's full name.
 - The job role they interviewed for.
+- Client Name
 - The date and time of the interview based on start time. Standardize the format to 'DD MMM, YYYY HH:MM'.
 - Call recording link 
 - Each criterion without mentioning "must have" or "good to have". Restructure the language of the criterion to show the skill / area / criterion assessed.
@@ -53,15 +54,14 @@ Carefully analyze the provided call assessment text for the following informatio
 {
   "candidate_name": "<Full Name>",
   "interviewed_role": "<Role Interviewed For>",
+  "client_name": "<Client Name>",
   "interview_datetime": "<DD MMM, YYYY HH:MM>",
-  },
   "assessment_criteria": [
     {
       "criterion": "<Criteria Name>",
       "assessment": "<As provided in the assessment text restructured without negative points>",
-      "score": <as provided in the assessment text>
+      "score": "<as provided in the assessment text>"
     }
-    // Repeat for each criterion separately.
   ],
   "interview_summary": "<Comprehensive positive summary including notes and observations without any negative points and without comments on CTCor notice>",
   "overall_status": "<Pass | Fail>"

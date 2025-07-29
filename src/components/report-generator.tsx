@@ -189,6 +189,7 @@ export function ReportGenerator() {
     const {
       candidate_name,
       interviewed_role,
+      client_name,
       interview_datetime,
       overall_status,
       assessment_criteria,
@@ -318,9 +319,8 @@ export function ReportGenerator() {
         });
     };
     
-    // Header, Summary, and Assessment drawing logic follows...
     // --- Draw Header ---
-    const headerHeight = 90;
+    const headerHeight = 110;
     if (checkPageBreak(headerHeight + 20)) y = height - margin;
     const headerStartY = y;
 
@@ -344,6 +344,16 @@ export function ReportGenerator() {
       color: textPrimary,
     });
     y -= 20;
+    if (client_name) {
+      page.drawText(client_name, {
+        x: margin + 20,
+        y,
+        font: boldFont,
+        size: 12,
+        color: textSecondary,
+      });
+      y -= 15;
+    }
     page.drawText(interviewed_role, {
       x: margin + 20,
       y,
