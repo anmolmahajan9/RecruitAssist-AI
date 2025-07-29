@@ -27,7 +27,7 @@ const SkillScoreSchema = z.object({
 export const InterviewAssessmentOutputSchema = z.object({
   candidateName: z.string().describe("The full name of the candidate."),
   role: z.string().describe("The job role the candidate interviewed for."),
-  email: z.string().email().describe("The candidate's email address."),
+  email: z.string().describe("The candidate's email address."),
   interviewDate: z.string().describe("The date and time of the interview in 'DD MMM, YYYY HH:MM' format."),
   overallStatus: z.enum(['Pass', 'Fail', 'Hold']).describe("The final interview outcome."),
   scores: z.array(SkillScoreSchema).describe("An array of scores for different skills."),
