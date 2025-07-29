@@ -89,47 +89,37 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const contentWidth = width - margin * 2;
       let y = height - margin;
 
-      // Helper to add a new page if needed
       const checkPageBreak = (spaceNeeded: number) => {
         if (y - spaceNeeded < margin) {
           page = pdfDoc.addPage();
           y = height - margin;
+          return true;
         }
+        return false;
       };
 
-      // Define colors
-      const headerBg = rgb(239 / 255, 246 / 255, 255 / 255); // A light blue color, e.g., blue-50 from Tailwind
+      const headerBg = rgb(239 / 255, 246 / 255, 255 / 255); 
       const textPrimary = rgb(0.1, 0.1, 0.1);
       const textSecondary = rgb(0.4, 0.4, 0.4);
       const green = rgb(34 / 255, 197 / 255, 94 / 255);
       const red = rgb(239 / 255, 68 / 255, 68 / 255);
       const barBg = rgb(224 / 255, 224 / 255, 224 / 255);
       const white = rgb(1, 1, 1);
+      const borderColor = rgb(0.9, 0.9, 0.9);
 
-      // === 1. Header Section ===
       checkPageBreak(80);
       const headerHeight = 90;
-      page.drawRectangle({
-        x: 0,
-        y: height - headerHeight,
-        width,
-        height: headerHeight,
-        color: headerBg,
-      });
-
       y = height - 40;
       const status = overall_status.toLowerCase();
       const statusColorVal = status === 'pass' ? green : red;
       const statusCircleRadius = 25;
 
-      // Candidate Name, Role, Date
       page.drawText(candidate_name, { x: margin, y, font: boldFont, size: 24, color: textPrimary });
       y -= 20;
       page.drawText(interviewed_role, { x: margin, y, font: font, size: 12, color: textSecondary });
       y -= 15;
       page.drawText(`Interview Date: ${interview_datetime}`, { x: margin, y, font: font, size: 12, color: textSecondary });
 
-      // Status Circle
       const statusCircleX = width - margin - statusCircleRadius;
       const statusCircleY = height - 65;
       page.drawCircle({ x: statusCircleX, y: statusCircleY, size: statusCircleRadius, color: statusColorVal });
@@ -144,9 +134,8 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         color: white,
       });
       
-      y = height - headerHeight - 40; // Reset y to be below the header
+      y = height - headerHeight - 40;
 
-      // === 2. Interview Summary Section ===
       checkPageBreak(40);
       page.drawText('Interview Summary', { x: margin, y, font: boldFont, size: 16, color: textPrimary });
       y -= 25;
@@ -158,45 +147,56 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       }
       y -= 20;
 
-      // === 3. Detailed Assessment Section ===
       checkPageBreak(40);
       page.drawText('Detailed Assessment', { x: margin, y, font: boldFont, size: 16, color: textPrimary });
-      y -= 30;
+      y -= 10;
 
       for (const item of assessment_criteria) {
-        checkPageBreak(100);
+        y -= 20; // Space before container
+        const assessmentLines = wrapText(item.assessment, font, 10, contentWidth - 30);
+        const blockHeight = 40 + assessmentLines.length * 14 + 30; // Title+Score + Text + Bar + Padding
 
-        // Criteria Title and Score
-        page.drawText(item.criteria, { x: margin, y, font: boldFont, size: 12, color: textPrimary });
+        if (checkPageBreak(blockHeight)) {
+           page.drawText('Detailed Assessment (Continued)', { x: margin, y, font: boldFont, size: 16, color: textPrimary });
+           y -= 30;
+        }
+
+        const startBlockY = y;
+        
+        y -= 20; // top padding
+        page.drawText(item.criteria, { x: margin + 15, y, font: boldFont, size: 12, color: textPrimary });
         const scoreText = `${item.score}/5`;
         const scoreWidth = boldFont.widthOfTextAtSize(scoreText, 12);
-        page.drawText(scoreText, { x: width - margin - scoreWidth, y, font: boldFont, size: 12, color: textPrimary });
+        page.drawText(scoreText, { x: width - margin - scoreWidth - 15, y, font: boldFont, size: 12, color: textPrimary });
         y -= 20;
 
-        // Score Bar
-        const barHeight = 8;
-        const barWidth = contentWidth;
-        const filledWidth = (item.score / 5) * barWidth;
-        const barColor = item.score >= 4 ? green : item.score >= 3 ? rgb(253 / 255, 186 / 255, 116 / 255) : red;
-
-        page.drawRectangle({ x: margin, y, width: barWidth, height: barHeight, color: barBg, });
-        page.drawRectangle({ x: margin, y, width: filledWidth, height: barHeight, color: barColor });
-        y -= 25;
-
-        // Assessment Text
-        const assessmentLines = wrapText(item.assessment, font, 10, contentWidth);
         for (const line of assessmentLines) {
-          checkPageBreak(14);
-          page.drawText(line, {
-            x: margin,
-            y,
-            font: font,
-            size: 10,
-            color: textSecondary,
-          });
+          page.drawText(line, { x: margin + 15, y, font: font, size: 10, color: textSecondary });
           y -= 14;
         }
-        y -= 25; // Space after each criteria block
+        y -= 10;
+
+        const barHeight = 8;
+        const barWidth = contentWidth - 30;
+        const filledWidth = (item.score / 5) * barWidth;
+        const barColor = item.score >= 3 ? green : red;
+
+        page.drawRectangle({ x: margin + 15, y, width: barWidth, height: barHeight, color: barBg, });
+        page.drawRectangle({ x: margin + 15, y, width: filledWidth, height: barHeight, color: barColor });
+        y -= 20; // bottom padding
+        
+        const endBlockY = y;
+        const calculatedHeight = startBlockY - endBlockY;
+
+        page.drawRectangle({
+          x: margin,
+          y: endBlockY,
+          width: contentWidth,
+          height: calculatedHeight,
+          borderColor: borderColor,
+          borderWidth: 1,
+          borderRadius: 8
+        });
       }
 
       const pdfBytes = await pdfDoc.save();
