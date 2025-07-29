@@ -31,25 +31,24 @@ import {
   StandardFonts,
   PDFFont,
 } from 'pdf-lib';
-import { assessInterview } from '@/ai/flows/interview-assessment-flow';
 import type { InterviewAssessmentOutput } from '@/ai/schemas/interview-assessment-schema';
 import { cn } from '@/lib/utils';
 
 const DEFAULT_LOGO_URL = 'https://recruitassist-ai-knbnk.web.app/logo.png';
 
 interface ReportGeneratorFormProps {
-    setAssessment: (assessment: InterviewAssessmentOutput | null) => void;
-    setIsLoading: (isLoading: boolean) => void;
-    setError: (error: string | null) => void;
+    onGenerate: (assessmentText: string) => Promise<InterviewAssessmentOutput | null>;
     onReset: () => void;
     isLoading: boolean;
     hasResults: boolean;
 }
 
-export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onReset, isLoading, hasResults }: ReportGeneratorFormProps) {
+export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults }: ReportGeneratorFormProps) {
   const [assessmentText, setAssessmentText] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [reportType, setReportType] = useState<'combined' | 'separate' | 'assessment_only'>('combined');
+  const [isProcessingPdf, setIsProcessingPdf] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -104,6 +103,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     setAssessmentText('');
     setResumeFile(null);
     setReportType('combined');
+    setError(null);
     onReset();
   };
   
@@ -124,16 +124,18 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       setError('Please provide the assessment text and a resume PDF.');
       return;
     }
-    setIsLoading(true);
     setError(null);
-    setAssessment(null);
+
+    // Call the parent to handle AI processing
+    const assessmentResult = await onGenerate(assessmentText);
+    if (!assessmentResult) {
+        // Error is already set by the parent component
+        return;
+    }
+    
+    setIsProcessingPdf(true);
 
     try {
-      const assessmentResult = await assessInterview({
-        callAssessmentText: assessmentText,
-      });
-      setAssessment(assessmentResult);
-      
       const candidateName = assessmentResult.candidate_name.replace(/\s+/g, '_');
       const jobName = assessmentResult.interviewed_role.replace(/\s+/g, '_');
 
@@ -169,14 +171,12 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
         const finalPdfBytes = await combinedPdfDoc.save();
         downloadPdf(finalPdfBytes, `${candidateName}-${jobName}-Report.pdf`);
       }
-
     } catch (err) {
       console.error(err);
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred during PDF generation.';
       setError(errorMessage);
-      setAssessment(null);
     } finally {
-      setIsLoading(false);
+      setIsProcessingPdf(false);
     }
   };
 
@@ -216,7 +216,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     } = assessment;
 
     const pdfDoc = await PDFDocument.create();
-
+    
     const addWatermark = async (doc: PDFDocument) => {
       const response = await fetch(DEFAULT_LOGO_URL);
       if (!response.ok) {
@@ -374,11 +374,16 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       y -= PADDING_V_BLOCK;
       
       const titleYStart = y;
+      let currentTitleY = y;
       for (const line of titleLines) {
-        y -= 14;
-        if (checkPageBreak(14)) y = height - margin;
-        page.drawText(line, { x: margin + 20, y, font: boldFont, size: 12, color: textPrimary, lineHeight: 14 });
+        if (checkPageBreak(14)) {
+            y = height-margin;
+            currentTitleY = y;
+        };
+        currentTitleY -= 14;
+        page.drawText(line, { x: margin + 20, y: currentTitleY, font: boldFont, size: 12, color: textPrimary, lineHeight: 14 });
       }
+      y = currentTitleY;
 
       const barColor = item.score >= 3 ? green : item.score >= 2 ? yellow : red;
       
@@ -393,8 +398,8 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
       y -= SPACE_BAR_TEXT;
       for (const line of assessmentLines) {
         if (checkPageBreak(14)) y = height - margin;
-        page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary, lineHeight: 14 });
         y -= 14;
+        page.drawText(line, { x: margin + 20, y, font: font, size: 10, color: textSecondary, lineHeight: 14 });
       }
       y = startBlockY - blockHeight - 20;
     }
@@ -403,7 +408,7 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
     return pdfDoc.save();
   };
 
-  const isButtonDisabled = isLoading || !assessmentText || (reportType !== 'assessment_only' && !resumeFile);
+  const isButtonDisabled = isLoading || isProcessingPdf || !assessmentText || (reportType !== 'assessment_only' && !resumeFile);
 
   return (
     <Card>
@@ -536,6 +541,9 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
             </div>
           </div>
         )}
+        {error && (
+          <p className="text-sm text-destructive text-center">{error}</p>
+        )}
       </CardContent>
       <CardFooter className="flex flex-col sm:flex-row gap-4">
         <Button
@@ -544,14 +552,14 @@ export function ReportGeneratorForm({ setAssessment, setIsLoading, setError, onR
           className="w-full text-lg py-6 font-bold"
           size="lg"
         >
-          {isLoading ? (
+          {isLoading || isProcessingPdf ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           ) : (
             <Download className="mr-2 h-5 w-5" />
           )}
-          {isLoading ? 'Generating Report...' : 'Generate and Download'}
+          {isLoading ? 'Running AI...' : isProcessingPdf ? 'Generating PDF...' : 'Generate and Download'}
         </Button>
-        {hasResults && (
+        {(hasResults || assessmentText || resumeFile) && (
         <Button
           type="button"
           variant="outline"

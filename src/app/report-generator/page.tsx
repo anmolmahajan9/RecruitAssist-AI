@@ -8,13 +8,42 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { ReportGeneratorForm } from '@/components/report-generator-form';
 import { CallSummaryDisplay } from '@/components/call-summary-display';
-import type { InterviewAssessmentOutput } from '@/ai/schemas/interview-assessment-schema';
+import {
+  type InterviewAssessmentInput,
+  type InterviewAssessmentOutput,
+} from '@/ai/schemas/interview-assessment-schema';
+import { assessInterview } from '@/ai/flows/interview-assessment-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function ReportGeneratorPage() {
   const [assessment, setAssessment] = useState<InterviewAssessmentOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleGenerate = async (
+    assessmentText: string
+  ): Promise<InterviewAssessmentOutput | null> => {
+    setIsLoading(true);
+    setError(null);
+    setAssessment(null);
+
+    try {
+      const input: InterviewAssessmentInput = { callAssessmentText: assessmentText };
+      const result = await assessInterview(input);
+      setAssessment(result);
+      return result;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
+      setAssessment(null);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleReset = () => {
     setAssessment(null);
@@ -52,15 +81,13 @@ export default function ReportGeneratorPage() {
         </div>
       </header>
       <ReportGeneratorForm
-        setAssessment={setAssessment}
-        setIsLoading={setIsLoading}
-        setError={setError}
+        onGenerate={handleGenerate}
         onReset={handleReset}
         isLoading={isLoading}
         hasResults={!!assessment || !!error}
       />
 
-      {error && (
+      {error && !isLoading && (
         <Card className="mt-8 bg-destructive/10 border-destructive text-destructive-foreground">
           <CardHeader>
             <CardTitle>An Error Occurred</CardTitle>
@@ -71,7 +98,7 @@ export default function ReportGeneratorPage() {
         </Card>
       )}
 
-      {assessment && !error && (
+      {assessment && !error && !isLoading && (
         <div className="mt-8">
           <CallSummaryDisplay assessment={assessment} showFooter={false} />
         </div>
