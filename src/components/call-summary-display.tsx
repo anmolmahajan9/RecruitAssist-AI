@@ -128,7 +128,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
       const green = rgb(34 / 255, 197 / 255, 94 / 255);
       const red = rgb(239 / 255, 68 / 255, 68 / 255);
       const barBg = rgb(224 / 255, 224 / 255, 224 / 255);
-      const white = rgb(1, 1, 1);
       const borderColor = rgb(0.9, 0.9, 0.9);
       const yellow = rgb(253 / 255, 186 / 255, 116 / 255);
       const headerBgColor = rgb(220 / 255, 237 / 255, 248 / 255);
@@ -266,7 +265,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         borderRadius: containerRadius,
       });
 
-      y -= 25;
+      y -= 30; // Increased top padding
       page.drawText(summaryTitle, {
         x: margin + 20,
         y,
@@ -274,7 +273,7 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
         size: 16,
         color: textPrimary,
       });
-      y -= 20;
+      y -= 25; // Increased space after title
 
       for (const line of summaryLines) {
         if (checkPageBreak(14)) y = height - margin - 50;
@@ -302,7 +301,11 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           10,
           contentWidth - 40
         );
-        const blockHeight = 20 + 15 + barHeight + 8 + assessmentLines.length * 14 + 15;
+        const PADDING_V = 20;
+        const SPACE_TITLE_BAR = 12;
+        const SPACE_BAR_TEXT = 12;
+
+        const blockHeight = PADDING_V + 12 + SPACE_TITLE_BAR + barHeight + SPACE_BAR_TEXT + (assessmentLines.length * 14) + PADDING_V;
 
         if (checkPageBreak(blockHeight)) y = height - margin - 50;
 
@@ -318,7 +321,10 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           borderRadius: containerRadius,
         });
 
-        y -= 20; // top padding
+        y -= PADDING_V; // top padding
+        
+        // Draw title and score
+        y -= 12; // Height of title text
         page.drawText(item.criterion, {
           x: margin + 20,
           y,
@@ -339,18 +345,23 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
           size: 12,
           color: barColor,
         });
-        y -= 15;
-
+        
+        y -= SPACE_TITLE_BAR;
+        
+        // Draw progress bar
         const barWidth = contentWidth - 40;
         const filledWidth = (item.score / 5) * barWidth;
         
+        y -= barHeight;
         drawPill(margin + 20, y, barWidth, barHeight, barBg);
         drawPill(margin + 20, y, filledWidth, barHeight, barColor);
         
-        y -= (barHeight + 8);
+        y -= SPACE_BAR_TEXT;
 
+        // Draw assessment text
         for (const line of assessmentLines) {
           if (checkPageBreak(14)) y = height - margin - 50;
+          y -= 14;
           page.drawText(line, {
             x: margin + 20,
             y,
@@ -359,7 +370,6 @@ export function CallSummaryDisplay({ assessment }: CallSummaryDisplayProps) {
             color: textSecondary,
             lineHeight: 14,
           });
-          y -= 14;
         }
         y = startBlockY - blockHeight - 20;
       }
