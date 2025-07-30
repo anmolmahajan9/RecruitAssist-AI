@@ -159,25 +159,24 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         y: number,
         pillWidth: number,
         pillHeight: number,
-        color: any,
-        currentPage: any
+        color: any
       ) => {
         const radius = pillHeight / 2;
 
         if (pillWidth < pillHeight) {
           if (pillWidth > 0)
-            currentPage.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+            page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
           return;
         }
 
-        currentPage.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
-        currentPage.drawCircle({
+        page.drawCircle({ x: x + radius, y: y + radius, size: radius, color });
+        page.drawCircle({
           x: x + pillWidth - radius,
           y: y + radius,
           size: radius,
           color,
         });
-        currentPage.drawRectangle({
+        page.drawRectangle({
           x: x + radius,
           y: y,
           width: pillWidth - 2 * radius,
@@ -339,8 +338,8 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         );
         const PADDING_V_BLOCK_TOP = 20;
         const PADDING_V_BLOCK_BOTTOM = 20;
-        const SPACE_TITLE_BAR = 15;
-        const SPACE_BAR_TEXT = 15;
+        const SPACE_TITLE_BAR = 12;
+        const SPACE_BAR_TEXT = 12;
         const blockHeight =
           PADDING_V_BLOCK_TOP +
           (titleLines.length * 14) + // title height
@@ -403,8 +402,8 @@ export function CallSummaryDisplay({ assessment, showFooter = true }: CallSummar
         const filledWidth = (item.score / 5) * barWidth;
         
         y -= barHeight;
-        drawPill(margin + 20, y, barWidth, barHeight, barBg, page);
-        drawPill(margin + 20, y, filledWidth, barHeight, barColor, page);
+        drawPill(margin + 20, y, barWidth, barHeight, barBg);
+        drawPill(margin + 20, y, filledWidth, barHeight, barColor);
 
         y -= SPACE_BAR_TEXT;
 
