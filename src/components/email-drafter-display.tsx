@@ -15,37 +15,50 @@ interface EmailDrafterDisplayProps {
 }
 
 export function EmailDrafterDisplay({ result, onRefine, isRefining }: EmailDrafterDisplayProps) {
-  const [copied, setCopied] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [tableCopied, setTableCopied] = useState(false);
   const [instructions, setInstructions] = useState('');
   const emailBodyRef = useRef<HTMLDivElement>(null);
 
   if (!result) return null;
 
-  const handleCopy = () => {
-    // Create a temporary element to hold the HTML
+  const handleCopy = (type: 'email' | 'table') => {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = result.emailBody;
-    document.body.appendChild(tempDiv);
+
+    let contentToCopy: HTMLElement | null = tempDiv;
+    if (type === 'table') {
+      contentToCopy = tempDiv.querySelector('table');
+    }
+
+    if (!contentToCopy) {
+      console.error('Could not find content to copy.');
+      return;
+    }
+
+    document.body.appendChild(contentToCopy);
 
     try {
-      // Select the content of the temporary element
       const range = document.createRange();
-      range.selectNodeContents(tempDiv);
+      range.selectNodeContents(contentToCopy);
       const selection = window.getSelection();
       selection?.removeAllRanges();
       selection?.addRange(range);
 
-      // Execute the copy command
       const successful = document.execCommand('copy');
       if (successful) {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        if (type === 'email') {
+          setEmailCopied(true);
+          setTimeout(() => setEmailCopied(false), 2000);
+        } else {
+          setTableCopied(true);
+          setTimeout(() => setTableCopied(false), 2000);
+        }
       }
     } catch (err) {
-      console.error('Failed to copy HTML: ', err);
+      console.error('Failed to copy: ', err);
     } finally {
-      // Clean up the temporary element and clear the selection
-      document.body.removeChild(tempDiv);
+      document.body.removeChild(contentToCopy);
       window.getSelection()?.removeAllRanges();
     }
   };
@@ -56,24 +69,39 @@ export function EmailDrafterDisplay({ result, onRefine, isRefining }: EmailDraft
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between pb-2 gap-2">
         <CardTitle className="text-2xl font-bold flex items-center gap-3">
           <MailCheck className="w-7 h-7 text-primary" />
           Generated Email
         </CardTitle>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCopy}
-          className="text-sm"
-        >
-          {copied ? (
-            <Check className="mr-2 h-4 w-4 text-green-500" />
-          ) : (
-            <Copy className="mr-2 h-4 w-4" />
-          )}
-          {copied ? 'Copied!' : 'Copy Email'}
-        </Button>
+        <div className="flex items-center gap-2">
+           <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleCopy('table')}
+            className="text-sm"
+          >
+            {tableCopied ? (
+              <Check className="mr-2 h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="mr-2 h-4 w-4" />
+            )}
+            {tableCopied ? 'Copied!' : 'Copy Table'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleCopy('email')}
+            className="text-sm"
+          >
+            {emailCopied ? (
+              <Check className="mr-2 h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="mr-2 h-4 w-4" />
+            )}
+            {emailCopied ? 'Copied!' : 'Copy Email'}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="overflow-x-auto p-4 border-b">
         <div
