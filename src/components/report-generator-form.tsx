@@ -130,7 +130,7 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
     // Log the usage
     await logQuery('reportGenerator', {
       reportType,
-      assessmentText,
+      input: { assessmentText },
     });
 
     // Call the parent to handle AI processing
