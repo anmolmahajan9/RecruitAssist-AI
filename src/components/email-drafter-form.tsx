@@ -47,11 +47,16 @@ export function EmailDrafterForm({
   const [tablePreview, setTablePreview] = useState('');
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState('');
+  const [hasPreviewBeenRun, setHasPreviewBeenRun] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    if (name === 'requiredColumns') {
+      setHasPreviewBeenRun(false); // Reset preview status when columns change
+      setTablePreview(''); // Clear old preview
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -70,6 +75,7 @@ export function EmailDrafterForm({
     });
     setTablePreview('');
     setPreviewError('');
+    setHasPreviewBeenRun(false);
     onReset();
   };
 
@@ -87,6 +93,7 @@ export function EmailDrafterForm({
         ...prev,
         requiredColumns: result.formattedColumns,
       }));
+      setHasPreviewBeenRun(true); // Mark preview as successful
     } catch (err) {
       setPreviewError(
         err instanceof Error ? err.message : 'Failed to generate preview.'
@@ -95,6 +102,9 @@ export function EmailDrafterForm({
       setIsPreviewLoading(false);
     }
   };
+
+  const isDraftDisabled = isLoading || !formData.candidateDetails || (!!formData.requiredColumns && !hasPreviewBeenRun);
+
 
   return (
     <Card>
@@ -154,53 +164,55 @@ export function EmailDrafterForm({
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 p-4 border rounded-lg bg-secondary/30">
             <Label htmlFor="requiredColumns" className="font-semibold">
               Required Columns (Optional)
             </Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="requiredColumns"
-                name="requiredColumns"
-                placeholder="e.g., Candidate, Experience, Availability, Key Skills"
-                value={formData.requiredColumns}
-                onChange={handleInputChange}
-                className="flex-grow"
-              />
-              <Button
-                type="button"
-                onClick={handlePreview}
-                disabled={!formData.requiredColumns || isPreviewLoading}
-                variant="outline"
-              >
-                {isPreviewLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-                <span className="ml-2 hidden sm:inline">Preview</span>
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Enter a comma-separated list of column headers for the output
-              table. Preview to auto-format.
+            <Input
+              id="requiredColumns"
+              name="requiredColumns"
+              placeholder="e.g., Candidate, Experience, Availability, Key Skills"
+              value={formData.requiredColumns}
+              onChange={handleInputChange}
+              className="flex-grow"
+            />
+            <p className="text-xs text-muted-foreground pt-1">
+              If you specify columns, you must click Preview before drafting the email.
             </p>
-          </div>
 
-          {previewError && (
-            <p className="text-sm text-destructive">{previewError}</p>
-          )}
-          {tablePreview && (
-            <div className="p-4 border rounded-lg bg-background">
-              <h4 className="font-semibold text-muted-foreground mb-2">
-                Column Preview:
-              </h4>
-              <div
-                className="overflow-x-auto"
-                dangerouslySetInnerHTML={{ __html: tablePreview }}
-              />
-            </div>
-          )}
+            {formData.requiredColumns && (
+                <div className="pt-2">
+                    <Button
+                      type="button"
+                      onClick={handlePreview}
+                      disabled={!formData.requiredColumns || isPreviewLoading}
+                      className="w-full sm:w-auto"
+                    >
+                      {isPreviewLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Eye className="mr-2 h-4 w-4" />
+                      )}
+                      {isPreviewLoading ? 'Generating...' : 'Preview & Format Columns'}
+                    </Button>
+                </div>
+            )}
+            
+            {previewError && (
+              <p className="text-sm text-destructive pt-2">{previewError}</p>
+            )}
+            {tablePreview && (
+              <div className="pt-4">
+                <h4 className="font-semibold text-muted-foreground mb-2">
+                  Column Preview:
+                </h4>
+                <div
+                  className="overflow-x-auto p-4 border rounded-lg bg-background"
+                  dangerouslySetInnerHTML={{ __html: tablePreview }}
+                />
+              </div>
+            )}
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="instructions" className="font-semibold">
@@ -219,7 +231,7 @@ export function EmailDrafterForm({
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               type="submit"
-              disabled={isLoading || !formData.candidateDetails}
+              disabled={isDraftDisabled}
               className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
               size="lg"
             >
