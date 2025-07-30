@@ -12,8 +12,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Loader2, XCircle } from 'lucide-react';
+import { Loader2, XCircle, Eye } from 'lucide-react';
 import type { EmailDrafterInput } from '@/ai/schemas/email-drafter-schema';
+import { generateTablePreview } from '@/ai/flows/table-preview-flow';
 
 interface EmailDrafterFormProps {
   onSubmit: (formData: EmailDrafterInput) => Promise<void>;
@@ -40,6 +41,10 @@ export function EmailDrafterForm({
 }: EmailDrafterFormProps) {
   const [unstructuredText, setUnstructuredText] = useState('');
   const [requiredColumns, setRequiredColumns] = useState('');
+  const [tablePreview, setTablePreview] = useState('');
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState('');
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +54,25 @@ export function EmailDrafterForm({
   const handleReset = () => {
     setUnstructuredText('');
     setRequiredColumns('');
+    setTablePreview('');
+    setPreviewError('');
     onReset();
   };
+  
+  const handlePreview = async () => {
+    if (!requiredColumns) return;
+    setIsPreviewLoading(true);
+    setPreviewError('');
+    setTablePreview('');
+    try {
+      const result = await generateTablePreview({ requiredColumns });
+      setTablePreview(result.htmlTable);
+    } catch(err) {
+       setPreviewError(err instanceof Error ? err.message : 'Failed to generate preview.');
+    } finally {
+        setIsPreviewLoading(false);
+    }
+  }
 
   return (
     <Card>
@@ -83,17 +105,33 @@ export function EmailDrafterForm({
             <Label htmlFor="requiredColumns" className="font-semibold">
               Required Columns (Optional)
             </Label>
-            <Input
-              id="requiredColumns"
-              name="requiredColumns"
-              placeholder="e.g., Candidate, Experience, Availability, Key Skills"
-              value={requiredColumns}
-              onChange={(e) => setRequiredColumns(e.target.value)}
-            />
+            <div className="flex items-center gap-2">
+                <Input
+                  id="requiredColumns"
+                  name="requiredColumns"
+                  placeholder="e.g., Candidate, Experience, Availability, Key Skills"
+                  value={requiredColumns}
+                  onChange={(e) => setRequiredColumns(e.target.value)}
+                  className="flex-grow"
+                />
+                <Button type="button" onClick={handlePreview} disabled={!requiredColumns || isPreviewLoading}>
+                    {isPreviewLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : <Eye className="h-4 w-4" />}
+                    <span className="ml-2">Preview</span>
+                </Button>
+            </div>
              <p className="text-xs text-muted-foreground">
               Enter a comma-separated list of column headers in the order you want them to appear.
             </p>
           </div>
+          
+          {previewError && <p className="text-sm text-destructive">{previewError}</p>}
+          {tablePreview && (
+            <div className="p-4 border rounded-lg bg-background">
+                <h4 className="font-semibold text-muted-foreground mb-2">Column Preview:</h4>
+                <div dangerouslySetInnerHTML={{ __html: tablePreview }} />
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               type="submit"
