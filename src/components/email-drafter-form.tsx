@@ -107,7 +107,7 @@ export function EmailDrafterForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="clientPocName" className="font-semibold">
-                Client POC Name
+                Client POC Name <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="clientPocName"
@@ -120,7 +120,7 @@ export function EmailDrafterForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="jobRole" className="font-semibold">
-                Job Role
+                Job Role <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="jobRole"
@@ -135,7 +135,7 @@ export function EmailDrafterForm({
 
           <div className="space-y-2">
             <Label htmlFor="candidateDetails" className="font-semibold">
-              Candidate Details
+              Candidate Details <span className="text-destructive">*</span>
             </Label>
             <Textarea
               id="candidateDetails"
