@@ -47,7 +47,7 @@ interface ReportGeneratorFormProps {
 export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults, logQuery }: ReportGeneratorFormProps) {
   const [assessmentText, setAssessmentText] = useState('');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [reportType, setReportType] = useState<'combined' | 'separate' | 'assessment_only'>('combined');
+  const [reportType, setReportType] = useState<'combined' | 'separate' | 'assessment_only'>('separate');
   const [isProcessingPdf, setIsProcessingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -103,7 +103,7 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
   const handleReset = () => {
     setAssessmentText('');
     setResumeFile(null);
-    setReportType('combined');
+    setReportType('separate');
     setError(null);
     onReset();
   };
@@ -473,23 +473,6 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
             onValueChange={(value) => setReportType(value as 'combined' | 'separate' | 'assessment_only')}
             className="grid grid-cols-1 sm:grid-cols-3 gap-4"
           >
-            <Label htmlFor="r-combined">
-              <Card
-                className={cn(
-                  'cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2',
-                  reportType === 'combined'
-                    ? 'border-primary bg-primary/5'
-                    : 'hover:border-primary/50'
-                )}
-              >
-                <RadioGroupItem value="combined" id="r-combined" className="sr-only" />
-                <Combine className="w-10 h-10 mb-2 text-primary" />
-                <span className="font-semibold">Assessment + Resume (Combined)</span>
-                <span className="text-xs text-muted-foreground mt-1">
-                  Generates a single report.
-                </span>
-              </Card>
-            </Label>
              <Label htmlFor="r-separate">
               <Card
                 className={cn(
@@ -504,6 +487,23 @@ export function ReportGeneratorForm({ onGenerate, onReset, isLoading, hasResults
                 <span className="font-semibold">Assessment + Resume (Separate)</span>
                 <span className="text-xs text-muted-foreground mt-1">
                   Downloads two separate PDFs.
+                </span>
+              </Card>
+            </Label>
+            <Label htmlFor="r-combined">
+              <Card
+                className={cn(
+                  'cursor-pointer h-full p-4 flex flex-col items-center justify-center text-center transition-colors border-2',
+                  reportType === 'combined'
+                    ? 'border-primary bg-primary/5'
+                    : 'hover:border-primary/50'
+                )}
+              >
+                <RadioGroupItem value="combined" id="r-combined" className="sr-only" />
+                <Combine className="w-10 h-10 mb-2 text-primary" />
+                <span className="font-semibold">Assessment + Resume (Combined)</span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  Generates a single report.
                 </span>
               </Card>
             </Label>
