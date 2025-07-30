@@ -27,15 +27,25 @@ const emailDrafterPrompt = ai.definePrompt({
   model: googleAI.model('gemini-1.5-flash-latest'),
   input: { schema: EmailDrafterInputSchema },
   output: { schema: EmailDrafterOutputSchema },
-  prompt: `## Role and Objective
+  prompt: `## Role and 
 You are a recruitment consultant writing a professional HTML email to a client for candidate submission.
 
-## 
-You will be given a block of unstructured text that contains a candidate table, and may also contain the client's name, job title, name of attachments and other instructions related to the email. Along with this you may or may not be given an ordered list columns required in the candidate table. 
+## Inputs
 
-Your task is to identify the candidate table from the unstructured text and construct a full HTML email body around it.
+## **Required Columns:** This is an ordered list columns required in the candidate table. This order needs to be maintained in the final output. No change is permitted in this, even if there is repetition of columns. 
+{{{requiredColumns}}}
 
-**Instructions for Output:**
+## **Unstructured Input:**
+{{{unstructuredText}}}
+
+Unstructured text will contains a candidate table, and may also contain the client's name, job title, name of attachments and other instructions related to drafting of the email. 
+
+
+## Task
+1. Identify the required columns and their order for the final candidate table in the final email. This order needs to be maintained in the final output. No change is permitted in this, even if there is repetition of columns. If required columns are not separately mentioned then use the default columns of the candidate details in unstructured input.
+2. Construct a full HTML email body along with the final candidate details table.
+
+## **Instructions for Output:**
 
 1.  The entire output must be a single HTML string in the 'emailBody' field.
 2.  **Wrap the entire email body in a single \`<div>\` with inline CSS to set the font to Arial, size 10pt (e.g., \`<div style="font-family: Arial, sans-serif; font-size: 10pt;">...\`**
@@ -49,12 +59,6 @@ Your task is to identify the candidate table from the unstructured text and cons
 10.  Insert the formatted HTML table.
 11. After the table, write a short closing line (e.g., "<p>Looking forward to your feedback.</p>").
 12. Maintain a polite and business-friendly tone.
-
-## **Required Columns:**
-{{{requiredColumns}}}
-
-## **Unstructured Input:**
-{{{unstructuredText}}}
 `,
 });
 
