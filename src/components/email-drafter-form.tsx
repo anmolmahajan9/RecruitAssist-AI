@@ -23,11 +23,7 @@ interface EmailDrafterFormProps {
   hasResults: boolean;
 }
 
-const placeholderText = `Client: Ravi
-Role: Senior Frontend Developer
-Comments: Combine both tables
-
-Candidate | Experience | Availability
+const placeholderText = `Candidate | Experience | Availability
 --- | --- | ---
 John Doe | 8 Years | Next Monday
 Jane Smith | 6 Years | Immediate
@@ -39,40 +35,61 @@ export function EmailDrafterForm({
   onReset,
   hasResults,
 }: EmailDrafterFormProps) {
-  const [unstructuredText, setUnstructuredText] = useState('');
-  const [requiredColumns, setRequiredColumns] = useState('');
+  const [formData, setFormData] = useState<EmailDrafterInput>({
+    clientPocName: '',
+    jobRole: '',
+    candidateDetails: '',
+    requiredColumns: '',
+    instructions: '',
+  });
+
   const [tablePreview, setTablePreview] = useState('');
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState('');
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ unstructuredText, requiredColumns });
+    onSubmit(formData);
   };
 
   const handleReset = () => {
-    setUnstructuredText('');
-    setRequiredColumns('');
+    setFormData({
+      clientPocName: '',
+      jobRole: '',
+      candidateDetails: '',
+      requiredColumns: '',
+      instructions: '',
+    });
     setTablePreview('');
     setPreviewError('');
     onReset();
   };
-  
+
   const handlePreview = async () => {
-    if (!requiredColumns) return;
+    if (!formData.requiredColumns) return;
     setIsPreviewLoading(true);
     setPreviewError('');
     setTablePreview('');
     try {
-      const result = await generateTablePreview({ requiredColumns });
+      const result = await generateTablePreview({
+        requiredColumns: formData.requiredColumns,
+      });
       setTablePreview(result.htmlTable);
-    } catch(err) {
-       setPreviewError(err instanceof Error ? err.message : 'Failed to generate preview.');
+    } catch (err) {
+      setPreviewError(
+        err instanceof Error ? err.message : 'Failed to generate preview.'
+      );
     } finally {
-        setIsPreviewLoading(false);
+      setIsPreviewLoading(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -81,61 +98,129 @@ export function EmailDrafterForm({
           Enter Submission Details
         </CardTitle>
         <CardDescription>
-          Paste the client name, role, and candidate table below. The AI will
-          generate the email text around your table.
+          Provide the client, role, and candidate details. The AI will
+          construct the email.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="clientPocName" className="font-semibold">
+                Client POC Name
+              </Label>
+              <Input
+                id="clientPocName"
+                name="clientPocName"
+                placeholder="e.g., Ravi"
+                value={formData.clientPocName}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="jobRole" className="font-semibold">
+                Job Role
+              </Label>
+              <Input
+                id="jobRole"
+                name="jobRole"
+                placeholder="e.g., Senior Frontend Developer"
+                value={formData.jobRole}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="unstructuredText" className="font-semibold">
-              Submission Details
+            <Label htmlFor="candidateDetails" className="font-semibold">
+              Candidate Details
             </Label>
             <Textarea
-              id="unstructuredText"
-              name="unstructuredText"
+              id="candidateDetails"
+              name="candidateDetails"
               placeholder={placeholderText}
-              value={unstructuredText}
-              onChange={(e) => setUnstructuredText(e.target.value)}
+              value={formData.candidateDetails}
+              onChange={handleInputChange}
               required
-              className="min-h-[250px] font-mono text-sm"
+              className="min-h-[200px] font-mono text-sm"
             />
+            <p className="text-xs text-muted-foreground">
+              Paste the candidate data here, ideally in a markdown table format.
+            </p>
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="requiredColumns" className="font-semibold">
               Required Columns (Optional)
             </Label>
             <div className="flex items-center gap-2">
-                <Input
-                  id="requiredColumns"
-                  name="requiredColumns"
-                  placeholder="e.g., Candidate, Experience, Availability, Key Skills"
-                  value={requiredColumns}
-                  onChange={(e) => setRequiredColumns(e.target.value)}
-                  className="flex-grow"
-                />
-                <Button type="button" onClick={handlePreview} disabled={!requiredColumns || isPreviewLoading}>
-                    {isPreviewLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : <Eye className="h-4 w-4" />}
-                    <span className="ml-2">Preview</span>
-                </Button>
+              <Input
+                id="requiredColumns"
+                name="requiredColumns"
+                placeholder="e.g., Candidate, Experience, Availability, Key Skills"
+                value={formData.requiredColumns}
+                onChange={handleInputChange}
+                className="flex-grow"
+              />
+              <Button
+                type="button"
+                onClick={handlePreview}
+                disabled={!formData.requiredColumns || isPreviewLoading}
+              >
+                {isPreviewLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+                <span className="ml-2 hidden sm:inline">Preview</span>
+              </Button>
             </div>
-             <p className="text-xs text-muted-foreground">
-              Enter a comma-separated list of column headers in the order you want them to appear.
+            <p className="text-xs text-muted-foreground">
+              Enter a comma-separated list of column headers for the output
+              table.
             </p>
           </div>
-          
-          {previewError && <p className="text-sm text-destructive">{previewError}</p>}
+
+          {previewError && (
+            <p className="text-sm text-destructive">{previewError}</p>
+          )}
           {tablePreview && (
             <div className="p-4 border rounded-lg bg-background">
-                <h4 className="font-semibold text-muted-foreground mb-2">Column Preview:</h4>
-                <div dangerouslySetInnerHTML={{ __html: tablePreview }} />
+              <h4 className="font-semibold text-muted-foreground mb-2">
+                Column Preview:
+              </h4>
+              <div
+                className="overflow-x-auto"
+                dangerouslySetInnerHTML={{ __html: tablePreview }}
+              />
             </div>
           )}
+          
+          <div className="space-y-2">
+            <Label htmlFor="instructions" className="font-semibold">
+              Additional Instructions (Optional)
+            </Label>
+            <Textarea
+              id="instructions"
+              name="instructions"
+              placeholder="e.g., 'Combine the two tables provided' or 'Mention that resumes are attached separately'"
+              value={formData.instructions}
+              onChange={handleInputChange}
+              className="min-h-[100px]"
+            />
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               type="submit"
-              disabled={isLoading || !unstructuredText}
+              disabled={
+                isLoading ||
+                !formData.clientPocName ||
+                !formData.jobRole ||
+                !formData.candidateDetails
+              }
               className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
               size="lg"
             >

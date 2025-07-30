@@ -11,15 +11,23 @@ import { z } from 'zod';
 
 // Input Schema
 export const EmailDrafterInputSchema = z.object({
-  unstructuredText: z
+  clientPocName: z.string().describe('The name of the client contact person.'),
+  jobRole: z.string().describe('The job title the candidates are being submitted for.'),
+  candidateDetails: z
     .string()
     .describe(
-      'The unstructured text containing the candidate table, and optionally the client name and role name.'
+      'The core candidate information, typically in a table or list format.'
     ),
   requiredColumns: z
     .string()
     .optional()
-    .describe('An optional string of comma-separated column headers.'),
+    .describe(
+      'An optional string of comma-separated column headers for the output table.'
+    ),
+  instructions: z
+    .string()
+    .optional()
+    .describe('Any additional instructions for drafting the email.'),
 });
 export type EmailDrafterInput = z.infer<typeof EmailDrafterInputSchema>;
 

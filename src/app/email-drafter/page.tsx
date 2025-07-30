@@ -7,9 +7,7 @@ import {
   type EmailDrafterInput,
   type EmailDrafterOutput,
 } from '@/ai/schemas/email-drafter-schema';
-import {
-  type EmailRefinerInput,
-} from '@/ai/schemas/email-refiner-schema';
+import { type EmailRefinerInput } from '@/ai/schemas/email-refiner-schema';
 import { draftEmail } from '@/ai/flows/email-drafter-flow';
 import { refineEmail } from '@/ai/flows/email-refiner-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -20,7 +18,9 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function EmailDrafterPage() {
   const [result, setResult] = useState<EmailDrafterOutput | null>(null);
-  const [initialInput, setInitialInput] = useState<EmailDrafterInput | null>(null);
+  const [initialInput, setInitialInput] = useState<EmailDrafterInput | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,14 +47,14 @@ export default function EmailDrafterPage() {
 
   const handleRefineSubmit = async (newInstructions: string) => {
     if (!initialInput || !result) return;
-    
+
     setIsRefining(true);
     setError(null);
-    
+
     const refinerInput: EmailRefinerInput = {
-        originalInput: initialInput,
-        previousEmailBody: result.emailBody,
-        newInstructions,
+      originalInput: initialInput,
+      previousEmailBody: result.emailBody,
+      newInstructions,
     };
 
     try {
@@ -70,7 +70,6 @@ export default function EmailDrafterPage() {
       setIsRefining(false);
     }
   };
-
 
   const handleReset = () => {
     setResult(null);

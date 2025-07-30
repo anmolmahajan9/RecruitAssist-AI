@@ -8,13 +8,20 @@
  */
 
 import { z } from 'zod';
-import { EmailDrafterInputSchema, EmailDrafterOutputSchema } from './email-drafter-schema';
-export { EmailDrafterOutputSchema, type EmailDrafterOutput } from './email-drafter-schema';
-
+import {
+  EmailDrafterInputSchema,
+  EmailDrafterOutputSchema,
+} from './email-drafter-schema';
+export {
+  EmailDrafterOutputSchema,
+  type EmailDrafterOutput,
+} from './email-drafter-schema';
 
 // Input Schema for the refinement flow
 export const EmailRefinerInputSchema = z.object({
-  originalInput: EmailDrafterInputSchema.describe("The original input that generated the first draft."),
+  originalInput: EmailDrafterInputSchema.describe(
+    'The original input that generated the first draft.'
+  ),
   previousEmailBody: z
     .string()
     .describe('The full HTML body of the previously generated email.'),
