@@ -1,17 +1,22 @@
 'use client';
 
 import type { EmailDrafterOutput } from '@/ai/schemas/email-drafter-schema';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, MailCheck } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Copy, Check, MailCheck, Wand2, Loader2 } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 interface EmailDrafterDisplayProps {
   result: EmailDrafterOutput;
+  onRefine: (newInstructions: string) => Promise<void>;
+  isRefining: boolean;
 }
 
-export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
+export function EmailDrafterDisplay({ result, onRefine, isRefining }: EmailDrafterDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const [instructions, setInstructions] = useState('');
   const emailBodyRef = useRef<HTMLDivElement>(null);
 
   if (!result) return null;
@@ -44,7 +49,10 @@ export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
       window.getSelection()?.removeAllRanges();
     }
   };
-
+  
+  const handleRefineClick = () => {
+    onRefine(instructions);
+  }
 
   return (
     <Card>
@@ -67,12 +75,42 @@ export function EmailDrafterDisplay({ result }: EmailDrafterDisplayProps) {
           {copied ? 'Copied!' : 'Copy Email'}
         </Button>
       </CardHeader>
-      <CardContent className="overflow-x-auto p-4">
+      <CardContent className="overflow-x-auto p-4 border-b">
         <div
           ref={emailBodyRef}
           dangerouslySetInnerHTML={{ __html: result.emailBody }}
         />
       </CardContent>
+       <CardFooter className="p-6 bg-secondary/30">
+        <div className="w-full space-y-4">
+          <div>
+            <Label htmlFor="refine-instructions" className="text-base font-bold flex items-center gap-2 mb-2">
+              <Wand2 className="w-5 h-5 text-primary" />
+              Need changes?
+            </Label>
+            <Textarea
+              id="refine-instructions"
+              placeholder="e.g., 'Make the tone more formal' or 'Change the closing to Best Regards'"
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          <Button
+            onClick={handleRefineClick}
+            disabled={isRefining || !instructions}
+            className="w-full"
+            size="lg"
+          >
+            {isRefining ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <Wand2 className="mr-2 h-5 w-5" />
+            )}
+            {isRefining ? 'Refining...' : 'Refine Email'}
+          </Button>
+        </div>
+      </CardFooter>
     </Card>
   );
 }

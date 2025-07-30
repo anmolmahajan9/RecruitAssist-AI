@@ -7,7 +7,11 @@ import {
   type EmailDrafterInput,
   type EmailDrafterOutput,
 } from '@/ai/schemas/email-drafter-schema';
+import {
+  type EmailRefinerInput,
+} from '@/ai/schemas/email-refiner-schema';
 import { draftEmail } from '@/ai/flows/email-drafter-flow';
+import { refineEmail } from '@/ai/flows/email-refiner-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
@@ -16,13 +20,16 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function EmailDrafterPage() {
   const [result, setResult] = useState<EmailDrafterOutput | null>(null);
+  const [initialInput, setInitialInput] = useState<EmailDrafterInput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefining, setIsRefining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleFormSubmit = async (data: EmailDrafterInput) => {
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setInitialInput(data);
 
     try {
       const response = await draftEmail(data);
@@ -38,10 +45,39 @@ export default function EmailDrafterPage() {
     }
   };
 
+  const handleRefineSubmit = async (newInstructions: string) => {
+    if (!initialInput || !result) return;
+    
+    setIsRefining(true);
+    setError(null);
+    
+    const refinerInput: EmailRefinerInput = {
+        originalInput: initialInput,
+        previousEmailBody: result.emailBody,
+        newInstructions,
+    };
+
+    try {
+      const response = await refineEmail(refinerInput);
+      setResult(response);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred during refinement. Please try again.'
+      );
+    } finally {
+      setIsRefining(false);
+    }
+  };
+
+
   const handleReset = () => {
     setResult(null);
     setError(null);
     setIsLoading(false);
+    setIsRefining(false);
+    setInitialInput(null);
   };
 
   return (
@@ -94,7 +130,11 @@ export default function EmailDrafterPage() {
 
       {result && (
         <div className="mt-8">
-          <EmailDrafterDisplay result={result} />
+          <EmailDrafterDisplay
+            result={result}
+            onRefine={handleRefineSubmit}
+            isRefining={isRefining}
+          />
         </div>
       )}
     </div>
