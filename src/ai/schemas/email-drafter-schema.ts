@@ -16,6 +16,10 @@ export const EmailDrafterInputSchema = z.object({
     .describe(
       'The unstructured text containing the candidate table, and optionally the client name and role name.'
     ),
+  requiredColumns: z
+    .string()
+    .optional()
+    .describe('An optional string of comma-separated column headers.'),
 });
 export type EmailDrafterInput = z.infer<typeof EmailDrafterInputSchema>;
 

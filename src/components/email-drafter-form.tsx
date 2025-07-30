@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import {
@@ -38,14 +39,16 @@ export function EmailDrafterForm({
   hasResults,
 }: EmailDrafterFormProps) {
   const [unstructuredText, setUnstructuredText] = useState('');
+  const [requiredColumns, setRequiredColumns] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ unstructuredText });
+    onSubmit({ unstructuredText, requiredColumns });
   };
 
   const handleReset = () => {
     setUnstructuredText('');
+    setRequiredColumns('');
     onReset();
   };
 
@@ -75,6 +78,21 @@ export function EmailDrafterForm({
               required
               className="min-h-[250px] font-mono text-sm"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="requiredColumns" className="font-semibold">
+              Required Columns (Optional)
+            </Label>
+            <Input
+              id="requiredColumns"
+              name="requiredColumns"
+              placeholder="e.g., Candidate, Experience, Availability, Key Skills"
+              value={requiredColumns}
+              onChange={(e) => setRequiredColumns(e.target.value)}
+            />
+             <p className="text-xs text-muted-foreground">
+              Enter a comma-separated list of column headers in the order you want them to appear.
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
