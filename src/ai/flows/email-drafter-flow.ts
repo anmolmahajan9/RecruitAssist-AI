@@ -52,13 +52,18 @@ You are a recruitment consultant writing a professional HTML email to a client f
 2.  **Wrap the entire email body in a single \`<div>\` with inline CSS to set the font to Arial, size 10pt (e.g., \`<div style="font-family: Arial, sans-serif; font-size: 10pt;">...\`**
 3.  Use the provided 'Client POC Name' and 'Job Role'. If they seem like placeholders in the input, use generic placeholders like "[Client Name]" or "[Role Name]" in the output and highlight them with a yellow background.
 4.  Wrap all sentences and paragraphs in <p> tags to preserve line breaks. Use one line space between most lines.
-5.  Convert the candidate table from the 'Candidate Details' input into a proper HTML table (i.e., use <table>, <thead>, <tbody>, <tr>, <th>, and <td> tags). Ensure the table has a border (e.g., style="border: 1px solid black; border-collapse: collapse;") and cells have padding and a border (e.g., style="border: 1px solid black; padding: 8px;"). The table header cells (<th>) should have a light blue background color (#88d7e2). All candidate details in the table should be reproduced verbatim as is in the required columns, no candidate detail should be changed.
-6.  Start with a greeting (e.g., "<p>Hi {{{clientPocName}}},</p>").
-7.  Add a professional opening line (e.g., "<p>Hope you’re doing well.</p>").
-8.  State the purpose: submitting candidates for the role (e.g., "<p>Please find below the candidate details for the {{{jobRole}}} position for your review.</p>").
-9.  Insert the formatted HTML table.
-10. After the table, write a short closing line (e.g., "<p>Looking forward to your feedback.</p>").
-11. Maintain a polite and business-friendly tone.
+5.  Convert the candidate table from the 'Candidate Details' input into a proper HTML table.
+6.  To ensure the table works in Microsoft Outlook, use the following structure and styles:
+    -   **Table Tag:** Use \`<table border="1" cellspacing="0" cellpadding="8" style="border-collapse: collapse; border: 1px solid black;">\`
+    -   **Header Cells (th):** Use \`<th style="border: 1px solid black; padding: 8px; background-color: #88d7e2; white-space: nowrap;">\`
+    -   **Data Cells (td):** Use \`<td style="border: 1px solid black; padding: 8px; white-space: normal; word-break: keep-all;">\`
+    -   Ensure all candidate details in the table are reproduced verbatim as is in the required columns, no candidate detail should be changed.
+7.  Start with a greeting (e.g., "<p>Hi {{{clientPocName}}},</p>").
+8.  Add a professional opening line (e.g., "<p>Hope you’re doing well.</p>").
+9.  State the purpose: submitting candidates for the role (e.g., "<p>Please find below the candidate details for the {{{jobRole}}} position for your review.</p>").
+10. Insert the formatted HTML table.
+11. After the table, write a short closing line (e.g., "<p>Looking forward to your feedback.</p>").
+12. Maintain a polite and business-friendly tone.
 `,
 });
 

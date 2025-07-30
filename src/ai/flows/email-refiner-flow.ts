@@ -35,7 +35,7 @@ You are an expert editor for a recruitment consultant. Your task is to revise a 
 ### Original User Input
 This was the original, unstructured text provided by the user to generate the first draft.
 \`\`\`
-{{{originalInput.unstructuredText}}}
+{{{originalInput.candidateDetails}}}
 \`\`\`
 
 ### Required Columns (from original request)
@@ -58,7 +58,10 @@ Modify the "Previous HTML Email" based on the "New Instructions" below.
 ## Important Rules
 1.  **Preserve HTML Structure:** Your entire output must be a single HTML string in the 'emailBody' field. Adhere strictly to the original HTML structure (e.g., \`<div style="font-family: Arial, sans-serif; font-size: 10pt;">\`, \`<table>\`, etc.).
 2.  **Apply Changes:** Carefully apply the user's "New Instructions" to the content and structure of the email.
-3.  **Maintain Styling:** Ensure the final HTML has the correct inline styles for the main div, table, cells, and headers as specified in the original email creation. Table headers (\`<th>\`) must have a light blue background (\`#88d7e2\`).
+3.  **Maintain Styling:** Ensure the final HTML has the correct inline styles for the main div, table, cells, and headers as specified in the original email creation. 
+    -   **Table Tag:** Use \`<table border="1" cellspacing="0" cellpadding="8" style="border-collapse: collapse; border: 1px solid black;">\`
+    -   **Header Cells (th):** Use \`<th style="border: 1px solid black; padding: 8px; background-color: #88d7e2; white-space: nowrap;">\`
+    -   **Data Cells (td):** Use \`<td style="border: 1px solid black; padding: 8px; white-space: normal; word-break: keep-all;">\`
 4.  **Reproduce Data Verbatim:** Do not alter candidate data in the table unless explicitly told to do so by the new instructions.
 `,
 });
