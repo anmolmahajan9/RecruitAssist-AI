@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -111,7 +112,7 @@ export function EmailDrafterForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="clientPocName" className="font-semibold">
-                Client POC Name <span className="text-destructive">*</span>
+                Client POC Name
               </Label>
               <Input
                 id="clientPocName"
@@ -119,12 +120,11 @@ export function EmailDrafterForm({
                 placeholder="e.g., Ravi"
                 value={formData.clientPocName}
                 onChange={handleInputChange}
-                required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="jobRole" className="font-semibold">
-                Job Role <span className="text-destructive">*</span>
+                Job Role
               </Label>
               <Input
                 id="jobRole"
@@ -132,7 +132,6 @@ export function EmailDrafterForm({
                 placeholder="e.g., Senior Frontend Developer"
                 value={formData.jobRole}
                 onChange={handleInputChange}
-                required
               />
             </div>
           </div>
@@ -220,12 +219,7 @@ export function EmailDrafterForm({
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               type="submit"
-              disabled={
-                isLoading ||
-                !formData.clientPocName ||
-                !formData.jobRole ||
-                !formData.candidateDetails
-              }
+              disabled={isLoading || !formData.candidateDetails}
               className="w-full text-lg py-6 font-bold transition-all duration-300 ease-in-out transform hover:scale-105 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
               size="lg"
             >
