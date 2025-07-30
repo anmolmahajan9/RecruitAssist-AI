@@ -53,9 +53,10 @@ export function EmailDrafterForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    if (name === 'requiredColumns') {
-      setHasPreviewBeenRun(false); // Reset preview status when columns change
-      setTablePreview(''); // Clear old preview
+    // When columns change, we need a new preview. But only if it has not been run once already for formatting.
+    if (name === 'requiredColumns' && value === '') {
+      setHasPreviewBeenRun(false); 
+      setTablePreview(''); 
     }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -187,6 +188,7 @@ export function EmailDrafterForm({
                       onClick={handlePreview}
                       disabled={!formData.requiredColumns || isPreviewLoading}
                       className="w-full sm:w-auto"
+                      size="lg"
                     >
                       {isPreviewLoading ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
