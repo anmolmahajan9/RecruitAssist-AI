@@ -76,12 +76,33 @@ const interviewAssessmentFlow = ai.defineFlow(
     outputSchema: InterviewAssessmentOutputSchema,
   },
   async (input) => {
-    const { output } = await interviewAssessmentPrompt(input);
-    if (!output) {
-      throw new Error(
-        'An unexpected error occurred and the AI returned no output.'
-      );
+    let attempts = 0;
+    const maxAttempts = 3;
+    const delay = 2000; // 2 seconds
+
+    while (attempts < maxAttempts) {
+      try {
+        const { output } = await interviewAssessmentPrompt(input);
+        if (!output) {
+          throw new Error(
+            'An unexpected error occurred and the AI returned no output.'
+          );
+        }
+        return output;
+      } catch (e: any) {
+        attempts++;
+        if (e.message.includes('503') && attempts < maxAttempts) {
+          console.log(
+            `Attempt ${attempts} failed with 503 error. Retrying in ${delay / 1000}s...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        } else {
+          // For non-503 errors or if max attempts are reached, rethrow the error.
+          throw e;
+        }
+      }
     }
-    return output;
+    // This should not be reached, but as a fallback:
+    throw new Error('The AI model is currently unavailable after multiple retries. Please try again later.');
   }
 );
