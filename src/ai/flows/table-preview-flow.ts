@@ -26,27 +26,30 @@ const tablePreviewPrompt = ai.definePrompt({
   input: { schema: TablePreviewInputSchema },
   output: { schema: TablePreviewOutputSchema },
   prompt: `## Role and Objective
-You are an HTML generator. Your task is to create a simple HTML table header based on a given list of column names.
+You are an intelligent text processor and HTML generator. Your task is to parse a string of column headers, clean it up, and then generate an HTML table header.
 
 ## Input
-A comma-separated string of column headers.
+A string of column headers, which may be messy.
 \`\`\`
 {{{requiredColumns}}}
 \`\`\`
 
 ## Task
-1.  Parse the comma-separated string into individual column headers.
-2.  Generate an HTML table (\`<table>\`).
-3.  The table should have a header row (\`<thead>\` with a \`<tr>\`).
-4.  Each column header should be in a \`<th>\` tag inside the header row.
-5.  **Style the table:**
+1.  **Parse and Clean:** Read the input string and identify all the distinct column headers. Format them into a clean, single-line, comma-separated string.
+2.  **Generate HTML Table:** Using the cleaned list of headers, generate an HTML table (\`<table>\`).
+3.  **Style the table:**
     -   Table: \`<table style="border: 1px solid black; border-collapse: collapse; width: 100%;">\`
     -   Header Cells (th): \`<th style="border: 1px solid black; padding: 8px; background-color: #88d7e2; color: black; text-align: left;">\`
-6.  The final output should be a single HTML string in the 'htmlTable' field. Do not include any other text or explanation.
+4.  **Final Output:** Your final output must be a JSON object containing two fields:
+    -   \`formattedColumns\`: The cleaned, comma-separated string of column headers.
+    -   \`htmlTable\`: The full HTML string for the table header. Do not include any other text or explanation in this field.
 
 ## Example
-If the input is "Name, Email, Phone", the output 'htmlTable' should be:
-"<table style=\"border: 1px solid black; border-collapse: collapse; width: 100%;\"><thead><tr><th style=\"border: 1px solid black; padding: 8px; background-color: #88d7e2; color: black; text-align: left;\">Name</th><th style=\"border: 1px solid black; padding: 8px; background-color: #88d7e2; color: black; text-align: left;\">Email</th><th style=\"border: 1px solid black; padding: 8px; background-color: #88d7e2; color: black; text-align: left;\">Phone</th></tr></thead></table>"
+If the input is "Name, Email,  Phone Number", the output object should be:
+{
+  "formattedColumns": "Name, Email, Phone Number",
+  "htmlTable": "<table style=\"border: 1px solid black; border-collapse: collapse; width: 100%;\"><thead><tr><th style=\"border: 1px solid black; padding: 8px; background-color: #88d7e2; color: black; text-align: left;\">Name</th><th style=\"border: 1px solid black; padding: 8px; background-color: #88d7e2; color: black; text-align: left;\">Email</th><th style=\"border: 1px solid black; padding: 8px; background-color: #88d7e2; color: black; text-align: left;\">Phone Number</th></tr></thead></table>"
+}
 `,
 });
 

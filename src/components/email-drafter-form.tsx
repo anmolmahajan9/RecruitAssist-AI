@@ -82,6 +82,10 @@ export function EmailDrafterForm({
         requiredColumns: formData.requiredColumns,
       });
       setTablePreview(result.htmlTable);
+      setFormData((prev) => ({
+        ...prev,
+        requiredColumns: result.formattedColumns,
+      }));
     } catch (err) {
       setPreviewError(
         err instanceof Error ? err.message : 'Failed to generate preview.'
@@ -168,6 +172,7 @@ export function EmailDrafterForm({
                 type="button"
                 onClick={handlePreview}
                 disabled={!formData.requiredColumns || isPreviewLoading}
+                variant="outline"
               >
                 {isPreviewLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -179,7 +184,7 @@ export function EmailDrafterForm({
             </div>
             <p className="text-xs text-muted-foreground">
               Enter a comma-separated list of column headers for the output
-              table.
+              table. Preview to auto-format.
             </p>
           </div>
 
@@ -197,7 +202,7 @@ export function EmailDrafterForm({
               />
             </div>
           )}
-          
+
           <div className="space-y-2">
             <Label htmlFor="instructions" className="font-semibold">
               Additional Instructions (Optional)

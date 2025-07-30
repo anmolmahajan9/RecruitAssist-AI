@@ -20,5 +20,8 @@ export type TablePreviewInput = z.infer<typeof TablePreviewInputSchema>;
 // Output Schema
 export const TablePreviewOutputSchema = z.object({
   htmlTable: z.string().describe('The full generated HTML table header string.'),
+  formattedColumns: z
+    .string()
+    .describe('The cleaned-up, comma-separated string of column headers.'),
 });
 export type TablePreviewOutput = z.infer<typeof TablePreviewOutputSchema>;
