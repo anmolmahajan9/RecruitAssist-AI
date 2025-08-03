@@ -342,12 +342,12 @@ export default function ReportGeneratorPage() {
       const assessmentPdfBytes = await createAssessmentPdf(assessmentResult);
 
       if (reportType === 'assessment_only') {
-        downloadPdf(assessmentPdfBytes, `${candidateName}-${jobName}-Assessment.pdf`);
+        downloadPdf(assessmentPdfBytes, `${candidateName}-${jobName}-Assessment-suitable-ai.pdf`);
       } else if (reportType === 'separate' && resumeFile) {
-         downloadPdf(assessmentPdfBytes, `${candidateName}-${jobName}-Assessment.pdf`);
+         downloadPdf(assessmentPdfBytes, `${candidateName}-${jobName}-Assessment-suitable-ai.pdf`);
          const resumeBytes = await resumeFile.arrayBuffer();
          const watermarkedResumeBytes = await watermarkPdf(resumeBytes);
-         downloadPdf(watermarkedResumeBytes, `${candidateName}-${jobName}-Resume.pdf`);
+         downloadPdf(watermarkedResumeBytes, `${candidateName}-${jobName}-Resume-suitable-ai.pdf`);
       } else if (reportType === 'combined' && resumeFile) {
         const resumeBytes = await resumeFile.arrayBuffer();
         const watermarkedResumeBytes = await watermarkPdf(resumeBytes);
@@ -369,7 +369,7 @@ export default function ReportGeneratorPage() {
         resumePages.forEach((page) => combinedPdfDoc.addPage(page));
 
         const finalPdfBytes = await combinedPdfDoc.save();
-        downloadPdf(finalPdfBytes, `${candidateName}-${jobName}-Report.pdf`);
+        downloadPdf(finalPdfBytes, `${candidateName}-${jobName}-Report-suitable-ai.pdf`);
       }
 
     } catch (err) {
