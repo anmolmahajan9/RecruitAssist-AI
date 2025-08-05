@@ -53,8 +53,8 @@ export default function ReportGeneratorPage() {
         const { width, height } = page.getSize();
         const logoDims = watermarkImage.scale(0.08);
         page.drawImage(watermarkImage, {
-          x: width - logoDims.width - 20,
-          y: height - logoDims.height - 20,
+          x: width - logoDims.width - 40,
+          y: height - logoDims.height - 40,
           width: logoDims.width,
           height: logoDims.height,
           opacity: 0.5,
@@ -94,13 +94,13 @@ export default function ReportGeneratorPage() {
           const pages = doc.getPages();
           const logoDims = watermarkImage.scale(0.08);
           logoHeight = logoDims.height;
-          initialY = doc.getPage(0).getHeight() - 50 - logoHeight - 20;
+          initialY = doc.getPage(0).getHeight() - 50 - logoHeight - 40;
     
           for (const page of pages) {
             const { width, height } = page.getSize();
             page.drawImage(watermarkImage, {
-              x: width - logoDims.width - 20,
-              y: height - logoDims.height - 20,
+              x: width - logoDims.width - 40,
+              y: height - logoDims.height - 40,
               width: logoDims.width,
               height: logoDims.height,
               opacity: 0.5,
