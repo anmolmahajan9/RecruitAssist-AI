@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Slider } from '@/components/ui/slider';
 import {
   Loader2,
   Download,
@@ -39,6 +40,7 @@ export function PdfActions() {
   const [pdfFiles, setPdfFiles] = useState<File[]>([]);
   const [watermarkFile, setWatermarkFile] = useState<File | null>(null);
   const [watermarkSource, setWatermarkSource] = useState<'upload' | 'default'>('default');
+  const [opacity, setOpacity] = useState(0.5);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -171,7 +173,7 @@ export function PdfActions() {
           y: height - logoDims.height - 20,
           width: logoDims.width,
           height: logoDims.height,
-          opacity: 0.5,
+          opacity: opacity,
         });
       }
   };
@@ -251,6 +253,7 @@ export function PdfActions() {
     setPdfFiles([]);
     setWatermarkFile(null);
     setWatermarkSource('default');
+    setOpacity(0.5);
     setError(null);
     if (pdfFileInputRef.current) {
       pdfFileInputRef.current.value = '';
@@ -260,7 +263,9 @@ export function PdfActions() {
     }
   };
 
-  const stepNumber = action === 'combine' ? 2 : 3;
+  const stepNumberWatermark = 2;
+  const stepNumberUpload = (action === 'watermark' || action === 'both') ? 3 : 2;
+
 
   return (
     <Card className="w-full">
@@ -303,7 +308,7 @@ export function PdfActions() {
         {/* Step 2: Choose Watermark (if applicable) */}
         {(action === 'watermark' || action === 'both') && (
             <div className="space-y-4">
-                <h4 className="font-semibold text-lg">2. Choose Watermark</h4>
+                <h4 className="font-semibold text-lg">{stepNumberWatermark}. Choose Watermark</h4>
                  <RadioGroup
                     value={watermarkSource}
                     onValueChange={(value) => setWatermarkSource(value as 'upload' | 'default')}
@@ -360,12 +365,23 @@ export function PdfActions() {
                       </Card>
                     </Label>
                 </RadioGroup>
+                 <div className="space-y-2 pt-4">
+                  <Label htmlFor="opacity-slider">Watermark Opacity: {Math.round(opacity * 100)}%</Label>
+                  <Slider
+                    id="opacity-slider"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={[opacity]}
+                    onValueChange={(value) => setOpacity(value[0])}
+                  />
+                </div>
             </div>
         )}
 
         {/* Step 3: Upload PDFs */}
         <div>
-          <h4 className="font-semibold text-lg mb-4">{stepNumber}. Upload Files</h4>
+          <h4 className="font-semibold text-lg mb-4">{stepNumberUpload}. Upload Files</h4>
           <div
             className={cn(
               'border-2 border-dashed rounded-lg p-6 text-center transition-colors',
