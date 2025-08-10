@@ -57,7 +57,7 @@ export default function RootLayout({
                   aria-label="Suitable AI LinkedIn"
                   className="text-muted-foreground hover:text-primary"
                 >
-                  <Image src="https://i.imgur.com/MAJnJzH.png" alt="LinkedIn" width={24} height={24} className="h-6 w-6" />
+                  <Image src="/linkedin-logo.png" alt="LinkedIn" width={24} height={24} className="h-6 w-6" />
                 </Link>
               </div>
             </footer>
