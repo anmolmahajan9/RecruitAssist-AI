@@ -56,7 +56,7 @@ export const claudeApiProxy = functions.https.onRequest((req, res) => {
 
       // Construct the message for the Anthropic API
       const msg = await anthropic.messages.create({
-        model: 'claude-3-sonnet-20240229',
+        model: 'claude-3-haiku-20240307',
         max_tokens: 4096,
         system: systemPrompt,
         messages: [{ role: 'user', content: prompt }],

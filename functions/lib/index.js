@@ -41,6 +41,7 @@ var __importStar = (this && this.__importStar) || (function () {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.claudeApiProxy = void 0;
 const functions = __importStar(require("firebase-functions"));
@@ -51,9 +52,13 @@ const cors_1 = __importDefault(require("cors"));
 admin.initializeApp();
 // Initialize CORS middleware
 const corsHandler = (0, cors_1.default)({ origin: true });
-// Retrieve Anthropic API key from environment variables
+// Retrieve Anthropic API key from Firebase Functions configuration or environment variables
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || ((_a = functions.config().anthropic) === null || _a === void 0 ? void 0 : _a.key);
+if (!ANTHROPIC_API_KEY) {
+    console.warn('Anthropic API key is not configured. Please set it in functions/.env or using `firebase functions:config:set anthropic.key="YOUR_KEY"`');
+}
 const anthropic = new sdk_1.default({
-    apiKey: process.env.ANTHROPIC_API_KEY,
+    apiKey: ANTHROPIC_API_KEY,
 });
 /**
  * A secure proxy for the Anthropic (Claude) API.
