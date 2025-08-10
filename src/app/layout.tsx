@@ -4,7 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import Link from 'next/link';
-import { Linkedin } from 'lucide-react';
+import Image from 'next/image';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const alexBrush = Alex_Brush({
@@ -41,7 +41,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
             <main className="flex-grow">{children}</main>
             <footer className="py-4 px-8 text-center">
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-row items-center justify-center gap-2">
                 <Link
                   href="https://suitable.ai"
                   target="_blank"
@@ -57,7 +57,7 @@ export default function RootLayout({
                   aria-label="Suitable AI LinkedIn"
                   className="text-muted-foreground hover:text-primary"
                 >
-                  <Linkedin className="h-6 w-6" />
+                  <Image src="https://i.imgur.com/MAJnJzH.png" alt="LinkedIn" width={24} height={24} className="h-6 w-6" />
                 </Link>
               </div>
             </footer>
