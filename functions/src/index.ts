@@ -16,9 +16,18 @@ admin.initializeApp();
 // Initialize CORS middleware
 const corsHandler = cors({ origin: true });
 
-// Retrieve Anthropic API key from Firebase Functions configuration
+// Retrieve Anthropic API key from Firebase Functions configuration or environment variables
+const ANTHROPIC_API_KEY =
+  process.env.ANTHROPIC_API_KEY || functions.config().anthropic?.key;
+
+if (!ANTHROPIC_API_KEY) {
+  console.warn(
+    'Anthropic API key is not configured. Please set it in functions/.env or using `firebase functions:config:set anthropic.key="YOUR_KEY"`'
+  );
+}
+
 const anthropic = new Anthropic({
-  apiKey: functions.config().anthropic.key,
+  apiKey: ANTHROPIC_API_KEY,
 });
 
 /**
