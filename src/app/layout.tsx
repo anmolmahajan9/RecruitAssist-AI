@@ -50,15 +50,6 @@ export default function RootLayout({
                 >
                   Made with ❤️ by Suitable AI
                 </Link>
-                <Link
-                  href="https://linkedin.com/company/suitable-ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Suitable AI LinkedIn"
-                  className="text-muted-foreground hover:text-primary"
-                >
-                  <Image src="/linkedin-logo.png" alt="LinkedIn" width={24} height={24} className="h-6 w-6" />
-                </Link>
               </div>
             </footer>
           </div>
