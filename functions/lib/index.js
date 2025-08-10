@@ -46,11 +46,11 @@ exports.claudeApiProxy = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
-const cors = __importStar(require("cors"));
+const cors_1 = __importDefault(require("cors"));
 // Initialize Firebase Admin SDK
 admin.initializeApp();
 // Initialize CORS middleware
-const corsHandler = cors({ origin: true });
+const corsHandler = (0, cors_1.default)({ origin: true });
 // Retrieve Anthropic API key from environment variables
 const anthropic = new sdk_1.default({
     apiKey: process.env.ANTHROPIC_API_KEY,
