@@ -13,15 +13,19 @@ import {
   type JobExplainerInput,
   type JobExplainerOutput,
 } from '@/ai/schemas/job-explainer-schema';
-import { generateBooleanQuery } from '@/ai/flows/boolean-query-flow';
-import { explainJobDescription } from '@/ai/flows/job-explainer-flow';
+import { runBooleanQuery } from '@/ai/flows/boolean-query-flow';
+import { runJobExplainer } from '@/ai/flows/job-explainer-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Briefcase, Loader2 } from 'lucide-react';
+import { useModel } from '@/context/ModelContext';
+import { ModelSelector } from '@/components/model-selector';
 
 function BooleanQueryComponent() {
+  const { selectedModel } = useModel();
+
   // Primary (Boolean Query) state
   const [booleanQueryAnalysis, setBooleanQueryAnalysis] =
     useState<BooleanQueryOutput | null>(null);
@@ -31,11 +35,12 @@ function BooleanQueryComponent() {
   );
 
   // Secondary (Job Explainer) state
-  const [jobExplanation, setJobExplanation] = useState<JobExplainerOutput | null>(
-    null
-  );
+  const [jobExplanation, setJobExplanation] =
+    useState<JobExplainerOutput | null>(null);
   const [isJobExplanationLoading, setIsJobExplanationLoading] = useState(false);
-  const [jobExplanationError, setJobExplanationError] = useState<string | null>(null);
+  const [jobExplanationError, setJobExplanationError] = useState<
+    string | null
+  >(null);
 
   const [formData, setFormData] = useState<BooleanQueryInput>({
     jobTitle: '',
@@ -65,7 +70,7 @@ function BooleanQueryComponent() {
     setJobExplanationError(null);
 
     try {
-      const result = await generateBooleanQuery(data);
+      const result = await runBooleanQuery(selectedModel, data);
       setBooleanQueryAnalysis(result);
     } catch (err) {
       setBooleanQueryError(
@@ -84,7 +89,7 @@ function BooleanQueryComponent() {
     setJobExplanation(null);
 
     try {
-      const result = await explainJobDescription(data);
+      const result = await runJobExplainer(selectedModel, data);
       setJobExplanation(result);
     } catch (err) {
       setJobExplanationError(
@@ -132,7 +137,10 @@ function BooleanQueryComponent() {
               RecruitAssist AI
             </Link>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ModelSelector />
+            <ThemeToggle />
+          </div>
         </div>
         <div className="text-left">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
@@ -183,8 +191,8 @@ function BooleanQueryComponent() {
               {isJobExplanationLoading
                 ? 'Explaining...'
                 : jobExplanation
-                  ? 'Explanation Complete'
-                  : 'Explain Job Description'}
+                ? 'Explanation Complete'
+                : 'Explain Job Description'}
             </Button>
           </div>
         </div>

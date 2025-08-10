@@ -13,15 +13,19 @@ import {
   type BooleanQueryInput,
   type BooleanQueryOutput,
 } from '@/ai/schemas/boolean-query-schema';
-import { analyzeJobDescription } from '@/ai/flows/job-analyzer-flow';
-import { generateBooleanQuery } from '@/ai/flows/boolean-query-flow';
+import { runJobAnalysis } from '@/ai/flows/job-analyzer-flow';
+import { runBooleanQuery } from '@/ai/flows/boolean-query-flow';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Search, Loader2 } from 'lucide-react';
+import { useModel } from '@/context/ModelContext';
+import { ModelSelector } from '@/components/model-selector';
 
 function JobAnalyzerComponent() {
+  const { selectedModel } = useModel();
+
   // Primary (Job Analysis) state
   const [jobAnalysis, setJobAnalysis] = useState<JobAnalysisOutput | null>(
     null
@@ -65,7 +69,7 @@ function JobAnalyzerComponent() {
     setBooleanQueryError(null);
 
     try {
-      const result = await analyzeJobDescription(data);
+      const result = await runJobAnalysis(selectedModel, data);
       setJobAnalysis(result);
     } catch (err) {
       setJobAnalysisError(
@@ -84,7 +88,7 @@ function JobAnalyzerComponent() {
     setBooleanQueryAnalysis(null);
 
     try {
-      const result = await generateBooleanQuery(data);
+      const result = await runBooleanQuery(selectedModel, data);
       setBooleanQueryAnalysis(result);
     } catch (err) {
       setBooleanQueryError(
@@ -132,7 +136,10 @@ function JobAnalyzerComponent() {
               RecruitAssist AI
             </Link>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ModelSelector />
+            <ThemeToggle />
+          </div>
         </div>
         <div className="text-left">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
@@ -183,8 +190,8 @@ function JobAnalyzerComponent() {
               {isBooleanQueryLoading
                 ? 'Generating...'
                 : booleanQueryAnalysis
-                  ? 'Query Generated'
-                  : 'Generate Boolean Query'}
+                ? 'Query Generated'
+                : 'Generate Boolean Query'}
             </Button>
           </div>
         </div>

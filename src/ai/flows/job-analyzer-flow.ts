@@ -15,19 +15,8 @@ import {
 } from '@/ai/schemas/job-analyzer-schema';
 import { logQuery } from '@/services/loggingService';
 
-export async function analyzeJobDescription(
-  input: JobAnalysisInput
-): Promise<JobAnalysisOutput> {
-  await logQuery('jobAnalyzerFlow', input);
-  return jobAnalyzerFlow(input);
-}
-
-const jobAnalyzerPrompt = ai.definePrompt({
-  name: 'jobAnalyzerPrompt',
-  model: googleAI.model('gemini-1.5-flash-latest'),
-  input: { schema: JobAnalysisInputSchema },
-  output: { schema: JobAnalysisOutputSchema },
-  prompt: `## Objective
+// The system prompt is the same for both models
+const jobAnalyzerSystemPrompt = `## Objective
 Aim is to have a better understanding of the job role
 
 ## Tasks
@@ -44,50 +33,91 @@ Aim is to have a better understanding of the job role
 - For a 5 year old
 - For a college undergrad
 - For a recruiter
+`;
 
+export async function runJobAnalysis(
+  model: 'Google Gemini' | 'Claude Sonnet',
+  input: JobAnalysisInput
+): Promise<JobAnalysisOutput> {
+  await logQuery('jobAnalyzerFlow', { model, ...input });
+
+  if (model === 'Claude Sonnet') {
+    return await claudeJobAnalyzerFlow(input);
+  }
+  return await geminiJobAnalyzerFlow(input);
+}
+
+// Gemini specific flow using Genkit
+const geminiJobAnalyzerFlow = async (
+  input: JobAnalysisInput
+): Promise<JobAnalysisOutput> => {
+  const jobAnalyzerPrompt = ai.definePrompt({
+    name: 'jobAnalyzerPrompt',
+    model: googleAI.model('gemini-1.5-flash-latest'),
+    input: { schema: JobAnalysisInputSchema },
+    output: { schema: JobAnalysisOutputSchema },
+    prompt: `${jobAnalyzerSystemPrompt}
 ## Job title: 
 {{{jobTitle}}}
 
 ## Job details:
 {{{jobDescription}}}
-
-## Output format:
-
-{
-  "JobRoleExplained": {
-    "Easy": "string",
-    "Intermediate": "string",
-    "Recruiter": "string"
-  },
-  "TechnicalTermsAndJargon": {
-    "SpecificToRole": [
-      { "term": "string", "definition": "string" }
-    ],
-    "GeneralTerms": [
-      { "term": "string", "definition": "string" }
-    ]
-  },
-  "Tasks": {
-    "SpecificTasks": ["string"],
-    "GeneralTasks": ["string"]
-  }
-}
 `,
-});
+  });
 
-const jobAnalyzerFlow = ai.defineFlow(
-  {
-    name: 'jobAnalyzerFlow',
-    inputSchema: JobAnalysisInputSchema,
-    outputSchema: JobAnalysisOutputSchema,
-  },
-  async (input) => {
-    const { output } = await jobAnalyzerPrompt(input);
-    if (!output) {
-      throw new Error(
-        'An unexpected error occurred and the AI returned no output.'
-      );
-    }
-    return output;
+  const { output } = await jobAnalyzerPrompt(input);
+  if (!output) {
+    throw new Error(
+      'An unexpected error occurred and the AI returned no output.'
+    );
   }
-);
+  return output;
+};
+
+// Claude specific flow using the Firebase Cloud Function
+const claudeJobAnalyzerFlow = async (
+  input: JobAnalysisInput
+): Promise<JobAnalysisOutput> => {
+  const CLAUDE_FN_URL = process.env.NEXT_PUBLIC_CLAUDE_FN_URL;
+  if (!CLAUDE_FN_URL) {
+    throw new Error('Claude function URL is not configured.');
+  }
+
+  const userPrompt = `
+## Job title: 
+${input.jobTitle}
+
+## Job details:
+${input.jobDescription}
+`;
+
+  const response = await fetch(CLAUDE_FN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt: userPrompt,
+      systemPrompt: `${jobAnalyzerSystemPrompt}
+You must respond with a valid JSON object that conforms to this Zod schema:
+${JSON.stringify(JobAnalysisOutputSchema.shape, null, 2)}
+`,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Claude API request failed with status ${response.status}: ${errorText}`
+    );
+  }
+
+  const result = await response.json();
+  const parsed = JSON.parse(result.data);
+  const validation = JobAnalysisOutputSchema.safeParse(parsed);
+
+  if (!validation.success) {
+    console.error('Claude output validation error:', validation.error);
+    throw new Error('The AI returned an invalid data structure.');
+  }
+
+  return validation.data;
+};

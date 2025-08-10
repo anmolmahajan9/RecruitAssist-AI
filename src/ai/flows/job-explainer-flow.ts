@@ -15,19 +15,8 @@ import {
 } from '@/ai/schemas/job-explainer-schema';
 import { logQuery } from '@/services/loggingService';
 
-export async function explainJobDescription(
-  input: JobExplainerInput
-): Promise<JobExplainerOutput> {
-  await logQuery('jobExplainerFlow', input);
-  return jobExplainerFlow(input);
-}
-
-const jobExplainerPrompt = ai.definePrompt({
-  name: 'jobExplainerPrompt',
-  model: googleAI.model('gemini-1.5-flash-latest'),
-  input: { schema: JobExplainerInputSchema },
-  output: { schema: JobExplainerOutputSchema },
-  prompt: `## Objective
+// The system prompt is the same for both models
+const jobExplainerSystemPrompt = `## Objective
 Aim is to have a better understanding of the job role.
 
 ## Tasks
@@ -46,58 +35,91 @@ Aim is to have a better understanding of the job role.
 - For a 5 year old
 - For a college undergrad
 - For a recruiter
+`;
 
+export async function runJobExplainer(
+  model: 'Google Gemini' | 'Claude Sonnet',
+  input: JobExplainerInput
+): Promise<JobExplainerOutput> {
+  await logQuery('jobExplainerFlow', { model, ...input });
+
+  if (model === 'Claude Sonnet') {
+    return await claudeJobExplainerFlow(input);
+  }
+  return await geminiJobExplainerFlow(input);
+}
+
+// Gemini specific flow using Genkit
+const geminiJobExplainerFlow = async (
+  input: JobExplainerInput
+): Promise<JobExplainerOutput> => {
+  const jobExplainerPrompt = ai.definePrompt({
+    name: 'jobExplainerPrompt',
+    model: googleAI.model('gemini-1.5-flash-latest'),
+    input: { schema: JobExplainerInputSchema },
+    output: { schema: JobExplainerOutputSchema },
+    prompt: `${jobExplainerSystemPrompt}
 ## Job title: 
 {{{jobTitle}}}
 
 ## Job details:
 {{{jobDescription}}}
-
-## Output format:
-
-{
-  "JobRoleExplained": {
-    "Easy": "string",
-    "Intermediate": "string",
-    "Recruiter": "string"
-  },
-  "TechnicalTermsAndJargon": {
-    "SpecificToRole": [
-      { "term": "string", "definition": "string" }
-    ],
-    "GeneralTerms": [
-      { "term": "string", "definition": "string" }
-    ]
-  },
-  "Tasks": {
-    "SpecificTasks": ["string"],
-    "GeneralTasks": ["string"]
-  },
-  "MustHaves": [
-    "Must have experience with...",
-    "Must be able to...",
-    "Must know how to...",
-    "Must understand...",
-    "Must be familiar with...",
-    "Must have worked on..."
-  ]
-}
 `,
-});
+  });
 
-const jobExplainerFlow = ai.defineFlow(
-  {
-    name: 'jobExplainerFlow',
-    inputSchema: JobExplainerInputSchema,
-    outputSchema: JobExplainerOutputSchema,
-  },
-  async (input) => {
-    const { output } = await jobExplainerPrompt(input);
-    if (!output) {
-      throw new Error(
-        'An unexpected error occurred and the AI returned no output.'
-      );
-    }
-    return output;
+  const { output } = await jobExplainerPrompt(input);
+  if (!output) {
+    throw new Error(
+      'An unexpected error occurred and the AI returned no output.'
+    );
   }
-);
+  return output;
+};
+
+// Claude specific flow using the Firebase Cloud Function
+const claudeJobExplainerFlow = async (
+  input: JobExplainerInput
+): Promise<JobExplainerOutput> => {
+  const CLAUDE_FN_URL = process.env.NEXT_PUBLIC_CLAUDE_FN_URL;
+  if (!CLAUDE_FN_URL) {
+    throw new Error('Claude function URL is not configured.');
+  }
+
+  const userPrompt = `
+## Job title: 
+${input.jobTitle}
+
+## Job details:
+${input.jobDescription}
+`;
+
+  const response = await fetch(CLAUDE_FN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt: userPrompt,
+      systemPrompt: `${jobExplainerSystemPrompt}
+You must respond with a valid JSON object that conforms to this Zod schema:
+${JSON.stringify(JobExplainerOutputSchema.shape, null, 2)}
+`,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Claude API request failed with status ${response.status}: ${errorText}`
+    );
+  }
+
+  const result = await response.json();
+  const parsed = JSON.parse(result.data);
+  const validation = JobExplainerOutputSchema.safeParse(parsed);
+
+  if (!validation.success) {
+    console.error('Claude output validation error:', validation.error);
+    throw new Error('The AI returned an invalid data structure.');
+  }
+
+  return validation.data;
+};
