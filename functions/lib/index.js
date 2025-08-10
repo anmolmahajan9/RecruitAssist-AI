@@ -1,4 +1,10 @@
 "use strict";
+/**
+ * @fileoverview Firebase Cloud Functions for the RecruitAssist AI application.
+ *
+ * This file contains the backend logic for proxying requests to third-party AI APIs,
+ * ensuring that sensitive API keys are not exposed on the client-side.
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -32,62 +38,73 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertDocToPdf = void 0;
+exports.claudeApiProxy = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
-const googleapis_1 = require("googleapis");
-const path = __importStar(require("path"));
-const os = __importStar(require("os"));
-const fs = __importStar(require("fs"));
+const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
+const cors = __importStar(require("cors"));
+// Initialize Firebase Admin SDK
 admin.initializeApp();
-const auth = new googleapis_1.google.auth.GoogleAuth({
-    keyFile: path.join(__dirname, "../service-account.json"),
-    scopes: ["https://www.googleapis.com/auth/drive"],
+// Initialize CORS middleware
+const corsHandler = cors({ origin: true });
+// Retrieve Anthropic API key from environment variables
+const anthropic = new sdk_1.default({
+    apiKey: process.env.ANTHROPIC_API_KEY,
 });
-exports.convertDocToPdf = functions.storage.object().onFinalize(async (object) => {
-    const fileBucket = object.bucket;
-    const filePath = object.name;
-    const contentType = object.contentType;
-    if (!filePath || !contentType)
-        return;
-    if (!filePath.startsWith("uploads/") || filePath.endsWith(".pdf"))
-        return;
-    const bucket = admin.storage().bucket(fileBucket);
-    const tempLocalPath = path.join(os.tmpdir(), path.basename(filePath));
-    await bucket.file(filePath).download({ destination: tempLocalPath });
-    const authClient = await auth.getClient();
-    const drive = googleapis_1.google.drive({ version: "v3", auth: authClient });
-    const uploadRes = await drive.files.create({
-        requestBody: {
-            name: path.basename(filePath),
-            mimeType: contentType,
-        },
-        media: {
-            mimeType: contentType,
-            body: fs.createReadStream(tempLocalPath),
-        },
-        fields: "id",
+/**
+ * A secure proxy for the Anthropic (Claude) API.
+ *
+ * This function is callable via HTTPS and forwards requests to the Anthropic API.
+ * It expects a 'prompt' and a 'systemPrompt' in the request body.
+ *
+ * @param {functions.https.Request} req The HTTPS request object.
+ * @param {functions.https.Response} res The HTTPS response object.
+ */
+exports.claudeApiProxy = functions.https.onRequest((req, res) => {
+    corsHandler(req, res, async () => {
+        if (req.method !== 'POST') {
+            res.status(405).send('Method Not Allowed');
+            return;
+        }
+        try {
+            const { prompt, systemPrompt } = req.body;
+            if (!prompt) {
+                res.status(400).send('Bad Request: Missing prompt.');
+                return;
+            }
+            // Construct the message for the Anthropic API
+            const msg = await anthropic.messages.create({
+                model: 'claude-3-sonnet-20240229',
+                max_tokens: 4096,
+                system: systemPrompt,
+                messages: [{ role: 'user', content: prompt }],
+            });
+            // Assuming the response from Claude is in a format that can be sent back directly.
+            // We'll send back the content of the first message in the response.
+            if (msg.content && msg.content.length > 0) {
+                // Assuming text-based content for now
+                const responseText = msg.content
+                    .map((c) => (c.type === 'text' ? c.text : ''))
+                    .join('');
+                res.status(200).send({ data: responseText });
+            }
+            else {
+                res.status(500).send('No content received from Anthropic API');
+            }
+        }
+        catch (error) {
+            console.error('Error calling Anthropic API:', error);
+            if (error instanceof Error) {
+                res.status(500).send(`Internal Server Error: ${error.message}`);
+            }
+            else {
+                res.status(500).send('Internal Server Error');
+            }
+        }
     });
-    const fileId = uploadRes.data.id;
-    if (!fileId)
-        throw new Error("Failed to upload file to Google Drive");
-    const pdfPath = tempLocalPath.replace(/\.(docx|doc)$/i, ".pdf");
-    const dest = fs.createWriteStream(pdfPath);
-    await drive.files.export({ fileId, mimeType: "application/pdf" }, { responseType: "stream" }).then((res) => new Promise((resolve, reject) => {
-        res.data.pipe(dest);
-        dest.on("finish", resolve);
-        dest.on("error", reject);
-    }));
-    const newStoragePath = filePath.replace("uploads/", "converted/").replace(/\.(docx|doc)$/i, ".pdf");
-    await bucket.upload(pdfPath, {
-        destination: newStoragePath,
-        metadata: { contentType: "application/pdf" },
-    });
-    await drive.files.delete({ fileId });
-    fs.unlinkSync(tempLocalPath);
-    fs.unlinkSync(pdfPath);
-    await bucket.file(filePath).delete();
-    console.log(`✅ Converted and uploaded: ${newStoragePath}`);
 });
 //# sourceMappingURL=index.js.map

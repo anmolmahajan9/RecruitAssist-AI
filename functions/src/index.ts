@@ -8,7 +8,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import Anthropic from '@anthropic-ai/sdk';
-import * as cors from 'cors';
+import cors from 'cors';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
