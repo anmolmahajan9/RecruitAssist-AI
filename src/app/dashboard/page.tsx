@@ -6,7 +6,8 @@ import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Users } from 'lucide-react';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 function Dashboard() {
   const { user } = useAuth();
@@ -39,16 +40,28 @@ function Dashboard() {
             Dashboard
           </h1>
           <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Welcome, {user?.displayName || 'User'}! This is the employee management portal.
+            Welcome, {user?.displayName || 'User'}! This is your management portal.
           </p>
         </div>
       </header>
 
       <main>
-        {/* Placeholder for future content */}
-        <div className="border-2 border-dashed border-muted rounded-lg p-12 text-center">
-            <p className="text-muted-foreground">Employee management features will be added here soon.</p>
-        </div>
+        <Link href="/dashboard/employees">
+          <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
+            <CardHeader className="flex-grow">
+              <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                <Users className="w-7 h-7 text-primary" />
+                On-site Employee Management
+              </CardTitle>
+              <CardDescription className="pt-2 text-base">
+                Manage employee details, onboarding, timesheets, and engagement.
+              </CardDescription>
+            </CardHeader>
+            <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
+              Go to Module <ArrowRight className="ml-2 h-5 w-5" />
+            </div>
+          </Card>
+        </Link>
       </main>
 
     </div>
