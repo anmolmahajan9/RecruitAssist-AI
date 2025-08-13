@@ -16,8 +16,8 @@ const firebaseConfig = {
   messagingSenderId: '798548224026',
 };
 
-// Initialize Firebase
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+// Initialize Firebase for SSR
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const firestore = getFirestore(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
