@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -5,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Edit, Loader2, User, Building, Calendar, Briefcase } from 'lucide-react';
 import type { Employee } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
 
 interface EmployeeListProps {
   employees: Employee[];
