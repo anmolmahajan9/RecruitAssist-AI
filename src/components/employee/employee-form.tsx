@@ -95,8 +95,8 @@ export function EmployeeForm({
           ...(employee.onboarding || {}),
         },
       });
-    } else {
-      setFormData(initialEmployeeState);
+    } else if (!employee) {
+       setFormData(initialEmployeeState);
     }
   }, [isOpen, employee]);
 
@@ -145,6 +145,7 @@ export function EmployeeForm({
   const handleClose = (open: boolean) => {
       if (!open) {
         setError(null);
+        setFormData(initialEmployeeState); // Reset form on close
       }
       onOpenChange(open);
   }
@@ -177,8 +178,8 @@ export function EmployeeForm({
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="flex-grow overflow-hidden flex flex-col">
-          <ScrollArea className="flex-grow h-0">
+        <form onSubmit={handleSubmit} className="flex-grow overflow-hidden">
+          <ScrollArea className="h-[calc(90vh-160px)]">
             <div className="p-6">
               <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full space-y-4">
                   <AccordionItem value="item-1">
