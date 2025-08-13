@@ -88,12 +88,12 @@ function EmployeesPage() {
             <ThemeToggle />
           </div>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center bg-card p-4 rounded-2xl shadow-sm">
             <p className="text-lg text-muted-foreground max-w-2xl">
-                Add, view, and edit all your on-site employee records.
+                Add, view, and manage all your on-site employee records.
             </p>
-            <Button onClick={openNewForm}>
-              <PlusCircle className="mr-2 h-4 w-4" />
+            <Button onClick={openNewForm} size="lg" className="font-bold">
+              <PlusCircle className="mr-2 h-5 w-5" />
               Add New Employee
             </Button>
         </div>
@@ -119,5 +119,3 @@ function EmployeesPage() {
 }
 
 export default withAuth(EmployeesPage);
-
-    

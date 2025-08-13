@@ -23,9 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Loader2, User, FileText } from 'lucide-react';
 import { addEmployee, updateEmployee } from '@/services/employeeService';
-import type { Employee, OnboardingTracker, OnboardingStatus } from '@/types/employee';
+import type { Employee, OnboardingTracker } from '@/types/employee';
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -162,66 +168,75 @@ export function EmployeeForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle className="text-2xl">
-            {employee ? 'Edit Employee' : 'Add New Employee'}
+            {employee ? 'Edit Employee Record' : 'Add New Employee'}
           </DialogTitle>
           <DialogDescription>
-            Fill in the details for the on-site employee.
+            Fill in the details for the on-site employee. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit}>
-          <ScrollArea className="h-[65vh] px-6">
-            <div className="space-y-4 pt-4 pb-6">
-                <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">Employee Details</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div><Label htmlFor="name">Name</Label><Input id="name" name="name" value={formData.name} onChange={handleInputChange} required /></div>
-                  <div><Label htmlFor="client">Client</Label><Input id="client" name="client" value={formData.client} onChange={handleInputChange} required /></div>
-                  <div><Label htmlFor="role">Role</Label><Input id="role" name="role" value={formData.role} onChange={handleInputChange} required /></div>
-                  <div><Label htmlFor="poc">POC</Label><Input id="poc" name="poc" value={formData.poc} onChange={handleInputChange}/></div>
-                  <div><Label htmlFor="recruiter">Recruiter</Label><Input id="recruiter" name="recruiter" value={formData.recruiter} onChange={handleInputChange}/></div>
-                  <div><Label htmlFor="location">Location</Label><Input id="location" name="location" value={formData.location} onChange={handleInputChange}/></div>
-                  <div><Label htmlFor="doj">Date of Joining</Label><Input id="doj" name="doj" type="date" value={formData.doj} onChange={handleInputChange}/></div>
-                  <div><Label htmlFor="poEndDate">PO End Date</Label><Input id="poEndDate" name="poEndDate" type="date" value={formData.poEndDate} onChange={handleInputChange}/></div>
-                  <div><Label htmlFor="ctc">Candidate CTC</Label><Input id="ctc" name="ctc" value={formData.ctc} onChange={handleInputChange}/></div>
-                  <div><Label htmlFor="billingRate">Billing Rate (PO)</Label><Input id="billingRate" name="billingRate" value={formData.billingRate} onChange={handleInputChange}/></div>
-                  <div><Label>Status</Label><Select name="status" value={formData.status} onValueChange={(v) => handleSelectChange('status', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Active">Active</SelectItem><SelectItem value="Ended">Ended</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent></Select></div>
-                  <div><Label>Stage</Label><Select name="stage" value={formData.stage} onValueChange={(v) => handleSelectChange('stage', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Joined">Joined</SelectItem><SelectItem value="In-Progress">In-Progress</SelectItem></SelectContent></Select></div>
-                   <div><Label>Experience Source</Label><Select name="experience" value={formData.experience} onValueChange={(v) => handleSelectChange('experience', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="IN">IN</SelectItem><SelectItem value="OUT">OUT</SelectItem><SelectItem value="NA">NA</SelectItem></SelectContent></Select></div>
-                </div>
-                 <div className="flex items-center space-x-4 pt-4">
-                    <div className="flex items-center space-x-2"><Checkbox id="optForPF" checked={formData.optForPF} onCheckedChange={(c) => handleCheckboxChange('optForPF', c as boolean)} /><Label htmlFor="optForPF">Opt for PF?</Label></div>
-                    <div className="flex items-center space-x-2"><Checkbox id="optForHealth" checked={formData.optForHealth} onCheckedChange={(c) => handleCheckboxChange('optForHealth', c as boolean)} /><Label htmlFor="optForHealth">Opt for Health?</Label></div>
-                </div>
-                
-                <h4 className="text-lg font-semibold text-primary border-b pb-2 pt-6 mb-4">Onboarding Tracker</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
-                    {onboardingFields.map(field => (
-                        <div key={field.key}>
-                            <Label>{field.label}</Label>
-                            {field.type === 'status' ? (
-                                <RadioGroup
-                                    value={formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>]}
-                                    onValueChange={(v) => handleOnboardingChange(field.key, v)}
-                                    className="flex items-center space-x-4 pt-2"
-                                >
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="Done" id={`${field.key}-done`}/><Label htmlFor={`${field.key}-done`}>Done</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="Pending" id={`${field.key}-pending`}/><Label htmlFor={`${field.key}-pending`}>Pending</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="NA" id={`${field.key}-na`}/><Label htmlFor={`${field.key}-na`}>N/A</Label></div>
-                                </RadioGroup>
-                            ) : (
-                                <Input name={field.key} value={formData.onboarding[field.key]} onChange={(e) => handleOnboardingChange(field.key, e.target.value)} />
-                            )}
+        <form onSubmit={handleSubmit} className="flex-grow overflow-hidden flex flex-col">
+          <ScrollArea className="flex-grow h-0">
+            <div className="p-6">
+              <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full space-y-4">
+                  <AccordionItem value="item-1">
+                      <AccordionTrigger className="text-lg font-semibold hover:no-underline"><User className="mr-2 h-5 w-5 text-primary"/> Employee Details</AccordionTrigger>
+                      <AccordionContent className="pt-4">
+                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div><Label htmlFor="name">Name</Label><Input id="name" name="name" value={formData.name} onChange={handleInputChange} required /></div>
+                            <div><Label htmlFor="client">Client</Label><Input id="client" name="client" value={formData.client} onChange={handleInputChange} required /></div>
+                            <div><Label htmlFor="role">Role</Label><Input id="role" name="role" value={formData.role} onChange={handleInputChange} required /></div>
+                            <div><Label htmlFor="poc">POC</Label><Input id="poc" name="poc" value={formData.poc} onChange={handleInputChange}/></div>
+                            <div><Label htmlFor="recruiter">Recruiter</Label><Input id="recruiter" name="recruiter" value={formData.recruiter} onChange={handleInputChange}/></div>
+                            <div><Label htmlFor="location">Location</Label><Input id="location" name="location" value={formData.location} onChange={handleInputChange}/></div>
+                            <div><Label htmlFor="doj">Date of Joining</Label><Input id="doj" name="doj" type="date" value={formData.doj} onChange={handleInputChange}/></div>
+                            <div><Label htmlFor="poEndDate">PO End Date</Label><Input id="poEndDate" name="poEndDate" type="date" value={formData.poEndDate} onChange={handleInputChange}/></div>
+                            <div><Label htmlFor="ctc">Candidate CTC</Label><Input id="ctc" name="ctc" value={formData.ctc} onChange={handleInputChange}/></div>
+                            <div><Label htmlFor="billingRate">Billing Rate (PO)</Label><Input id="billingRate" name="billingRate" value={formData.billingRate} onChange={handleInputChange}/></div>
+                            <div><Label>Status</Label><Select name="status" value={formData.status} onValueChange={(v) => handleSelectChange('status', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Active">Active</SelectItem><SelectItem value="Ended">Ended</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent></Select></div>
+                            <div><Label>Stage</Label><Select name="stage" value={formData.stage} onValueChange={(v) => handleSelectChange('stage', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Joined">Joined</SelectItem><SelectItem value="In-Progress">In-Progress</SelectItem></SelectContent></Select></div>
+                            <div><Label>Experience Source</Label><Select name="experience" value={formData.experience} onValueChange={(v) => handleSelectChange('experience', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="IN">IN</SelectItem><SelectItem value="OUT">OUT</SelectItem><SelectItem value="NA">NA</SelectItem></SelectContent></Select></div>
+                         </div>
+                         <div className="flex items-center space-x-6 pt-6">
+                            <div className="flex items-center space-x-2"><Checkbox id="optForPF" checked={formData.optForPF} onCheckedChange={(c) => handleCheckboxChange('optForPF', c as boolean)} /><Label htmlFor="optForPF">Opt for PF?</Label></div>
+                            <div className="flex items-center space-x-2"><Checkbox id="optForHealth" checked={formData.optForHealth} onCheckedChange={(c) => handleCheckboxChange('optForHealth', c as boolean)} /><Label htmlFor="optForHealth">Opt for Health Insurance?</Label></div>
+                         </div>
+                      </AccordionContent>
+                  </AccordionItem>
+                   <AccordionItem value="item-2">
+                      <AccordionTrigger className="text-lg font-semibold hover:no-underline"><FileText className="mr-2 h-5 w-5 text-primary"/> Onboarding Tracker</AccordionTrigger>
+                       <AccordionContent className="pt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+                            {onboardingFields.map(field => (
+                                <div key={field.key} className="p-2 rounded-md bg-secondary/50">
+                                    <Label className="text-sm font-medium">{field.label}</Label>
+                                    {field.type === 'status' ? (
+                                        <RadioGroup
+                                            value={formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>]}
+                                            onValueChange={(v) => handleOnboardingChange(field.key, v)}
+                                            className="flex items-center space-x-4 pt-2"
+                                        >
+                                            <div className="flex items-center space-x-2"><RadioGroupItem value="Done" id={`${field.key}-done`}/><Label htmlFor={`${field.key}-done`}>Done</Label></div>
+                                            <div className="flex items-center space-x-2"><RadioGroupItem value="Pending" id={`${field.key}-pending`}/><Label htmlFor={`${field.key}-pending`}>Pending</Label></div>
+                                            <div className="flex items-center space-x-2"><RadioGroupItem value="NA" id={`${field.key}-na`}/><Label htmlFor={`${field.key}-na`}>N/A</Label></div>
+                                        </RadioGroup>
+                                    ) : (
+                                        <Input className="mt-2" name={field.key} value={formData.onboarding[field.key]} onChange={(e) => handleOnboardingChange(field.key, e.target.value)} />
+                                    )}
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
+                      </AccordionContent>
+                  </AccordionItem>
+              </Accordion>
             </div>
           </ScrollArea>
-           <DialogFooter className="p-6 border-t">
+           <DialogFooter className="p-4 border-t bg-background">
             {error && <p className="text-sm text-destructive mr-auto">{error}</p>}
-            <Button type="button" variant="outline" onClick={() => handleClose(false)}>
+             <Button type="button" variant="outline" onClick={() => handleClose(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
