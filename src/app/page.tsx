@@ -16,6 +16,7 @@ import {
   Mail,
   FileEdit,
   Combine,
+  Users
 } from 'lucide-react';
 
 export default function Home() {
@@ -35,6 +36,22 @@ export default function Home() {
       </div>
 
       <main className="w-full max-w-2xl flex flex-col gap-8">
+         <Link href="/dashboard">
+          <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
+            <CardHeader className="flex-grow">
+              <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                <Users className="w-7 h-7 text-primary" />
+                Employee Management
+              </CardTitle>
+              <CardDescription className="pt-2 text-base">
+                Manage on-site employee details, onboarding, timesheets, and engagement.
+              </CardDescription>
+            </CardHeader>
+            <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
+              Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+            </div>
+          </Card>
+        </Link>
         <Link href="/job-explainer">
           <Card className="h-full transform transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer flex flex-col">
             <CardHeader className="flex-grow">

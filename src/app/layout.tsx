@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ModelProvider } from '@/context/ModelContext';
+import { AuthProvider } from '@/context/AuthContext';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const alexBrush = Alex_Brush({
@@ -39,23 +40,25 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ModelProvider>
-            <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
-              <main className="flex-grow">{children}</main>
-              <footer className="py-4 px-8 text-center">
-                <div className="flex flex-row items-center justify-center gap-2">
-                  <Link
-                    href="https://suitable.ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-base text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Made with ❤️ by Suitable AI
-                  </Link>
-                </div>
-              </footer>
-            </div>
-          </ModelProvider>
+          <AuthProvider>
+            <ModelProvider>
+              <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
+                <main className="flex-grow">{children}</main>
+                <footer className="py-4 px-8 text-center">
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <Link
+                      href="https://suitable.ai"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-base text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      Made with ❤️ by Suitable AI
+                    </Link>
+                  </div>
+                </footer>
+              </div>
+            </ModelProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
