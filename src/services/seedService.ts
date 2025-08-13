@@ -2,7 +2,7 @@
 'use server';
 
 import { firestore } from '@/lib/firebase';
-import { collection, addDoc, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, getDocs, writeBatch, doc } from 'firebase/firestore';
 import type { Employee, OnboardingStatus } from '@/types/employee';
 
 const employees: Omit<Employee, 'id'>[] = [
