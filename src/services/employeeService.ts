@@ -27,7 +27,13 @@ export async function addEmployee(employee: Omit<Employee, 'id'>): Promise<strin
 export async function getEmployees(): Promise<Employee[]> {
   const q = query(employeesCollection, orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Employee));
+  return snapshot.docs.map(doc => {
+      const data = doc.data();
+      // Firestore Timestamps are not serializable, so we exclude it or convert it.
+      // Since we don't display it, we can just exclude it for now.
+      const { createdAt, ...rest } = data;
+      return { id: doc.id, ...rest } as Employee;
+  });
 }
 
 export async function updateEmployee(id: string, employee: Partial<Employee>): Promise<void> {
