@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,6 +12,7 @@ import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 import withAuth from '@/components/with-auth';
 import { auth } from '@/lib/firebase';
+import { seedDatabase } from '@/services/seedService';
 
 function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -18,6 +20,7 @@ function EmployeesPage() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSeeding, setIsSeeding] = useState(true);
 
   const fetchEmployees = async () => {
     try {
@@ -34,7 +37,19 @@ function EmployeesPage() {
   };
 
   useEffect(() => {
-    fetchEmployees();
+    const runSeeder = async () => {
+        console.log("Attempting to seed database...");
+        try {
+            const result = await seedDatabase();
+            console.log(result.message);
+        } catch (e) {
+            console.error("Seeding failed:", e);
+        } finally {
+            setIsSeeding(false);
+            fetchEmployees();
+        }
+    };
+    runSeeder();
   }, []);
 
   const handleFormSuccess = () => {
@@ -88,7 +103,7 @@ function EmployeesPage() {
         <EmployeeList 
             employees={employees} 
             onEdit={handleEdit} 
-            isLoading={isLoading}
+            isLoading={isLoading || isSeeding}
             error={error}
         />
       </main>
@@ -104,3 +119,5 @@ function EmployeesPage() {
 }
 
 export default withAuth(EmployeesPage);
+
+    
