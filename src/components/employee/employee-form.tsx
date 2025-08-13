@@ -86,19 +86,19 @@ export function EmployeeForm({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (employee) {
+    if (isOpen && employee) {
       setFormData({
         ...initialEmployeeState,
         ...employee,
         onboarding: {
           ...initialOnboardingState,
-          ...employee.onboarding,
+          ...(employee.onboarding || {}),
         },
       });
     } else {
       setFormData(initialEmployeeState);
     }
-  }, [employee]);
+  }, [isOpen, employee]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -144,7 +144,6 @@ export function EmployeeForm({
   
   const handleClose = (open: boolean) => {
       if (!open) {
-        setFormData(initialEmployeeState);
         setError(null);
       }
       onOpenChange(open);
