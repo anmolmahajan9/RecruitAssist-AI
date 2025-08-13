@@ -163,17 +163,18 @@ export function EmployeeForm({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-4">
-          <DialogTitle>
+        <DialogHeader className="p-6 pb-4 border-b">
+          <DialogTitle className="text-2xl">
             {employee ? 'Edit Employee' : 'Add New Employee'}
           </DialogTitle>
           <DialogDescription>
             Fill in the details for the on-site employee.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex-grow overflow-hidden">
-          <ScrollArea className="h-full px-6">
-            <div className="space-y-4 pt-2 pb-6">
+        
+        <form onSubmit={handleSubmit}>
+          <ScrollArea className="h-[65vh] px-6">
+            <div className="space-y-4 pt-4 pb-6">
                 <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">Employee Details</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div><Label htmlFor="name">Name</Label><Input id="name" name="name" value={formData.name} onChange={handleInputChange} required /></div>
@@ -218,7 +219,7 @@ export function EmployeeForm({
                 </div>
             </div>
           </ScrollArea>
-           <DialogFooter className="p-6 pt-4 border-t">
+           <DialogFooter className="p-6 border-t">
             {error && <p className="text-sm text-destructive mr-auto">{error}</p>}
             <Button type="button" variant="outline" onClick={() => handleClose(false)}>
               Cancel
