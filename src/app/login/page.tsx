@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -6,8 +7,11 @@ import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
 
 const GoogleIcon = () => (
   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -35,20 +39,36 @@ const GoogleIcon = () => (
 export default function LoginPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
 
   const handleSignIn = async () => {
     const provider = new GoogleAuthProvider();
+    setError(null);
     try {
-      await signInWithPopup(auth, provider);
-      router.push('/dashboard');
+      const result = await signInWithPopup(auth, provider);
+      const userEmail = result.user.email;
+
+      if (userEmail && userEmail.endsWith('@suitable.ai')) {
+         router.push('/dashboard');
+      } else {
+        await auth.signOut();
+        setError('Access denied. Please sign in with a @suitable.ai email address.');
+      }
     } catch (error) {
       console.error('Error signing in with Google', error);
+      setError('An error occurred during sign-in. Please try again.');
     }
   };
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/dashboard');
+       if (user.email && user.email.endsWith('@suitable.ai')) {
+        router.push('/dashboard');
+      } else {
+        // This case handles if a user is already logged in but with a non-approved domain
+        // and they try to access the login page again.
+        auth.signOut();
+      }
     }
   }, [user, loading, router]);
 
@@ -72,7 +92,15 @@ export default function LoginPage() {
           <CardTitle>Login</CardTitle>
           <CardDescription>Sign in to access the dashboard.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+           {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
           <Button onClick={handleSignIn} className="w-full" size="lg">
             <GoogleIcon />
             Sign in with Google
