@@ -161,7 +161,7 @@ export function EmployeeForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>
             {employee ? 'Edit Employee' : 'Add New Employee'}
@@ -170,8 +170,8 @@ export function EmployeeForm({
             Fill in the details for the on-site employee.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <ScrollArea className="max-h-[70vh] p-4">
+        <form onSubmit={handleSubmit} className="flex-grow overflow-hidden">
+          <ScrollArea className="h-full pr-6">
             <div className="space-y-4">
                 <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">Employee Details</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -217,8 +217,8 @@ export function EmployeeForm({
                 </div>
             </div>
           </ScrollArea>
-          <DialogFooter className="pt-6">
-            {error && <p className="text-sm text-destructive">{error}</p>}
+           <DialogFooter className="pt-6 border-t mt-4">
+            {error && <p className="text-sm text-destructive mr-auto">{error}</p>}
             <Button type="button" variant="outline" onClick={() => handleClose(false)}>
               Cancel
             </Button>
