@@ -82,7 +82,7 @@ function Dashboard() {
         if (emp.status !== 'Active') return;
         const totalSteps = onboardingTemplate.length;
         const completedSteps =
-          emp.onboarding?.steps.filter(
+          emp.onboarding?.steps?.filter(
             (s) => s.status === 'Done' || s.status === 'NA'
           ).length || 0;
         if (completedSteps === totalSteps) {
