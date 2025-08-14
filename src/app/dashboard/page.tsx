@@ -38,13 +38,17 @@ interface UpcomingTask {
   dueDate: Date;
 }
 
+interface GroupedTasks {
+  [taskName: string]: { employeeName: string; dueDate: Date }[];
+}
+
 interface DashboardStats {
   totalActive: number;
   totalClients: number;
   onboardingComplete: number;
   onboardingPending: number;
   upcomingPoEnds: Employee[];
-  upcomingTasks: UpcomingTask[];
+  groupedTasks: GroupedTasks;
   statusCounts: {
     active: number;
     pending: number;
@@ -152,9 +156,11 @@ export default function Dashboard() {
       );
       
       // Calculate Upcoming Tasks
-      const upcomingTasks: UpcomingTask[] = [];
       const today = new Date();
       today.setHours(0,0,0,0);
+      
+      const sevenDaysFromNow = new Date(today);
+      sevenDaysFromNow.setDate(today.getDate() + 7);
 
       const trackerMap = trackerEntries.reduce((acc, entry) => {
         acc[entry.employeeId] = entry;
@@ -163,32 +169,46 @@ export default function Dashboard() {
 
       const activeEmployees = employees.filter(e => e.status === 'Active');
 
+      const groupedTasks: GroupedTasks = {};
+      
+      const taskDefinitions = [
+        { name: 'HR Check-in (12th)', day: 12, statusField: 'hrCheckin12thStatus' },
+        { name: 'HR Check-in (25th)', day: 25, statusField: 'hrCheckin25thStatus' },
+        { name: 'Timesheet', day: 29, statusField: 'timesheetStatus' },
+        { name: 'Invoice', day: new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate(), statusField: 'invoiceStatus' },
+      ] as const;
+
+
       for (const emp of activeEmployees) {
         const entry = trackerMap[emp.id!] || {};
         const year = today.getFullYear();
         const month = today.getMonth();
         
-        const tasks = [
-            { name: 'HR Check-in (12th)', dueDay: 12, status: entry.hrCheckin12thStatus },
-            { name: 'HR Check-in (25th)', dueDay: 25, status: entry.hrCheckin25thStatus },
-            { name: 'Timesheet', dueDay: 29, status: entry.timesheetStatus },
-            { name: 'Invoice', dueDay: new Date(year, month + 1, 0).getDate(), status: entry.invoiceStatus },
-        ];
-
-        for (const task of tasks) {
-            const dueDate = new Date(year, month, task.dueDay);
+        for (const task of taskDefinitions) {
+            const dueDate = new Date(year, month, task.day);
             dueDate.setHours(0,0,0,0);
-            
-            const isPending = task.name.includes('Invoice') ? task.status === 'Due, Not Raised' : task.status === 'Pending' || !task.status;
+
+            const status = entry[task.statusField];
+            const isPending = task.name.includes('Invoice') ? status === 'Due, Not Raised' : status === 'Pending' || !status;
             
             if (isPending) {
-                upcomingTasks.push({
-                    employeeName: emp.name,
-                    taskName: task.name,
-                    dueDate,
-                });
+                // Include if it's past due or due within the next 7 days
+                if (dueDate < today || (dueDate >= today && dueDate <= sevenDaysFromNow)) {
+                     if (!groupedTasks[task.name]) {
+                        groupedTasks[task.name] = [];
+                     }
+                     groupedTasks[task.name].push({
+                        employeeName: emp.name,
+                        dueDate,
+                     });
+                }
             }
         }
+      }
+      
+      // Sort tasks within each group by due date
+      for (const taskName in groupedTasks) {
+          groupedTasks[taskName].sort((a,b) => a.dueDate.getTime() - b.dueDate.getTime());
       }
 
 
@@ -198,7 +218,7 @@ export default function Dashboard() {
         onboardingComplete,
         onboardingPending,
         upcomingPoEnds,
-        upcomingTasks,
+        groupedTasks,
         statusCounts,
       });
       setIsLoading(false);
@@ -313,22 +333,26 @@ export default function Dashboard() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow">
-                        {stats.upcomingTasks.length > 0 ? (
-                             <ul className="space-y-3">
-                                {stats.upcomingTasks.map((task, index) => (
-                                    <li key={index} className="flex justify-between items-center p-3 bg-secondary/50 rounded-lg">
-                                        <div>
-                                            <p className="font-semibold">{task.employeeName}</p>
-                                            <p className="text-sm text-muted-foreground">{task.taskName}</p>
-                                        </div>
-                                        <p className="font-semibold text-destructive">{formatDate(task.dueDate)}</p>
+                        {Object.keys(stats.groupedTasks).length > 0 ? (
+                             <ul className="space-y-4">
+                                {Object.entries(stats.groupedTasks).map(([taskName, tasks]) => (
+                                    <li key={taskName}>
+                                      <h4 className="font-bold mb-2 pb-1 border-b text-primary">{taskName}</h4>
+                                       <ul className="space-y-2 pl-2">
+                                        {tasks.map((task, index) => (
+                                            <li key={index} className="flex justify-between items-center p-2 bg-secondary/50 rounded-md">
+                                                <p className="font-semibold text-sm">{task.employeeName}</p>
+                                                <p className="font-semibold text-sm text-destructive">{formatDate(task.dueDate)}</p>
+                                            </li>
+                                        ))}
+                                      </ul>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
                             <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full">
                                <CheckCircle2 className="w-12 h-12 text-green-500 mb-2"/>
-                               <p>No pending tasks for this month.</p>
+                               <p>No overdue or upcoming tasks.</p>
                             </div>
                         )}
                     </CardContent>
@@ -378,4 +402,4 @@ export default function Dashboard() {
         />
       </main>
   );
- 
+}
