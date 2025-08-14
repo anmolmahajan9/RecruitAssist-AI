@@ -119,16 +119,16 @@ export interface Employee {
 }
 
 export const initialClientNames = [
-  'Spiro',
-  'Vivance',
-  'TASL',
-  'Biotek Ortho',
-  'Billdesk',
-  'Marelli',
   'Aptean',
+  'Billdesk',
+  'Biotek Ortho',
+  'Marelli',
   'Schiebel',
-  'Zomato',
   'Simon',
+  'Spiro',
+  'TASL',
+  'Vivance',
+  'Zomato',
 ].sort();
 
 
