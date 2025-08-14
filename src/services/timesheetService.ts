@@ -10,6 +10,7 @@ import {
   doc,
   setDoc,
   serverTimestamp,
+  Timestamp
 } from 'firebase/firestore';
 import type { Timesheet } from '@/types/employee';
 
@@ -29,7 +30,7 @@ export async function getTimesheetsForMonth(month: string): Promise<Timesheet[]>
       // Convert any Firestore Timestamps to JS Date objects to make them serializable
       const serializableData: { [key: string]: any } = { ...data };
       for (const key in serializableData) {
-        if (serializableData[key] && typeof serializableData[key].toDate === 'function') {
+        if (serializableData[key] instanceof Timestamp) {
           serializableData[key] = serializableData[key].toDate();
         }
       }
@@ -84,7 +85,7 @@ export async function upsertTimesheet(data: Partial<Timesheet>): Promise<Timeshe
     // Convert any potential Timestamps to Dates for the return value
     const serializableData: { [key: string]: any } = { ...finalData };
       for (const key in serializableData) {
-        if (serializableData[key] && typeof serializableData[key].toDate === 'function') {
+        if (serializableData[key] instanceof Timestamp) {
           serializableData[key] = serializableData[key].toDate();
         }
       }

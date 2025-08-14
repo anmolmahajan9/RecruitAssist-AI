@@ -12,10 +12,30 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  Timestamp,
 } from 'firebase/firestore';
 import type { Employee } from '@/types/employee';
 
 const employeesCollection = collection(firestore, 'employees');
+
+// Helper function to convert Timestamps to Dates
+const convertTimestamps = (data: any): any => {
+  if (data === null || typeof data !== 'object') {
+    return data;
+  }
+  if (data instanceof Timestamp) {
+    return data.toDate();
+  }
+  if (Array.isArray(data)) {
+    return data.map(convertTimestamps);
+  }
+  const newData: { [key: string]: any } = {};
+  for (const key in data) {
+    newData[key] = convertTimestamps(data[key]);
+  }
+  return newData;
+};
+
 
 export async function addEmployee(employee: Omit<Employee, 'id'>): Promise<string> {
   const docRef = await addDoc(employeesCollection, {
@@ -30,10 +50,9 @@ export async function getEmployees(): Promise<Employee[]> {
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => {
       const data = doc.data();
-      // Firestore Timestamps are not serializable, so we exclude it or convert it.
-      // Since we don't display it, we can just exclude it for now.
-      const { createdAt, ...rest } = data;
-      return { id: doc.id, ...rest } as Employee;
+      // Firestore Timestamps are not serializable, so we convert them.
+      const serializableData = convertTimestamps(data);
+      return { id: doc.id, ...serializableData } as Employee;
   });
 }
 
