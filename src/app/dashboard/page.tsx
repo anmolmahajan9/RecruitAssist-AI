@@ -39,11 +39,7 @@ interface UpcomingTask {
 }
 
 interface GroupedTasks {
-  [taskName: string]: { employeeName: string; dueDate: Date }[];
-}
-
-interface CategorizedTaskCounts {
-  [category: string]: number;
+  [taskName: string]: number;
 }
 
 interface DashboardStats {
@@ -52,13 +48,13 @@ interface DashboardStats {
   onboardingComplete: number;
   onboardingPending: number;
   upcomingPoEnds: Employee[];
-  groupedTasks: GroupedTasks;
+  pendingTasks: GroupedTasks;
+  upcomingTasks: GroupedTasks;
   statusCounts: {
     active: number;
     pending: number;
     ended: number;
   };
-  taskSummary: CategorizedTaskCounts;
 }
 
 const formatDate = (dateString: string | Date): string => {
@@ -169,6 +165,9 @@ export default function Dashboard() {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const upcomingThreshold = new Date(today);
+    upcomingThreshold.setDate(today.getDate() + 7);
+
 
     const trackerMap = trackerEntries.reduce((acc, entry) => {
       acc[entry.employeeId] = entry;
@@ -177,7 +176,8 @@ export default function Dashboard() {
 
     const activeEmployees = employees.filter((e) => e.status === 'Active');
 
-    const groupedTasks: GroupedTasks = {};
+    const pendingTasks: GroupedTasks = {};
+    const upcomingTasks: GroupedTasks = {};
 
     const taskDefinitions = [
       {
@@ -206,12 +206,6 @@ export default function Dashboard() {
       },
     ] as const;
 
-    const taskSummary: CategorizedTaskCounts = {};
-
-    for (const task of taskDefinitions) {
-      taskSummary[task.name] = 0; // Initialize with 0
-    }
-
     for (const emp of activeEmployees) {
       const entry = trackerMap[emp.id!] || {};
 
@@ -229,16 +223,13 @@ export default function Dashboard() {
         }
 
         if (status === task.pendingStatus) {
-          taskSummary[task.name]++;
+           if (dueDate < today) { // Overdue
+             pendingTasks[task.name] = (pendingTasks[task.name] || 0) + 1;
+           } else if (dueDate <= upcomingThreshold) { // Upcoming
+             upcomingTasks[task.name] = (upcomingTasks[task.name] || 0) + 1;
+           }
         }
       }
-    }
-
-    // Sort tasks within each group by due date
-    for (const taskName in groupedTasks) {
-      groupedTasks[taskName].sort(
-        (a, b) => a.dueDate.getTime() - b.dueDate.getTime()
-      );
     }
 
     setStats({
@@ -247,9 +238,9 @@ export default function Dashboard() {
       onboardingComplete,
       onboardingPending,
       upcomingPoEnds,
-      groupedTasks,
+      pendingTasks,
+      upcomingTasks,
       statusCounts,
-      taskSummary,
     });
     setIsLoading(false);
   };
@@ -257,6 +248,9 @@ export default function Dashboard() {
   useEffect(() => {
     fetchStats();
   }, []);
+  
+  const hasPendingTasks = stats && Object.keys(stats.pendingTasks).length > 0;
+  const hasUpcomingTasks = stats && Object.keys(stats.upcomingTasks).length > 0;
 
   return (
     <main>
@@ -369,35 +363,61 @@ export default function Dashboard() {
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
                   <ListTodo className="w-6 h-6 text-primary" />
-                  Monthly Task Summary
+                   Task Summary
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex-grow">
-                {Object.keys(stats.taskSummary).length > 0 ? (
-                  <div className="space-y-3">
-                    {Object.entries(stats.taskSummary).map(
-                      ([category, count]) => (
-                        <div
-                          key={category}
-                          className="flex justify-between items-center"
-                        >
-                          <span className="text-muted-foreground">
-                            {category}
-                          </span>
-                          <span className="font-bold text-lg text-destructive">
-                            {count}{' '}
-                            <span className="text-sm font-normal text-muted-foreground">
-                              Pending
-                            </span>
-                          </span>
-                        </div>
-                      )
-                    )}
-                  </div>
-                ) : (
+                {!hasPendingTasks && !hasUpcomingTasks ? (
                   <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full">
                     <CheckCircle2 className="w-12 h-12 text-green-500 mb-2" />
-                    <p>No task data available for this month.</p>
+                    <p>All tasks are up to date!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                     {hasPendingTasks && (
+                       <div>
+                          <h4 className="font-bold text-destructive mb-2">Pending Tasks</h4>
+                           <div className="space-y-2">
+                            {Object.entries(stats.pendingTasks).map(
+                              ([category, count]) => (
+                                <div
+                                  key={category}
+                                  className="flex justify-between items-center"
+                                >
+                                  <span className="text-muted-foreground">
+                                    {category}
+                                  </span>
+                                  <span className="font-bold text-lg text-destructive">
+                                    {count}
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </div>
+                       </div>
+                     )}
+                      {hasUpcomingTasks && (
+                       <div>
+                          <h4 className="font-bold text-amber-600 mb-2 pt-2 border-t">Upcoming Tasks</h4>
+                           <div className="space-y-2">
+                            {Object.entries(stats.upcomingTasks).map(
+                              ([category, count]) => (
+                                <div
+                                  key={category}
+                                  className="flex justify-between items-center"
+                                >
+                                  <span className="text-muted-foreground">
+                                    {category}
+                                  </span>
+                                  <span className="font-bold text-lg text-amber-600">
+                                    {count}
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </div>
+                       </div>
+                     )}
                   </div>
                 )}
               </CardContent>
