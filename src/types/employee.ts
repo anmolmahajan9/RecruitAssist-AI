@@ -166,16 +166,20 @@ export interface MonthlyTracker {
   timesheetStatus: TimesheetStatus;
   timesheetUpdatedAt?: any;
   timesheetUpdatedBy?: string;
+  timesheetNotes?: string;
   
   invoiceStatus: InvoiceStatus;
   invoiceUpdatedAt?: any;
   invoiceUpdatedBy?: string;
+  invoiceNotes?: string;
   
   hrCheckin12thStatus: HrCheckinStatus;
   hrCheckin12thUpdatedAt?: any;
   hrCheckin12thUpdatedBy?: string;
+  hrCheckin12thNotes?: string;
 
   hrCheckin25thStatus: HrCheckinStatus;
   hrCheckin25thUpdatedAt?: any;
   hrCheckin25thUpdatedBy?: string;
+  hrCheckin25thNotes?: string;
 }
