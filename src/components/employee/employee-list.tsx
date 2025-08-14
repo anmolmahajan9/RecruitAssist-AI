@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight } from 'lucide-react';
+import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle } from 'lucide-react';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
@@ -19,11 +19,29 @@ interface GroupedEmployees {
   [key: string]: Employee[];
 }
 
-const getOnboardingProgress = (steps: OnboardingStep[] = []) => {
-    if (!steps || steps.length === 0) return 0;
+const getOnboardingProgressCount = (steps: OnboardingStep[] = []) => {
+    if (!steps || steps.length === 0) return { completed: 0, total: 0 };
     
-    const doneCount = steps.filter(step => step.status === 'Done').length;
-    return Math.round((doneCount / steps.length) * 100);
+    const completedCount = steps.filter(step => step.status === 'Done' || step.status === 'NA').length;
+    return { completed: completedCount, total: steps.length };
+}
+
+const getPoProgress = (doj: string, poEndDate: string): number => {
+    const startDate = new Date(doj);
+    const endDate = new Date(poEndDate);
+    const today = new Date();
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
+      return 100; // Return 100 if dates are invalid or start is after end
+    }
+
+    if (today >= endDate) return 100;
+    if (today <= startDate) return 0;
+
+    const totalDuration = endDate.getTime() - startDate.getTime();
+    const elapsedDuration = today.getTime() - startDate.getTime();
+
+    return Math.round((elapsedDuration / totalDuration) * 100);
 }
 
 
@@ -107,14 +125,14 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
             <h2 className="text-2xl font-bold tracking-tight text-foreground mb-4 pb-2 border-b-2 border-primary/20">{month}</h2>
             <div className="space-y-4">
               {groupedEmployees[month].map((employee) => {
-                const onboardingProgress = getOnboardingProgress(employee.onboarding?.steps);
+                const onboardingCount = getOnboardingProgressCount(employee.onboarding?.steps);
+                const poProgress = getPoProgress(employee.doj, employee.poEndDate);
                 return (
                     <Card 
                         key={employee.id} 
                         className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-                        onClick={() => onEdit(employee)}
                     >
-                        <div className="p-4 grid grid-cols-12 items-center gap-4 cursor-pointer">
+                        <div className="p-4 grid grid-cols-12 items-center gap-4 cursor-pointer" onClick={() => onEdit(employee)}>
                             {/* Left part: Name, Role, Status */}
                             <div className="col-span-12 md:col-span-3">
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
@@ -129,12 +147,21 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                 <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
                                 <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {employee.doj}</span></div>
                             </div>
-                            {/* Progress Bar */}
-                            <div className="col-span-12 md:col-span-5">
-                                <Label className="text-xs font-semibold">Onboarding Progress</Label>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <Progress value={onboardingProgress} className="h-2"/>
-                                    <span className="text-sm font-bold text-primary">{onboardingProgress}%</span>
+                            {/* Progress Bars & Counts */}
+                            <div className="col-span-12 md:col-span-5 space-y-3">
+                                <div>
+                                    <Label className="text-xs font-semibold">Contract Duration</Label>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <Progress value={poProgress} className="h-2"/>
+                                        <span className="text-sm font-bold text-primary">{poProgress}%</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 pt-1">
+                                    <Label className="text-xs font-semibold">Onboarding:</Label>
+                                    <Badge variant="secondary" className="font-bold text-base">
+                                        <CheckCircle className="w-4 h-4 mr-1.5 text-green-500"/>
+                                        {onboardingCount.completed} / {onboardingCount.total}
+                                    </Badge>
                                 </div>
                             </div>
                             {/* Action Button */}
