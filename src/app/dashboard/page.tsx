@@ -167,15 +167,15 @@ export default function Dashboard() {
                     Onboarding Status
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                   <div className="flex justify-around items-center text-center">
+                <CardContent>
+                   <div className="flex justify-center items-center text-center gap-8">
                         <div>
                             <p className="text-4xl font-bold text-green-500">{stats.onboardingComplete}</p>
-                            <p className="text-sm text-muted-foreground">Completed</p>
+                            <p className="text-sm text-muted-foreground mt-1">Completed</p>
                         </div>
                         <div>
                             <p className="text-4xl font-bold text-yellow-500">{stats.onboardingPending}</p>
-                            <p className="text-sm text-muted-foreground">Pending</p>
+                            <p className="text-sm text-muted-foreground mt-1">Pending</p>
                         </div>
                    </div>
                 </CardContent>
@@ -188,25 +188,25 @@ export default function Dashboard() {
                     Status Overview
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-around items-center text-center">
+                <CardContent>
+                  <div className="flex justify-center items-center text-center gap-8">
                     <div>
                       <p className="text-4xl font-bold text-green-500">
                         {stats.statusCounts.active}
                       </p>
-                      <p className="text-sm text-muted-foreground">Active</p>
+                      <p className="text-sm text-muted-foreground mt-1">Active</p>
                     </div>
                     <div>
                       <p className="text-4xl font-bold text-yellow-500">
                         {stats.statusCounts.pending}
                       </p>
-                      <p className="text-sm text-muted-foreground">Pending</p>
+                      <p className="text-sm text-muted-foreground mt-1">Pending</p>
                     </div>
                     <div>
                       <p className="text-4xl font-bold text-red-500">
                         {stats.statusCounts.ended}
                       </p>
-                      <p className="text-sm text-muted-foreground">Ended</p>
+                      <p className="text-sm text-muted-foreground mt-1">Ended</p>
                     </div>
                   </div>
                 </CardContent>
