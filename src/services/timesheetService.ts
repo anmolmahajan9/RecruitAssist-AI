@@ -25,7 +25,15 @@ export async function getTimesheetsForMonth(month: string): Promise<Timesheet[]>
   
   return snapshot.docs.map(doc => {
       const data = doc.data();
-      return { id: doc.id, ...data } as Timesheet;
+      // Convert any Firestore Timestamps to JS Date objects to make them serializable
+      const serializableData = { ...data };
+      if (serializableData.timesheetUpdatedAt?.toDate) {
+          serializableData.timesheetUpdatedAt = serializableData.timesheetUpdatedAt.toDate();
+      }
+      if (serializableData.invoiceUpdatedAt?.toDate) {
+          serializableData.invoiceUpdatedAt = serializableData.invoiceUpdatedAt.toDate();
+      }
+      return { id: doc.id, ...serializableData } as Timesheet;
   });
 }
 
@@ -59,21 +67,26 @@ export async function upsertTimesheet(data: Partial<Timesheet>): Promise<Timeshe
         existingData = snapshot.docs[0].data();
     }
     
-    // Explicitly handle date objects for Firestore
+    // Merge new data with existing data
     const dataToSet = {
         ...existingData,
         ...data,
-        timesheetUpdatedAt: data.timesheetUpdatedAt || existingData.timesheetUpdatedAt || null,
-        invoiceUpdatedAt: data.invoiceUpdatedAt || existingData.invoiceUpdatedAt || null,
     };
     
     await setDoc(docRef, dataToSet, { merge: true });
 
-    // Return the merged data, ensuring dates are correctly represented
+    // Return the merged data, ensuring dates are correctly represented as serializable objects
     const finalData = {
         id: docRef.id,
         ...dataToSet
     } as Timesheet;
+    
+    if (finalData.timesheetUpdatedAt?.toDate) {
+        finalData.timesheetUpdatedAt = finalData.timesheetUpdatedAt.toDate();
+    }
+     if (finalData.invoiceUpdatedAt?.toDate) {
+        finalData.invoiceUpdatedAt = finalData.invoiceUpdatedAt.toDate();
+    }
 
     return finalData;
 }
