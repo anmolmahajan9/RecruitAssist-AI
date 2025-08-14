@@ -196,7 +196,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                         key={employee.id} 
                         className="group transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
                     >
-                        <div className={cn(
+                         <div className={cn(
                             "absolute left-0 top-0 h-full w-2 group-hover:w-8 transition-all duration-300 ease-in-out flex items-center justify-center", 
                             getStatusColor(employee.status)
                         )}>
@@ -279,7 +279,13 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                             </Badge>
                                         )}
                                     </div>
-                                    <Progress value={100} indicatorClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-green-400'} value2={poProgress} indicator2ClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-red-400'} className="h-2"/>
+                                    <Progress 
+                                      value={100}
+                                      indicatorClassName={cn(employee.status === 'Ended' ? 'bg-gray-300' : (daysLeft > 45 ? 'bg-green-400' : 'bg-yellow-400'))}
+                                      value2={poProgress} 
+                                      indicator2ClassName={cn(employee.status === 'Ended' ? 'bg-gray-300' : 'bg-red-400')}
+                                      className="h-2"
+                                    />
                                     <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                                       <span>{formatDate(employee.doj)}</span>
                                       <span>{formatDate(employee.poEndDate)}</span>
@@ -302,3 +308,4 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
     </div>
   );
 }
+
