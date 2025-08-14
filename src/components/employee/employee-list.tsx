@@ -224,19 +224,19 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                     <Label className="text-xs font-semibold">Onboarding:</Label>
                                     <div className="flex items-center gap-2">
                                         <Badge variant="secondary" className="font-bold bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
-                                            <CheckCircle className="w-3 h-3 mr-1.5"/>
-                                            {onboardingCount.completed} Done
+                                            <CheckCircle className="w-3 h-3 mr-1"/>
+                                            {onboardingCount.completed}
                                         </Badge>
                                         {onboardingCount.inProgress > 0 && (
                                             <Badge variant="secondary" className="font-bold bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
-                                                <CircleAlert className="w-3 h-3 mr-1.5"/>
-                                                {onboardingCount.inProgress} In Progress
+                                                <CircleAlert className="w-3 h-3 mr-1"/>
+                                                {onboardingCount.inProgress}
                                             </Badge>
                                         )}
                                         {onboardingCount.pending > 0 && (
                                             <Badge variant="secondary" className="font-bold bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700">
-                                                <CircleDotDashed className="w-3 h-3 mr-1.5"/>
-                                                {onboardingCount.pending} Pending
+                                                <CircleDotDashed className="w-3 h-3 mr-1"/>
+                                                {onboardingCount.pending}
                                             </Badge>
                                         )}
                                     </div>
