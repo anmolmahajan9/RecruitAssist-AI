@@ -12,7 +12,7 @@ import {
   CardHeader,
 } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, Users, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Users, ArrowLeft, CalendarClock } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 
@@ -22,6 +22,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   
   const getActiveTab = () => {
     if (pathname === '/dashboard/employees') return 'employees';
+    if (pathname === '/dashboard/timesheets') return 'timesheets';
     return 'dashboard';
   };
 
@@ -71,6 +72,12 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
                     <Link href="/dashboard/employees" className="flex items-center gap-2 px-4 py-2">
                          <Users className="h-4 w-4"/>
                          All Employees
+                    </Link>
+                </TabsTrigger>
+                 <TabsTrigger value="timesheets" asChild>
+                    <Link href="/dashboard/timesheets" className="flex items-center gap-2 px-4 py-2">
+                         <CalendarClock className="h-4 w-4"/>
+                         Timesheets
                     </Link>
                 </TabsTrigger>
             </TabsList>

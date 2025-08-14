@@ -116,3 +116,31 @@ export interface Employee {
   notes?: string;
   createdAt?: any;
 }
+
+export const timesheetStatuses = [
+  'Pending',
+  'Received',
+  'Sent to Client',
+  'Approved',
+  'Not Applicable',
+] as const;
+
+export const invoiceStatuses = [
+  'Not Due',
+  'Due, Not Raised',
+  'Sent to Client',
+  'Paid',
+  'Not Applicable',
+] as const;
+
+export type TimesheetStatus = (typeof timesheetStatuses)[number];
+export type InvoiceStatus = (typeof invoiceStatuses)[number];
+
+export interface Timesheet {
+  id?: string;
+  employeeId: string;
+  month: string; // YYYY-MM format
+  timesheetStatus: TimesheetStatus;
+  invoiceStatus: InvoiceStatus;
+  updatedAt: any;
+}
