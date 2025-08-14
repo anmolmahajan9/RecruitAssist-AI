@@ -87,18 +87,21 @@ export function EmployeeForm({
 
   useEffect(() => {
     if (isOpen && employee) {
+      // Deep copy to prevent state mutation issues, especially for nested onboarding object
+      const employeeCopy = JSON.parse(JSON.stringify(employee));
       setFormData({
         ...initialEmployeeState,
-        ...employee,
+        ...employeeCopy,
         onboarding: {
           ...initialOnboardingState,
-          ...(employee.onboarding || {}),
+          ...(employeeCopy.onboarding || {}),
         },
       });
     } else if (!employee) {
        setFormData(initialEmployeeState);
     }
   }, [isOpen, employee]);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -128,8 +131,8 @@ export function EmployeeForm({
     setIsLoading(true);
     setError(null);
     try {
-      if (employee) {
-        await updateEmployee(employee.id!, formData);
+      if (employee && employee.id) {
+        await updateEmployee(employee.id, formData);
       } else {
         await addEmployee(formData);
       }
@@ -145,7 +148,7 @@ export function EmployeeForm({
   const handleClose = (open: boolean) => {
       if (!open) {
         setError(null);
-        setFormData(initialEmployeeState); // Reset form on close
+        setFormData(initialEmployeeState);
       }
       onOpenChange(open);
   }
@@ -168,7 +171,7 @@ export function EmployeeForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="sm:max-w-4xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-6 pb-4 border-b">
           <DialogTitle className="text-2xl">
             {employee ? 'Edit Employee Record' : 'Add New Employee'}
@@ -178,14 +181,14 @@ export function EmployeeForm({
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="flex-grow overflow-hidden">
-          <ScrollArea className="h-[calc(90vh-160px)]">
-            <div className="p-6">
-              <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full space-y-4">
+        <div className="flex-grow overflow-hidden">
+          <ScrollArea className="h-full">
+            <form onSubmit={handleSubmit} className="p-6">
+               <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full space-y-4">
                   <AccordionItem value="item-1">
                       <AccordionTrigger className="text-lg font-semibold hover:no-underline"><User className="mr-2 h-5 w-5 text-primary"/> Employee Details</AccordionTrigger>
                       <AccordionContent className="pt-4">
-                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div><Label htmlFor="name">Name</Label><Input id="name" name="name" value={formData.name} onChange={handleInputChange} required /></div>
                             <div><Label htmlFor="client">Client</Label><Input id="client" name="client" value={formData.client} onChange={handleInputChange} required /></div>
                             <div><Label htmlFor="role">Role</Label><Input id="role" name="role" value={formData.role} onChange={handleInputChange} required /></div>
@@ -198,7 +201,7 @@ export function EmployeeForm({
                             <div><Label htmlFor="billingRate">Billing Rate (PO)</Label><Input id="billingRate" name="billingRate" value={formData.billingRate} onChange={handleInputChange}/></div>
                             <div><Label>Status</Label><Select name="status" value={formData.status} onValueChange={(v) => handleSelectChange('status', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Active">Active</SelectItem><SelectItem value="Ended">Ended</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent></Select></div>
                             <div><Label>Stage</Label><Select name="stage" value={formData.stage} onValueChange={(v) => handleSelectChange('stage', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Joined">Joined</SelectItem><SelectItem value="In-Progress">In-Progress</SelectItem></SelectContent></Select></div>
-                            <div><Label>Experience Source</Label><Select name="experience" value={formData.experience} onValueChange={(v) => handleSelectChange('experience', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="IN">IN</SelectItem><SelectItem value="OUT">OUT</SelectItem><SelectItem value="NA">NA</SelectItem></SelectContent></Select></div>
+                            <div className="lg:col-span-3"><Label>Experience Source</Label><Select name="experience" value={formData.experience} onValueChange={(v) => handleSelectChange('experience', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="IN">IN</SelectItem><SelectItem value="OUT">OUT</SelectItem><SelectItem value="NA">NA</SelectItem></SelectContent></Select></div>
                          </div>
                          <div className="flex items-center space-x-6 pt-6">
                             <div className="flex items-center space-x-2"><Checkbox id="optForPF" checked={formData.optForPF} onCheckedChange={(c) => handleCheckboxChange('optForPF', c as boolean)} /><Label htmlFor="optForPF">Opt for PF?</Label></div>
@@ -209,22 +212,22 @@ export function EmployeeForm({
                    <AccordionItem value="item-2">
                       <AccordionTrigger className="text-lg font-semibold hover:no-underline"><FileText className="mr-2 h-5 w-5 text-primary"/> Onboarding Tracker</AccordionTrigger>
                        <AccordionContent className="pt-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {onboardingFields.map(field => (
-                                <div key={field.key} className="p-2 rounded-md bg-secondary/50">
-                                    <Label className="text-sm font-medium">{field.label}</Label>
+                                <div key={field.key} className="p-3 rounded-lg bg-secondary/50 border space-y-2">
+                                    <Label className="text-sm font-medium text-foreground">{field.label}</Label>
                                     {field.type === 'status' ? (
                                         <RadioGroup
                                             value={formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>]}
                                             onValueChange={(v) => handleOnboardingChange(field.key, v)}
-                                            className="flex items-center space-x-4 pt-2"
+                                            className="flex items-center space-x-4 pt-1"
                                         >
                                             <div className="flex items-center space-x-2"><RadioGroupItem value="Done" id={`${field.key}-done`}/><Label htmlFor={`${field.key}-done`}>Done</Label></div>
                                             <div className="flex items-center space-x-2"><RadioGroupItem value="Pending" id={`${field.key}-pending`}/><Label htmlFor={`${field.key}-pending`}>Pending</Label></div>
                                             <div className="flex items-center space-x-2"><RadioGroupItem value="NA" id={`${field.key}-na`}/><Label htmlFor={`${field.key}-na`}>N/A</Label></div>
                                         </RadioGroup>
                                     ) : (
-                                        <Input className="mt-2" name={field.key} value={formData.onboarding[field.key]} onChange={(e) => handleOnboardingChange(field.key, e.target.value)} />
+                                        <Input name={field.key} value={formData.onboarding[field.key]} onChange={(e) => handleOnboardingChange(field.key, e.target.value)} />
                                     )}
                                 </div>
                             ))}
@@ -232,19 +235,19 @@ export function EmployeeForm({
                       </AccordionContent>
                   </AccordionItem>
               </Accordion>
-            </div>
+               <DialogFooter className="p-4 mt-6 -mx-6 sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-t">
+                {error && <p className="text-sm text-destructive mr-auto">{error}</p>}
+                 <Button type="button" variant="outline" onClick={() => handleClose(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {employee ? 'Save Changes' : 'Create Employee'}
+                </Button>
+              </DialogFooter>
+            </form>
           </ScrollArea>
-           <DialogFooter className="p-4 border-t bg-background">
-            {error && <p className="text-sm text-destructive mr-auto">{error}</p>}
-             <Button type="button" variant="outline" onClick={() => handleClose(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {employee ? 'Save Changes' : 'Create Employee'}
-            </Button>
-          </DialogFooter>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
