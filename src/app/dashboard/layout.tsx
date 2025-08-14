@@ -59,52 +59,40 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       <main>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Link href="/dashboard">
-            <Card
+        <div className="flex items-center gap-2 mb-8 border-b">
+           <Link
+              href="/dashboard"
               className={cn(
-                'cursor-pointer h-full p-4 flex items-center justify-center text-center transition-colors border-2',
+                'px-4 py-2 text-sm font-semibold transition-colors',
                 activeTab === 'dashboard'
-                  ? 'border-primary bg-primary/5'
-                  : 'hover:border-primary/50 bg-card'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-primary'
               )}
             >
-              <div className="flex items-center gap-3">
-                <LayoutDashboard className="w-6 h-6 text-primary" />
-                <span className="font-semibold text-lg">Dashboard</span>
-              </div>
-            </Card>
-          </Link>
-          <Link href="/dashboard/employees">
-            <Card
+              Dashboard
+            </Link>
+             <Link
+              href="/dashboard/employees"
               className={cn(
-                'cursor-pointer h-full p-4 flex items-center justify-center text-center transition-colors border-2',
+                'px-4 py-2 text-sm font-semibold transition-colors',
                 activeTab === 'employees'
-                  ? 'border-primary bg-primary/5'
-                  : 'hover:border-primary/50 bg-card'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-primary'
               )}
             >
-              <div className="flex items-center gap-3">
-                <Users className="w-6 h-6 text-primary" />
-                <span className="font-semibold text-lg">All Employees</span>
-              </div>
-            </Card>
-          </Link>
-          <Link href="/dashboard/monthly-tracker">
-            <Card
+              All Employees
+            </Link>
+             <Link
+              href="/dashboard/monthly-tracker"
               className={cn(
-                'cursor-pointer h-full p-4 flex items-center justify-center text-center transition-colors border-2',
+                'px-4 py-2 text-sm font-semibold transition-colors',
                 activeTab === 'monthly-tracker'
-                  ? 'border-primary bg-primary/5'
-                  : 'hover:border-primary/50 bg-card'
+                  ? 'border-b-2 border-primary text-primary'
+                  : 'text-muted-foreground hover:text-primary'
               )}
             >
-               <div className="flex items-center gap-3">
-                <CalendarCheck className="w-6 h-6 text-primary" />
-                <span className="font-semibold text-lg">Monthly Tracker</span>
-              </div>
-            </Card>
-          </Link>
+              Monthly Tracker
+            </Link>
         </div>
         {children}
       </main>
