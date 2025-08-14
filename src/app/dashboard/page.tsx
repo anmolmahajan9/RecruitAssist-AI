@@ -168,14 +168,14 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                   <div className="flex justify-center items-center text-center gap-8">
+                   <div className="flex justify-around items-center text-center">
                         <div>
-                            <p className="text-4xl font-bold text-green-500">{stats.onboardingComplete}</p>
-                            <p className="text-sm text-muted-foreground mt-1">Completed</p>
+                            <p className="text-5xl font-bold text-green-500">{stats.onboardingComplete}</p>
+                            <p className="text-sm text-muted-foreground mt-2">Completed</p>
                         </div>
                         <div>
-                            <p className="text-4xl font-bold text-yellow-500">{stats.onboardingPending}</p>
-                            <p className="text-sm text-muted-foreground mt-1">Pending</p>
+                            <p className="text-5xl font-bold text-yellow-500">{stats.onboardingPending}</p>
+                            <p className="text-sm text-muted-foreground mt-2">Pending</p>
                         </div>
                    </div>
                 </CardContent>
@@ -189,24 +189,24 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex justify-center items-center text-center gap-8">
+                  <div className="flex justify-around items-center text-center">
                     <div>
-                      <p className="text-4xl font-bold text-green-500">
+                      <p className="text-5xl font-bold text-green-500">
                         {stats.statusCounts.active}
                       </p>
-                      <p className="text-sm text-muted-foreground mt-1">Active</p>
+                      <p className="text-sm text-muted-foreground mt-2">Active</p>
                     </div>
                     <div>
-                      <p className="text-4xl font-bold text-yellow-500">
+                      <p className="text-5xl font-bold text-yellow-500">
                         {stats.statusCounts.pending}
                       </p>
-                      <p className="text-sm text-muted-foreground mt-1">Pending</p>
+                      <p className="text-sm text-muted-foreground mt-2">Pending</p>
                     </div>
                     <div>
-                      <p className="text-4xl font-bold text-red-500">
+                      <p className="text-5xl font-bold text-red-500">
                         {stats.statusCounts.ended}
                       </p>
-                      <p className="text-sm text-muted-foreground mt-1">Ended</p>
+                      <p className="text-sm text-muted-foreground mt-2">Ended</p>
                     </div>
                   </div>
                 </CardContent>
