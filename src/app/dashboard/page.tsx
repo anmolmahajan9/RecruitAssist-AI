@@ -11,7 +11,8 @@ import {
   UserCheck,
   Loader2,
   Bell,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight
 } from 'lucide-react';
 import {
   Card,
@@ -19,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
+  CardFooter,
 } from '@/components/ui/card';
 import { getEmployees } from '@/services/employeeService';
 import type { Employee } from '@/types/employee';
@@ -39,16 +41,17 @@ interface DashboardStats {
 const formatDate = (dateString: string): string => {
   if (!dateString) return 'N/A';
   try {
-    const date = new Date(dateString);
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
     if (isNaN(date.getTime())) return dateString;
     // Use UTC methods to avoid timezone issues during rendering
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const month = date.toLocaleString('default', {
+    const dayFormatted = String(date.getUTCDate()).padStart(2, '0');
+    const monthFormatted = date.toLocaleString('default', {
       month: 'short',
       timeZone: 'UTC',
     });
-    const year = date.getUTCFullYear();
-    return `${day}-${month}-${year}`;
+    const yearFormatted = date.getUTCFullYear();
+    return `${dayFormatted}-${monthFormatted}-${yearFormatted}`;
   } catch (e) {
     return dateString;
   }
@@ -141,16 +144,21 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Stat Cards */}
                <Link href="/dashboard/employees">
-                  <Card className="flex flex-col justify-center items-center text-center p-6 bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full">
-                    <Users className="w-12 h-12 text-primary mb-4" />
-                    <CardTitle className="text-5xl font-extrabold text-foreground">
-                      {stats.totalActive}
-                    </CardTitle>
-                    <CardDescription className="text-lg font-medium">
-                      Active Employees
-                    </CardDescription>
-                  </Card>
-                </Link>
+                 <Card className="flex flex-col bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full">
+                    <CardHeader className="flex-grow flex flex-col items-center text-center p-6 pb-2">
+                        <Users className="w-12 h-12 text-primary mb-4" />
+                        <CardTitle className="text-5xl font-extrabold text-foreground">
+                        {stats.totalActive}
+                        </CardTitle>
+                        <CardDescription className="text-lg font-medium">
+                        Active Employees
+                        </CardDescription>
+                    </CardHeader>
+                    <CardFooter className="p-4 pt-0 flex justify-end items-center text-primary font-semibold">
+                       View All <ArrowRight className="ml-2 h-4 w-4" />
+                    </CardFooter>
+                 </Card>
+               </Link>
 
               <Card>
                 <CardHeader>
