@@ -202,7 +202,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                 {employee.status}
                             </span>
                         </div>
-                        <div className="p-4 pl-6 grid grid-cols-12 items-center gap-4">
+                        <div className="p-4 pl-12 grid grid-cols-12 items-center gap-4">
                             {/* Left part: Name, Role, Status */}
                             <div className="col-span-12 md:col-span-4">
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
