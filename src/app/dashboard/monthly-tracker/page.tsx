@@ -223,10 +223,10 @@ export default function MonthlyTrackerPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
-                                <TableHead>Timesheet</TableHead>
-                                <TableHead>Invoice</TableHead>
                                 <TableHead>HR Check-in (12th)</TableHead>
                                 <TableHead>HR Check-in (25th)</TableHead>
+                                <TableHead>Timesheet</TableHead>
+                                <TableHead>Invoice</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -259,6 +259,46 @@ export default function MonthlyTrackerPage() {
                                             <TableRow key={employee.id}>
                                                 <TableCell className="font-medium">{employee.name}</TableCell>
                                                 
+                                                {/* HR Check-in 12th */}
+                                                <TableCell>
+                                                   <div className="flex items-center gap-2">
+                                                      <Select 
+                                                          value={entry.hrCheckin12thStatus}
+                                                          onValueChange={(v: HrCheckinStatus) => handleStatusChange(employee.id!, 'hrCheckin12th', v)}
+                                                      >
+                                                          <SelectTrigger className={cn("w-32", getStatusColor(entry.hrCheckin12thStatus))}>
+                                                              <SelectValue />
+                                                          </SelectTrigger>
+                                                          <SelectContent>
+                                                              {hrCheckinStatuses.map(status => (
+                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                                                              ))}
+                                                          </SelectContent>
+                                                      </Select>
+                                                      {tooltips.hrCheckin12th && <Tooltip><TooltipTrigger asChild><History className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger><TooltipContent>{tooltips.hrCheckin12th}</TooltipContent></Tooltip>}
+                                                    </div>
+                                                </TableCell>
+                                                
+                                                {/* HR Check-in 25th */}
+                                                <TableCell>
+                                                   <div className="flex items-center gap-2">
+                                                      <Select 
+                                                          value={entry.hrCheckin25thStatus}
+                                                          onValueChange={(v: HrCheckinStatus) => handleStatusChange(employee.id!, 'hrCheckin25th', v)}
+                                                      >
+                                                          <SelectTrigger className={cn("w-32", getStatusColor(entry.hrCheckin25thStatus))}>
+                                                              <SelectValue />
+                                                          </SelectTrigger>
+                                                          <SelectContent>
+                                                              {hrCheckinStatuses.map(status => (
+                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                                                              ))}
+                                                          </SelectContent>
+                                                      </Select>
+                                                      {tooltips.hrCheckin25th && <Tooltip><TooltipTrigger asChild><History className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger><TooltipContent>{tooltips.hrCheckin25th}</TooltipContent></Tooltip>}
+                                                    </div>
+                                                </TableCell>
+
                                                 {/* Timesheet Status */}
                                                 <TableCell>
                                                     <div className="flex items-center gap-2">
@@ -299,45 +339,6 @@ export default function MonthlyTrackerPage() {
                                                     </div>
                                                 </TableCell>
 
-                                                {/* HR Check-in 12th */}
-                                                <TableCell>
-                                                   <div className="flex items-center gap-2">
-                                                      <Select 
-                                                          value={entry.hrCheckin12thStatus}
-                                                          onValueChange={(v: HrCheckinStatus) => handleStatusChange(employee.id!, 'hrCheckin12th', v)}
-                                                      >
-                                                          <SelectTrigger className={cn("w-32", getStatusColor(entry.hrCheckin12thStatus))}>
-                                                              <SelectValue />
-                                                          </SelectTrigger>
-                                                          <SelectContent>
-                                                              {hrCheckinStatuses.map(status => (
-                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                                                              ))}
-                                                          </SelectContent>
-                                                      </Select>
-                                                      {tooltips.hrCheckin12th && <Tooltip><TooltipTrigger asChild><History className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger><TooltipContent>{tooltips.hrCheckin12th}</TooltipContent></Tooltip>}
-                                                    </div>
-                                                </TableCell>
-                                                
-                                                {/* HR Check-in 25th */}
-                                                <TableCell>
-                                                   <div className="flex items-center gap-2">
-                                                      <Select 
-                                                          value={entry.hrCheckin25thStatus}
-                                                          onValueChange={(v: HrCheckinStatus) => handleStatusChange(employee.id!, 'hrCheckin25th', v)}
-                                                      >
-                                                          <SelectTrigger className={cn("w-32", getStatusColor(entry.hrCheckin25thStatus))}>
-                                                              <SelectValue />
-                                                          </SelectTrigger>
-                                                          <SelectContent>
-                                                              {hrCheckinStatuses.map(status => (
-                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                                                              ))}
-                                                          </SelectContent>
-                                                      </Select>
-                                                      {tooltips.hrCheckin25th && <Tooltip><TooltipTrigger asChild><History className="h-4 w-4 text-muted-foreground cursor-pointer" /></TooltipTrigger><TooltipContent>{tooltips.hrCheckin25th}</TooltipContent></Tooltip>}
-                                                    </div>
-                                                </TableCell>
                                             </TableRow>
                                         )
                                     })}
