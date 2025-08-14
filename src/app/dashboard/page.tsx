@@ -35,6 +35,7 @@ interface DashboardStats {
   totalClients: number;
   onboardingComplete: number;
   onboardingPending: number;
+
   upcomingPoEnds: Employee[];
   statusCounts: {
     active: number;
@@ -155,9 +156,9 @@ export default function Dashboard() {
           </div>
         ) : (
           stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Stat Cards */}
-               <Link href="/dashboard/employees">
+               <Link href="/dashboard/employees" className="lg:col-span-1">
                  <Card className="flex flex-col bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full">
                     <CardHeader className="flex-grow flex flex-col items-center text-center p-6 pb-2">
                         <Users className="w-12 h-12 text-primary mb-4" />
@@ -174,7 +175,7 @@ export default function Dashboard() {
                  </Card>
                </Link>
                
-              <Card>
+              <Card className="lg:col-span-1">
                 <CardHeader>
                   <CardTitle className="text-xl flex items-center gap-2">
                     <UserCheck className="w-6 h-6 text-primary" />
@@ -195,7 +196,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="lg:col-span-1">
                 <CardHeader>
                   <CardTitle className="text-xl flex items-center gap-2">
                     <Building className="w-6 h-6 text-primary" />
@@ -225,28 +226,10 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-
-                <Card 
-                  className="flex flex-col bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full"
-                  onClick={() => setIsClientManagerOpen(true)}
-               >
-                    <CardHeader className="flex-grow flex flex-col items-center text-center p-6 pb-2">
-                        <Landmark className="w-12 h-12 text-primary mb-4" />
-                        <CardTitle className="text-5xl font-extrabold text-foreground">
-                        {stats.totalClients}
-                        </CardTitle>
-                        <CardDescription className="text-lg font-medium">
-                        Total Clients
-                        </CardDescription>
-                    </CardHeader>
-                    <CardFooter className="p-4 pt-0 flex justify-end items-center text-primary font-semibold">
-                       Manage Clients <ArrowRight className="ml-2 h-4 w-4" />
-                    </CardFooter>
-                 </Card>
-
-
+              
+              <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Upcoming PO Ends Card */}
-                <Card className="md:col-span-2 lg:col-span-4">
+                <Card>
                     <CardHeader>
                         <CardTitle className="text-xl flex items-center gap-2">
                             <Bell className="w-6 h-6 text-primary" />
@@ -274,7 +257,25 @@ export default function Dashboard() {
                         )}
                     </CardContent>
                 </Card>
-
+                
+                 <Card 
+                  className="flex flex-col bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full"
+                  onClick={() => setIsClientManagerOpen(true)}
+               >
+                    <CardHeader className="flex-grow flex flex-col items-center text-center p-6 pb-2">
+                        <Landmark className="w-12 h-12 text-primary mb-4" />
+                        <CardTitle className="text-5xl font-extrabold text-foreground">
+                        {stats.totalClients}
+                        </CardTitle>
+                        <CardDescription className="text-lg font-medium">
+                        Total Clients
+                        </CardDescription>
+                    </CardHeader>
+                    <CardFooter className="p-4 pt-0 flex justify-end items-center text-primary font-semibold">
+                       Manage Clients <ArrowRight className="ml-2 h-4 w-4" />
+                    </CardFooter>
+                 </Card>
+               </div>
             </div>
           )
         )}
