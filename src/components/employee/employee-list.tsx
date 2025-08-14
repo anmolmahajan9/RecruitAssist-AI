@@ -82,6 +82,23 @@ const getPoProgress = (doj: string, poEndDate: string): { percentage: number, da
     return { percentage, daysLeft };
 }
 
+const formatDate = (dateString: string): string => {
+    if (!dateString) return '';
+    try {
+        const date = new Date(dateString);
+        // Check for invalid date, which can happen with empty or malformed strings
+        if (isNaN(date.getTime())) return dateString;
+
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = date.toLocaleString('default', { month: 'short', timeZone: 'UTC' });
+        const year = date.getUTCFullYear();
+        
+        return `${day}-${month}-${year}`;
+    } catch (e) {
+        return dateString; // Return original string on error
+    }
+};
+
 
 export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeListProps) {
 
@@ -194,7 +211,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                 </p>
                                 <div className="text-sm text-muted-foreground space-y-2 mt-2">
                                 <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
-                                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {employee.doj}</span></div>
+                                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {formatDate(employee.doj)}</span></div>
                             </div>
                             </div>
                             {/* Middle part: Onboarding Icons */}
@@ -234,7 +251,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         {onboardingCount.pending > 0 && (
                                              <div className="flex items-center gap-2">
                                                 <Tooltip>
-                                                    <TooltipTrigger>
+                                                    <TooltipTrigger asChild>
                                                         <Badge variant="secondary" className={cn("font-bold w-fit", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700')}>
                                                             <CircleDotDashed className="w-3 h-3 mr-1"/>
                                                             {onboardingCount.pending}
@@ -265,8 +282,8 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                     </div>
                                     <Progress value={100} indicatorClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-green-400'} value2={poProgress} indicator2ClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-red-400'} className="h-2"/>
                                     <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
-                                      <span>{employee.doj}</span>
-                                      <span>{employee.poEndDate}</span>
+                                      <span>{formatDate(employee.doj)}</span>
+                                      <span>{formatDate(employee.poEndDate)}</span>
                                     </div>
                                 </div>
                             </div>
