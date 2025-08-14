@@ -8,13 +8,9 @@ import { EmployeeForm } from '@/components/employee/employee-form';
 import { EmployeeList } from '@/components/employee/employee-list';
 import type { Employee } from '@/types/employee';
 import { getEmployees } from '@/services/employeeService';
-import Link from 'next/link';
-import { ThemeToggle } from '@/components/theme-toggle';
-import withAuth from '@/components/with-auth';
-import { auth } from '@/lib/firebase';
 import { seedDatabase } from '@/services/seedService';
 
-function EmployeesPage() {
+export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
@@ -69,26 +65,8 @@ function EmployeesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-4 sm:p-6 md:p-8">
-      <header className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-                <span className="sr-only">Back to Dashboard</span>
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold text-foreground">
-              On-Site Employee Management
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button onClick={() => auth.signOut()}>Sign Out</Button>
-            <ThemeToggle />
-          </div>
-        </div>
-        <div className="flex justify-between items-center bg-card p-4 rounded-2xl shadow-sm">
+    <div>
+       <div className="flex justify-between items-center bg-card p-4 rounded-2xl shadow-sm mb-6">
             <p className="text-lg text-muted-foreground max-w-2xl">
                 Add, view, and manage all your on-site employee records.
             </p>
@@ -97,7 +75,6 @@ function EmployeesPage() {
               Add New Employee
             </Button>
         </div>
-      </header>
       
       <main>
         <EmployeeList 
@@ -117,5 +94,3 @@ function EmployeesPage() {
     </div>
   );
 }
-
-export default withAuth(EmployeesPage);

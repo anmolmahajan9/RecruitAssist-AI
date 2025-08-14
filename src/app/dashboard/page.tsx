@@ -2,18 +2,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import withAuth from '@/components/with-auth';
 import { useAuth } from '@/context/AuthContext';
-import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import {
-  ArrowLeft,
   Users,
   Building,
   UserCheck,
-  UserX,
   Loader2,
   Bell,
   CheckCircle2
@@ -59,7 +54,7 @@ const formatDate = (dateString: string): string => {
 };
 
 
-function Dashboard() {
+export default function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,39 +123,6 @@ function Dashboard() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl p-4 sm:p-6 md:p-8">
-      <header className="mb-8">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-                <span className="sr-only">Back</span>
-              </Button>
-            </Link>
-            <Link
-              href="/"
-              className="text-xl font-bold text-foreground hover:text-primary transition-colors"
-            >
-              RecruitAssist AI
-            </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button onClick={() => auth.signOut()}>Sign Out</Button>
-            <ThemeToggle />
-          </div>
-        </div>
-        <div className="text-left">
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
-            Dashboard
-          </h1>
-          <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Welcome, {user?.displayName || 'User'}! This is your management
-            portal.
-          </p>
-        </div>
-      </header>
-
       <main>
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
@@ -269,8 +231,5 @@ function Dashboard() {
           )
         )}
       </main>
-    </div>
   );
 }
-
-export default withAuth(Dashboard);
