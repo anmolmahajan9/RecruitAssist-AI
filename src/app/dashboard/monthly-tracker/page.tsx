@@ -37,7 +37,14 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card';
-import { Loader2, ArrowLeft, ArrowRight, Building, NotebookPen } from 'lucide-react';
+import {
+  Loader2,
+  ArrowLeft,
+  ArrowRight,
+  Building,
+  NotebookPen,
+  NotebookText,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   timesheetStatuses,
@@ -46,6 +53,12 @@ import {
 } from '@/types/employee';
 import { useAuth } from '@/context/AuthContext';
 import { NotesDialog } from '@/components/employee/notes-dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type NoteableItem =
   | 'timesheet'
@@ -62,7 +75,9 @@ interface EditingNotes {
   updatedAt?: any;
 }
 
-const getStatusColor = (status: TimesheetStatus | InvoiceStatus | HrCheckinStatus) => {
+const getStatusColor = (
+  status: TimesheetStatus | InvoiceStatus | HrCheckinStatus
+) => {
   switch (status) {
     // Timesheet & HR
     case 'Pending':
@@ -92,10 +107,26 @@ const getStatusColor = (status: TimesheetStatus | InvoiceStatus | HrCheckinStatu
   }
 };
 
+const formatUpdateDate = (timestamp: any): string => {
+  if (!timestamp) return '';
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  if (isNaN(date.getTime())) return '';
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
 export default function MonthlyTrackerPage() {
   const { user } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [trackerData, setTrackerData] = useState<Record<string, MonthlyTracker>>({});
+  const [trackerData, setTrackerData] = useState<Record<string, MonthlyTracker>>(
+    {}
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -228,17 +259,20 @@ export default function MonthlyTrackerPage() {
       hrCheckin12thStatus: 'Pending',
       hrCheckin25thStatus: 'Pending',
     };
-    
+
     let updatedEntry: Partial<MonthlyTracker> = { ...existingEntry };
     updatedEntry[`${itemType}Notes`] = newNotes;
-    
+
     try {
       const newDoc = await upsertTrackerEntry(updatedEntry);
-      setTrackerData(prev => ({ ...prev, [employeeId]: { ...existingEntry, ...newDoc } as MonthlyTracker }));
+      setTrackerData((prev) => ({
+        ...prev,
+        [employeeId]: { ...existingEntry, ...newDoc } as MonthlyTracker,
+      }));
       setEditingNotes(null); // Close dialog on save
     } catch (e) {
-        console.error("Failed to update notes: ", e);
-        // Optionally, show an error in the dialog
+      console.error('Failed to update notes: ', e);
+      // Optionally, show an error in the dialog
     }
   };
 
@@ -266,18 +300,65 @@ export default function MonthlyTrackerPage() {
     () => Object.keys(groupedEmployees).sort(),
     [groupedEmployees]
   );
-  
+
   const openNotesEditor = (employee: Employee, itemType: NoteableItem) => {
     const entry = trackerData[employee.id!] || {};
     setEditingNotes({
-        employeeId: employee.id!,
-        employeeName: employee.name,
-        itemType: itemType,
-        currentNotes: entry[`${itemType}Notes`] || '',
-        updatedBy: entry[`${itemType}UpdatedBy`],
-        updatedAt: entry[`${itemType}UpdatedAt`],
+      employeeId: employee.id!,
+      employeeName: employee.name,
+      itemType: itemType,
+      currentNotes: entry[`${itemType}Notes`] || '',
+      updatedBy: entry[`${itemType}UpdatedBy`],
+      updatedAt: entry[`${itemType}UpdatedAt`],
     });
-  }
+  };
+
+  const renderNotesIcon = (employee: Employee, itemType: NoteableItem) => {
+    const entry = trackerData[employee.id!] || {};
+    const notes = entry[`${itemType}Notes`];
+    const updater = entry[`${itemType}UpdatedBy`];
+    const updateTime = entry[`${itemType}UpdatedAt`];
+
+    const NotesIcon = notes ? NotebookText : NotebookPen;
+
+    return (
+      <TooltipProvider delayDuration={100}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => openNotesEditor(employee, itemType)}
+            >
+              <NotesIcon
+                className={cn(
+                  'h-4 w-4',
+                  notes ? 'text-primary' : 'text-muted-foreground'
+                )}
+              />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {notes ? (
+              <div className="max-w-xs space-y-1 p-1">
+                <p className="font-bold border-b pb-1 mb-1">Notes:</p>
+                <p className="whitespace-pre-wrap">{notes}</p>
+                {updater && (
+                  <p className="text-xs text-muted-foreground pt-2 border-t mt-2">
+                    Updated by <strong>{updater}</strong> on{' '}
+                    {formatUpdateDate(updateTime)}.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p>No notes yet. Click to add.</p>
+            )}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
 
   return (
     <Card>
@@ -385,9 +466,7 @@ export default function MonthlyTrackerPage() {
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openNotesEditor(employee, 'hrCheckin12th')}>
-                                <NotebookPen className="h-4 w-4 text-muted-foreground" />
-                            </Button>
+                            {renderNotesIcon(employee, 'hrCheckin12th')}
                           </div>
                         </TableCell>
 
@@ -420,9 +499,7 @@ export default function MonthlyTrackerPage() {
                                 ))}
                               </SelectContent>
                             </Select>
-                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openNotesEditor(employee, 'hrCheckin25th')}>
-                                <NotebookPen className="h-4 w-4 text-muted-foreground" />
-                            </Button>
+                            {renderNotesIcon(employee, 'hrCheckin25th')}
                           </div>
                         </TableCell>
 
@@ -455,9 +532,7 @@ export default function MonthlyTrackerPage() {
                                 ))}
                               </SelectContent>
                             </Select>
-                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openNotesEditor(employee, 'timesheet')}>
-                                <NotebookPen className="h-4 w-4 text-muted-foreground" />
-                            </Button>
+                            {renderNotesIcon(employee, 'timesheet')}
                           </div>
                         </TableCell>
 
@@ -486,9 +561,7 @@ export default function MonthlyTrackerPage() {
                                 ))}
                               </SelectContent>
                             </Select>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openNotesEditor(employee, 'invoice')}>
-                                <NotebookPen className="h-4 w-4 text-muted-foreground" />
-                            </Button>
+                            {renderNotesIcon(employee, 'invoice')}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -500,19 +573,19 @@ export default function MonthlyTrackerPage() {
           </Table>
         )}
       </CardContent>
-       {editingNotes && (
-        <NotesDialog 
-            isOpen={!!editingNotes}
-            onOpenChange={(isOpen) => !isOpen && setEditingNotes(null)}
-            onSave={handleSaveNotes}
-            employeeId={editingNotes.employeeId}
-            employeeName={editingNotes.employeeName}
-            itemType={editingNotes.itemType}
-            currentNotes={editingNotes.currentNotes}
-            updatedBy={editingNotes.updatedBy}
-            updatedAt={editingNotes.updatedAt}
+      {editingNotes && (
+        <NotesDialog
+          isOpen={!!editingNotes}
+          onOpenChange={(isOpen) => !isOpen && setEditingNotes(null)}
+          onSave={handleSaveNotes}
+          employeeId={editingNotes.employeeId}
+          employeeName={editingNotes.employeeName}
+          itemType={editingNotes.itemType}
+          currentNotes={editingNotes.currentNotes}
+          updatedBy={editingNotes.updatedBy}
+          updatedAt={editingNotes.updatedAt}
         />
-       )}
+      )}
     </Card>
   );
 }
