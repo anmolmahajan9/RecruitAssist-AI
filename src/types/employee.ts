@@ -118,6 +118,20 @@ export interface Employee {
   createdAt?: any;
 }
 
+export const clientNames = [
+  'Spiro',
+  'Vivance',
+  'TASL',
+  'Biotek Ortho',
+  'Billdesk',
+  'Marelli',
+  'Aptean',
+  'Schiebel',
+  'Zomato',
+  'Simon',
+].sort();
+
+
 export const timesheetStatuses = [
   'Pending',
   'Received',
@@ -142,9 +156,9 @@ export interface Timesheet {
   employeeId: string;
   month: string; // YYYY-MM format
   timesheetStatus: TimesheetStatus;
-  invoiceStatus: InvoiceStatus;
   timesheetUpdatedAt?: any;
   timesheetUpdatedBy?: string;
+  invoiceStatus: InvoiceStatus;
   invoiceUpdatedAt?: any;
   invoiceUpdatedBy?: string;
 }

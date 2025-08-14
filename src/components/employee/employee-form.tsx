@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -34,7 +34,7 @@ import {
 import { addEmployee, updateEmployee } from '@/services/employeeService';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { cn } from '@/lib/utils';
-import { onboardingTemplate } from '@/types/employee';
+import { onboardingTemplate, clientNames } from '@/types/employee';
 import { Textarea } from '../ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 
@@ -102,7 +102,6 @@ interface EmployeeFormProps {
 
 const formatUpdateDate = (timestamp: any): string => {
   if (!timestamp) return '';
-  // Can be a Firestore Timestamp (from existing data) or a JS Date (from new changes)
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   if (isNaN(date.getTime())) return '';
   return date.toLocaleString('en-US', {
@@ -122,68 +121,67 @@ export function EmployeeForm({
   onSuccess,
 }: EmployeeFormProps) {
   const { user } = useAuth();
-  const [formData, setFormData] =
-    useState<Omit<Employee, 'id'>>(initialEmployeeState);
+  const [formData, setFormData] = useState<Omit<Employee, 'id'>>(initialEmployeeState);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      if (employee) {
-        const employeeCopy = JSON.parse(JSON.stringify(employee));
-        // Merge saved steps with the template to ensure all steps are present
-        const savedSteps = employeeCopy.onboarding?.steps || [];
-        const mergedSteps = getInitialOnboardingSteps().map((templateStep) => {
-          const savedStep = savedSteps.find(
-            (s: OnboardingStep) => s.id === templateStep.id
-          );
-          return savedStep
-            ? { ...templateStep, ...savedStep }
-            : templateStep;
-        });
+        if (employee) {
+            const employeeCopy = JSON.parse(JSON.stringify(employee));
+            const savedSteps = employeeCopy.onboarding?.steps || [];
+            const mergedSteps = getInitialOnboardingSteps().map((templateStep) => {
+                const savedStep = savedSteps.find(
+                    (s: OnboardingStep) => s.id === templateStep.id
+                );
+                return savedStep ? { ...templateStep, ...savedStep } : templateStep;
+            });
 
-        setFormData({
-          ...initialEmployeeState,
-          ...employeeCopy,
-          onboarding: {
-            steps: mergedSteps,
-            documentsLink: employeeCopy.onboarding?.documentsLink || '',
-          },
-        });
-      } else {
-        setFormData({
-          ...initialEmployeeState,
-          onboarding: {
-            steps: getInitialOnboardingSteps(),
-            documentsLink: '',
-          },
-        });
-      }
+            setFormData({
+                ...initialEmployeeState,
+                ...employeeCopy,
+                onboarding: {
+                    steps: mergedSteps,
+                    documentsLink: employeeCopy.onboarding?.documentsLink || '',
+                },
+            });
+        } else {
+            setFormData({
+              ...initialEmployeeState,
+              onboarding: {
+                  ...initialEmployeeState.onboarding,
+                  steps: getInitialOnboardingSteps(),
+              },
+            });
+        }
     }
   }, [isOpen, employee]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleDocLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      onboarding: {
-        ...prev.onboarding,
-        documentsLink: value,
-      },
-    }));
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (
+    name: string,
+    value: string | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const a = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    if (typeof value === 'string') {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    } else {
+        const { name, value: val } = value.target;
+        if (name === 'documentsLink') {
+           setFormData((prev) => ({
+              ...prev,
+              onboarding: {
+                ...prev.onboarding,
+                documentsLink: val,
+              },
+            }));
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: val }));
+        }
+    }
   };
 
   const handleOnboardingStatusChange = (stepId: string, newStatus: string) => {
-    const newTimestamp = new Date(); // Use standard JS Date object
+    const newTimestamp = new Date();
     const updaterName = user?.displayName || 'Unknown User';
 
     setFormData((prev) => ({
@@ -259,19 +257,29 @@ export function EmployeeForm({
                         id="name"
                         name="name"
                         value={formData.name}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('name', e)}
                         required
                       />
                     </div>
                     <div>
                       <Label htmlFor="client">Client</Label>
-                      <Input
-                        id="client"
+                       <Select
                         name="client"
                         value={formData.client}
-                        onChange={handleInputChange}
+                        onValueChange={(v) => handleChange('client', v)}
                         required
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a client" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clientNames.map((client) => (
+                            <SelectItem key={client} value={client}>
+                              {client}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label htmlFor="role">Role</Label>
@@ -279,7 +287,7 @@ export function EmployeeForm({
                         id="role"
                         name="role"
                         value={formData.role}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('role', e)}
                         required
                       />
                     </div>
@@ -289,7 +297,7 @@ export function EmployeeForm({
                         id="poc"
                         name="poc"
                         value={formData.poc}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('poc', e)}
                       />
                     </div>
                     <div>
@@ -298,7 +306,7 @@ export function EmployeeForm({
                         id="recruiter"
                         name="recruiter"
                         value={formData.recruiter}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('recruiter', e)}
                       />
                     </div>
                     <div>
@@ -306,7 +314,7 @@ export function EmployeeForm({
                       <Select
                         name="status"
                         value={formData.status}
-                        onValueChange={(v) => handleSelectChange('status', v)}
+                        onValueChange={(v) => handleChange('status', v)}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -324,7 +332,7 @@ export function EmployeeForm({
                         id="city"
                         name="city"
                         value={formData.city}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('city', e)}
                       />
                     </div>
                     <div>
@@ -332,7 +340,7 @@ export function EmployeeForm({
                        <Select
                         name="state"
                         value={formData.state}
-                        onValueChange={(v) => handleSelectChange('state', v)}
+                        onValueChange={(v) => handleChange('state', v)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a state" />
@@ -353,7 +361,7 @@ export function EmployeeForm({
                         name="doj"
                         type="date"
                         value={formData.doj}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('doj', e)}
                       />
                     </div>
                     <div>
@@ -363,7 +371,7 @@ export function EmployeeForm({
                         name="poEndDate"
                         type="date"
                         value={formData.poEndDate}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('poEndDate', e)}
                       />
                     </div>
                     <div>
@@ -372,7 +380,7 @@ export function EmployeeForm({
                         id="ctc"
                         name="ctc"
                         value={formData.ctc}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('ctc', e)}
                       />
                     </div>
                     <div>
@@ -381,7 +389,7 @@ export function EmployeeForm({
                         id="billingRate"
                         name="billingRate"
                         value={formData.billingRate}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('billingRate', e)}
                       />
                     </div>
                   </div>
@@ -391,7 +399,7 @@ export function EmployeeForm({
                         id="notes"
                         name="notes"
                         value={formData.notes}
-                        onChange={handleInputChange}
+                        onChange={(e) => handleChange('notes', e)}
                         placeholder="Add any remarks or notes here..."
                      />
                   </div>
@@ -497,7 +505,7 @@ export function EmployeeForm({
                     id="documentsLink"
                     name="documentsLink"
                     value={formData.onboarding.documentsLink}
-                    onChange={handleDocLinkChange}
+                    onChange={(e) => handleChange('documentsLink', e)}
                   />
                 </div>
               </div>
