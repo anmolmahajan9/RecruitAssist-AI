@@ -192,9 +192,16 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                 return (
                     <Card 
                         key={employee.id} 
-                        className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
+                        className="group transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
                     >
-                        <div className={cn("absolute left-0 top-0 h-full w-2", getStatusColor(employee.status))}></div>
+                        <div className={cn(
+                            "absolute left-0 top-0 h-full w-2 group-hover:w-24 transition-all duration-300 ease-in-out flex items-center justify-center", 
+                            getStatusColor(employee.status)
+                        )}>
+                            <span className="text-white font-bold text-sm -rotate-90 group-hover:rotate-0 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150">
+                                {employee.status}
+                            </span>
+                        </div>
                         <div className="p-4 pl-6 grid grid-cols-12 items-center gap-4">
                             {/* Left part: Name, Role, Status */}
                             <div className="col-span-12 md:col-span-4">
