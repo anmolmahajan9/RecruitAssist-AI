@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/firebase';
 import withAuth from '@/components/with-auth';
 import { Card, CardHeader } from '@/components/ui/card';
-import { LayoutDashboard, Users, ArrowLeft, CalendarCheck } from 'lucide-react';
+import { LayoutDashboard, Users, ArrowLeft, CalendarCheck, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +28,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="mx-auto max-w-7xl p-4 sm:p-6 md:p-8">
       <header className="mb-8">
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-xl font-semibold text-foreground">
             <Link href="/">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-5 w-5" />
@@ -37,20 +37,17 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             </Link>
             <Link
               href="/"
-              className="text-xl font-bold text-foreground hover:text-primary transition-colors"
+              className="hover:text-primary transition-colors"
             >
               RecruitAssist AI
             </Link>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            <span className="text-primary">Employee Management</span>
           </div>
           <div className="flex items-center gap-2">
             <Button onClick={() => auth.signOut()}>Sign Out</Button>
             <ThemeToggle />
           </div>
-        </div>
-        <div className="text-left">
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
-            On-site Employee Management
-          </h1>
         </div>
       </header>
 

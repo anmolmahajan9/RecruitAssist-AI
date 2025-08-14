@@ -20,7 +20,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ThemeToggle } from '@/components/theme-toggle';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Briefcase, Loader2 } from 'lucide-react';
+import { ArrowLeft, Briefcase, Loader2, ChevronRight } from 'lucide-react';
 import { useModel } from '@/context/ModelContext';
 import { ModelSelector } from '@/components/model-selector';
 
@@ -124,7 +124,7 @@ function BooleanQueryComponent() {
     <div className="mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
       <header className="mb-8">
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-xl font-semibold text-foreground">
             <Link href="/">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-5 w-5" />
@@ -133,20 +133,17 @@ function BooleanQueryComponent() {
             </Link>
             <Link
               href="/"
-              className="text-xl font-bold text-foreground hover:text-primary transition-colors"
+              className="hover:text-primary transition-colors"
             >
               RecruitAssist AI
             </Link>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            <span className="text-primary">Boolean Query Helper</span>
           </div>
           <div className="flex items-center gap-2">
             <ModelSelector />
             <ThemeToggle />
           </div>
-        </div>
-        <div className="text-left">
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
-            Boolean Query Helper
-          </h1>
         </div>
       </header>
 
