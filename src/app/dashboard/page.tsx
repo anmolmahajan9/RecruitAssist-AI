@@ -159,8 +159,8 @@ export default function Dashboard() {
       const today = new Date();
       today.setHours(0,0,0,0);
       
-      const sevenDaysFromNow = new Date(today);
-      sevenDaysFromNow.setDate(today.getDate() + 7);
+      const fifteenDaysFromNow = new Date(today);
+      fifteenDaysFromNow.setDate(today.getDate() + 15);
 
       const trackerMap = trackerEntries.reduce((acc, entry) => {
         acc[entry.employeeId] = entry;
@@ -192,8 +192,8 @@ export default function Dashboard() {
             const isPending = task.name.includes('Invoice') ? status === 'Due, Not Raised' : status === 'Pending' || !status;
             
             if (isPending) {
-                // Include if it's past due or due within the next 7 days
-                if (dueDate < today || (dueDate >= today && dueDate <= sevenDaysFromNow)) {
+                // Include if it's past due or due within the next 15 days
+                if (dueDate < today || (dueDate >= today && dueDate <= fifteenDaysFromNow)) {
                      if (!groupedTasks[task.name]) {
                         groupedTasks[task.name] = [];
                      }
