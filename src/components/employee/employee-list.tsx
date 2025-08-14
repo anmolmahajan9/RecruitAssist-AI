@@ -84,27 +84,19 @@ const getPoProgress = (doj: string, poEndDate: string): { percentage: number, da
 
 
 export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeListProps) {
-  const getStatusVariant = (status: string) => {
+
+  const getMainStatusPillClass = (status: string) => {
     switch (status) {
       case 'Active':
-        return 'default';
+        return 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700';
       case 'Ended':
-        return 'destructive';
+        return 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700';
       case 'Pending':
-        return 'secondary';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700';
       default:
-        return 'outline';
+        return 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
     }
   };
-
-  const getStatusColorClass = (status: string) => {
-    switch(status) {
-        case 'Active': return 'bg-green-500';
-        case 'Ended': return 'bg-red-500';
-        case 'Pending': return 'bg-yellow-500';
-        default: return 'bg-gray-500';
-    }
-  }
 
   const groupedEmployees = employees.reduce((acc, employee) => {
     let key = 'Undated';
@@ -194,7 +186,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                             <div className="col-span-12 md:col-span-4">
                                 <div className='flex items-center gap-2'>
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
-                                <Badge variant={getStatusVariant(employee.status)} className={cn("text-white", getStatusColorClass(employee.status))}>{employee.status}</Badge>
+                                <Badge variant="outline" className={cn("font-bold", getMainStatusPillClass(employee.status))}>{employee.status}</Badge>
                                 </div>
                                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                     <Briefcase className="w-4 h-4"/>
@@ -211,7 +203,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                     <div className="flex flex-col space-y-2">
                                         <div className="flex items-center gap-2">
                                              <Tooltip>
-                                                <TooltipTrigger>
+                                                <TooltipTrigger asChild>
                                                     <Badge variant="secondary" className={cn("font-bold w-fit", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700')}>
                                                         <CheckCircle className="w-3 h-3 mr-1"/>
                                                         {onboardingCount.completed}
@@ -226,7 +218,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         {onboardingCount.inProgress > 0 && (
                                             <div className="flex items-center gap-2">
                                                 <Tooltip>
-                                                    <TooltipTrigger>
+                                                    <TooltipTrigger asChild>
                                                         <Badge variant="secondary" className={cn("font-bold w-fit", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700')}>
                                                             <CircleAlert className="w-3 h-3 mr-1"/>
                                                             {onboardingCount.inProgress}
@@ -242,7 +234,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         {onboardingCount.pending > 0 && (
                                              <div className="flex items-center gap-2">
                                                 <Tooltip>
-                                                    <TooltipTrigger>
+                                                    <TooltipTrigger asChild>
                                                         <Badge variant="secondary" className={cn("font-bold w-fit", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700')}>
                                                             <CircleDotDashed className="w-3 h-3 mr-1"/>
                                                             {onboardingCount.pending}
@@ -290,3 +282,5 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
     </div>
   );
 }
+
+    
