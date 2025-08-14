@@ -174,10 +174,12 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                 const daysLeft = poProgressData.daysLeft;
 
                 let pillColorClass = '';
-                if (daysLeft < 30) {
-                    pillColorClass = 'text-red-600 border-red-400';
-                } else if (daysLeft <= 45) {
+                if (daysLeft > 45) {
+                    pillColorClass = 'text-green-600 border-green-400';
+                } else if (daysLeft > 30) {
                     pillColorClass = 'text-yellow-600 border-yellow-400';
+                } else {
+                    pillColorClass = 'text-red-600 border-red-400';
                 }
 
                 const getStatusColor = (status: string) => {
@@ -207,8 +209,8 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                             <div className="col-span-12 md:col-span-4">
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
                                 <div className="text-sm text-muted-foreground space-y-1 mt-2">
-                                  <div className="flex items-center gap-2"><Building className="w-4 h-4"/><span>{employee.client}</span></div>
-                                  <div className="flex items-center gap-2"><Briefcase className="w-4 h-4"/><span>{employee.role}</span></div>
+                                  <div className="flex items-center gap-2"><Building className="w-4 h-4 text-muted-foreground"/><span>{employee.client}</span></div>
+                                  <div className="flex items-center gap-2"><Briefcase className="w-4 h-4 text-muted-foreground"/><span>{employee.role}</span></div>
                                 </div>
                             </div>
                             {/* Middle part: Onboarding Icons */}
