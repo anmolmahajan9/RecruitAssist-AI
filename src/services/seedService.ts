@@ -11,7 +11,6 @@ import {
 import type { Employee, OnboardingStep } from '@/types/employee';
 
 const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
-    { id: 'offerLetter', header: 'Offer Letter', description: 'Generate and send the official offer letter to the candidate.' },
     { id: 'resignationEmail', header: 'Resignation Email', description: 'Confirm receipt of the candidate\'s resignation email from their previous employer.' },
     { id: 'aadharCard', header: 'Aadhar Card', description: 'Collect a copy of the candidate\'s Aadhar card for verification.' },
     { id: 'panCard', header: 'PAN Card', description: 'Collect a copy of the candidate\'s PAN card for tax purposes.' },
@@ -20,6 +19,7 @@ const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
     { id: 'offerLetters', header: 'Previous Offer Letters', description: 'Collect offer letters from previous employments.' },
     { id: 'relievingDocs', header: 'Relieving Documents', description: 'Collect relieving letters from all previous employers.' },
     { id: 'experienceDocs', header: 'Experience Documents', description: 'Collect all experience certificates from previous employers.' },
+    { id: 'offerLetter', header: 'Offer Letter', description: 'Generate and send the official offer letter to the candidate.' },
     { id: 'bgv', header: 'Background Verification (BGV)', description: 'Initiate and track the background verification process.' },
     { id: 'callRefCheck', header: 'Call Reference Check', description: 'Conduct a telephonic reference check with previous managers.' },
     { id: 'addToPlum', header: 'Add to Plum', description: 'Add the new employee to the Plum health insurance portal.' },

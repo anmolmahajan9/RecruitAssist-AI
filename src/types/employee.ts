@@ -10,11 +10,6 @@ export interface OnboardingStep {
 
 export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
   {
-    id: 'offerLetter',
-    header: 'Offer Letter',
-    description: 'Generate and send the official offer letter to the candidate.',
-  },
-  {
     id: 'resignationEmail',
     header: 'Resignation Email',
     description:
@@ -54,6 +49,11 @@ export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
     id: 'experienceDocs',
     header: 'Experience Documents',
     description: 'Collect all experience certificates from previous employers.',
+  },
+  {
+    id: 'offerLetter',
+    header: 'Offer Letter',
+    description: 'Generate and send the official offer letter to the candidate.',
   },
   {
     id: 'bgv',
