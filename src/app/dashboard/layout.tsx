@@ -28,7 +28,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="mx-auto max-w-7xl p-4 sm:p-6 md:p-8">
       <header className="mb-8">
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-2 text-xl font-semibold text-foreground">
+          <div className="flex items-center gap-1 text-base sm:text-xl font-semibold text-foreground flex-wrap">
             <Link href="/">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-5 w-5" />
