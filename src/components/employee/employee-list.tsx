@@ -204,7 +204,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                 {employee.status}
                             </span>
                         </div>
-                        <div className="p-4 pl-12 grid grid-cols-12 items-center gap-4">
+                        <div className="p-4 pl-8 grid grid-cols-12 items-center gap-4">
                             {/* Left part: Name, Role, Status */}
                             <div className="col-span-12 md:col-span-4">
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
@@ -271,7 +271,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                             <div className="col-span-12 md:col-span-4 space-y-3">
                                 <div>
                                     <div className="flex justify-between items-center mb-1">
-                                        <Label className="text-xs font-semibold">Contract Duration</Label>
+                                        <Label className="text-xs font-semibold">PO Duration</Label>
                                         {employee.status !== 'Ended' && (
                                             <Badge variant="outline" className={pillColorClass}>
                                                 <AlertTriangle className="w-3 h-3 mr-1.5" />
