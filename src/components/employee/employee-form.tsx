@@ -29,9 +29,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Loader2, User, FileText } from 'lucide-react';
+import { Loader2, User, FileText, CheckCircle, XCircle, AlertCircle, CircleDot } from 'lucide-react';
 import { addEmployee, updateEmployee } from '@/services/employeeService';
 import type { Employee, OnboardingTracker } from '@/types/employee';
+import { cn } from '@/lib/utils';
+
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -75,6 +77,13 @@ const initialEmployeeState: Omit<Employee, 'id'> = {
   onboarding: initialOnboardingState,
 };
 
+const statusConfig = {
+    Done: { icon: CheckCircle, color: 'text-green-500', label: 'Done' },
+    Pending: { icon: XCircle, color: 'text-red-500', label: 'Pending' },
+    'In-Progress': { icon: AlertCircle, color: 'text-yellow-500', label: 'In Progress' },
+    NA: { icon: CircleDot, color: 'text-muted-foreground', label: 'N/A' },
+};
+
 export function EmployeeForm({
   isOpen,
   onOpenChange,
@@ -86,19 +95,20 @@ export function EmployeeForm({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen && employee) {
-      // Deep copy to prevent state mutation issues, especially for nested onboarding object
-      const employeeCopy = JSON.parse(JSON.stringify(employee));
-      setFormData({
-        ...initialEmployeeState,
-        ...employeeCopy,
-        onboarding: {
-          ...initialOnboardingState,
-          ...(employeeCopy.onboarding || {}),
-        },
-      });
-    } else if (!employee) {
-       setFormData(initialEmployeeState);
+    if (isOpen) {
+        if (employee) {
+            const employeeCopy = JSON.parse(JSON.stringify(employee));
+            setFormData({
+                ...initialEmployeeState,
+                ...employeeCopy,
+                onboarding: {
+                ...initialOnboardingState,
+                ...(employeeCopy.onboarding || {}),
+                },
+            });
+        } else {
+            setFormData(initialEmployeeState);
+        }
     }
   }, [isOpen, employee]);
 
@@ -148,7 +158,6 @@ export function EmployeeForm({
   const handleClose = (open: boolean) => {
       if (!open) {
         setError(null);
-        setFormData(initialEmployeeState);
       }
       onOpenChange(open);
   }
@@ -180,15 +189,14 @@ export function EmployeeForm({
             Fill in the details for the on-site employee. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        
         <div className="flex-grow overflow-hidden">
-          <ScrollArea className="h-full">
-            <form onSubmit={handleSubmit} className="p-6">
-               <Accordion type="multiple" defaultValue={['item-1', 'item-2']} className="w-full space-y-4">
-                  <AccordionItem value="item-1">
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline"><User className="mr-2 h-5 w-5 text-primary"/> Employee Details</AccordionTrigger>
-                      <AccordionContent className="pt-4">
-                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ScrollArea className="h-full">
+            <form onSubmit={handleSubmit} className="p-6 space-y-8">
+                {/* Employee Details Section */}
+                <div className="space-y-4">
+                    <h3 className="text-lg font-semibold flex items-center"><User className="mr-2 h-5 w-5 text-primary"/> Employee Details</h3>
+                    <div className="p-6 rounded-2xl bg-secondary/30 border">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                             <div><Label htmlFor="name">Name</Label><Input id="name" name="name" value={formData.name} onChange={handleInputChange} required /></div>
                             <div><Label htmlFor="client">Client</Label><Input id="client" name="client" value={formData.client} onChange={handleInputChange} required /></div>
                             <div><Label htmlFor="role">Role</Label><Input id="role" name="role" value={formData.role} onChange={handleInputChange} required /></div>
@@ -202,51 +210,70 @@ export function EmployeeForm({
                             <div><Label>Status</Label><Select name="status" value={formData.status} onValueChange={(v) => handleSelectChange('status', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Active">Active</SelectItem><SelectItem value="Ended">Ended</SelectItem><SelectItem value="Pending">Pending</SelectItem></SelectContent></Select></div>
                             <div><Label>Stage</Label><Select name="stage" value={formData.stage} onValueChange={(v) => handleSelectChange('stage', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="Joined">Joined</SelectItem><SelectItem value="In-Progress">In-Progress</SelectItem></SelectContent></Select></div>
                             <div className="lg:col-span-3"><Label>Experience Source</Label><Select name="experience" value={formData.experience} onValueChange={(v) => handleSelectChange('experience', v)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="IN">IN</SelectItem><SelectItem value="OUT">OUT</SelectItem><SelectItem value="NA">NA</SelectItem></SelectContent></Select></div>
-                         </div>
-                         <div className="flex items-center space-x-6 pt-6">
-                            <div className="flex items-center space-x-2"><Checkbox id="optForPF" checked={formData.optForPF} onCheckedChange={(c) => handleCheckboxChange('optForPF', c as boolean)} /><Label htmlFor="optForPF">Opt for PF?</Label></div>
-                            <div className="flex items-center space-x-2"><Checkbox id="optForHealth" checked={formData.optForHealth} onCheckedChange={(c) => handleCheckboxChange('optForHealth', c as boolean)} /><Label htmlFor="optForHealth">Opt for Health Insurance?</Label></div>
-                         </div>
-                      </AccordionContent>
-                  </AccordionItem>
-                   <AccordionItem value="item-2">
-                      <AccordionTrigger className="text-lg font-semibold hover:no-underline"><FileText className="mr-2 h-5 w-5 text-primary"/> Onboarding Tracker</AccordionTrigger>
-                       <AccordionContent className="pt-4">
+                            <div className="lg:col-span-3 flex items-center space-x-6 pt-2">
+                                <div className="flex items-center space-x-2"><Checkbox id="optForPF" checked={formData.optForPF} onCheckedChange={(c) => handleCheckboxChange('optForPF', c as boolean)} /><Label htmlFor="optForPF">Opt for PF?</Label></div>
+                                <div className="flex items-center space-x-2"><Checkbox id="optForHealth" checked={formData.optForHealth} onCheckedChange={(c) => handleCheckboxChange('optForHealth', c as boolean)} /><Label htmlFor="optForHealth">Opt for Health Insurance?</Label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Onboarding Tracker Section */}
+                <div className="space-y-4">
+                     <h3 className="text-lg font-semibold flex items-center"><FileText className="mr-2 h-5 w-5 text-primary"/> Onboarding Tracker</h3>
+                     <div className="p-6 rounded-2xl bg-secondary/30 border">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {onboardingFields.map(field => (
-                                <div key={field.key} className="p-3 rounded-lg bg-secondary/50 border space-y-2">
-                                    <Label className="text-sm font-medium text-foreground">{field.label}</Label>
+                                <div key={field.key}>
                                     {field.type === 'status' ? (
-                                        <RadioGroup
-                                            value={formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>]}
-                                            onValueChange={(v) => handleOnboardingChange(field.key, v)}
-                                            className="flex items-center space-x-4 pt-1"
-                                        >
-                                            <div className="flex items-center space-x-2"><RadioGroupItem value="Done" id={`${field.key}-done`}/><Label htmlFor={`${field.key}-done`}>Done</Label></div>
-                                            <div className="flex items-center space-x-2"><RadioGroupItem value="Pending" id={`${field.key}-pending`}/><Label htmlFor={`${field.key}-pending`}>Pending</Label></div>
-                                            <div className="flex items-center space-x-2"><RadioGroupItem value="NA" id={`${field.key}-na`}/><Label htmlFor={`${field.key}-na`}>N/A</Label></div>
-                                        </RadioGroup>
+                                        <div className="space-y-2">
+                                            <Label className="font-medium text-foreground">{field.label}</Label>
+                                            <Select
+                                                value={formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>]}
+                                                onValueChange={(v) => handleOnboardingChange(field.key, v)}
+                                            >
+                                                <SelectTrigger className={cn(
+                                                    "font-semibold",
+                                                    formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>] === 'Done' && 'bg-green-100/80 border-green-200 text-green-800 dark:bg-green-900/50 dark:border-green-800 dark:text-green-300',
+                                                    formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>] === 'Pending' && 'bg-red-100/80 border-red-200 text-red-800 dark:bg-red-900/50 dark:border-red-800 dark:text-red-300',
+                                                    formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>] === 'In-Progress' && 'bg-yellow-100/80 border-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:border-yellow-800 dark:text-yellow-300',
+                                                    formData.onboarding[field.key as keyof Omit<OnboardingTracker, 'documentsLink'>] === 'NA' && 'bg-slate-100/80 border-slate-200 text-slate-800 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-300',
+                                                )}>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {Object.entries(statusConfig).map(([status, { icon: Icon, color, label }]) => (
+                                                        <SelectItem key={status} value={status}>
+                                                            <div className="flex items-center gap-2">
+                                                                <Icon className={cn("h-4 w-4", color)} />
+                                                                <span>{label}</span>
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                     ) : (
-                                        <Input name={field.key} value={formData.onboarding[field.key]} onChange={(e) => handleOnboardingChange(field.key, e.target.value)} />
+                                         <div><Label htmlFor={field.key} className="font-medium text-foreground">{field.label}</Label><Input id={field.key} name={field.key} value={formData.onboarding[field.key]} onChange={(e) => handleOnboardingChange(field.key, e.target.value)} /></div>
                                     )}
                                 </div>
                             ))}
                         </div>
-                      </AccordionContent>
-                  </AccordionItem>
-              </Accordion>
-               <DialogFooter className="p-4 mt-6 -mx-6 sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-t">
-                {error && <p className="text-sm text-destructive mr-auto">{error}</p>}
-                 <Button type="button" variant="outline" onClick={() => handleClose(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {employee ? 'Save Changes' : 'Create Employee'}
-                </Button>
-              </DialogFooter>
+                     </div>
+                </div>
+
+                <DialogFooter className="p-4 mt-6 -mx-6 sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-t">
+                    {error && <p className="text-sm text-destructive mr-auto">{error}</p>}
+                    <Button type="button" variant="outline" onClick={() => handleClose(false)}>
+                    Cancel
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {employee ? 'Save Changes' : 'Create Employee'}
+                    </Button>
+                </DialogFooter>
             </form>
-          </ScrollArea>
+        </ScrollArea>
         </div>
       </DialogContent>
     </Dialog>

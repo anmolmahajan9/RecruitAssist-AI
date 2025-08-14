@@ -1,4 +1,4 @@
-export type OnboardingStatus = 'Done' | 'Pending' | 'NA';
+export type OnboardingStatus = 'Done' | 'Pending' | 'In-Progress' | 'NA';
 
 export interface OnboardingTracker {
   offerLetter: OnboardingStatus;
