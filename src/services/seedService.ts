@@ -9,7 +9,7 @@ import {
   doc,
 } from 'firebase/firestore';
 import type { Employee, OnboardingStep } from '@/types/employee';
-import { onboardingTemplate } from '@/types/employee';
+import { onboardingTemplate, initialClientNames } from '@/types/employee';
 
 
 const getInitialOnboardingSteps = (): OnboardingStep[] => {
@@ -41,35 +41,44 @@ const employees_old: Omit<Employee, 'id'>[] = [
   // Add other employees here, converting their old onboarding to the new structure
 ];
 
-export async function seedDatabase() {
-  const employeesCollectionRef = collection(firestore, 'employees');
+async function seedCollection(collectionName: string, data: any[], checkField?: string) {
+    const collectionRef = collection(firestore, collectionName);
+    const snapshot = await getDocs(collectionRef);
+    if (!snapshot.empty) {
+        console.log(`Collection ${collectionName} is already populated.`);
+        return { success: true, message: `Collection ${collectionName} already contains data.` };
+    }
 
-  // Check if the collection is already populated to prevent re-seeding
-  const snapshot = await getDocs(employeesCollectionRef);
-  if (!snapshot.empty) {
-    console.log('Database already seeded.');
-    return {
-      success: true,
-      message: 'Database already contains data. No action taken.',
-    };
-  }
+    const batch = writeBatch(firestore);
+    if (collectionName === 'clients') {
+        data.forEach(name => {
+            const docRef = doc(collectionRef);
+            batch.set(docRef, { name });
+        });
+    } else {
+        data.forEach(item => {
+            const docRef = doc(collectionRef);
+            batch.set(docRef, { ...item, createdAt: new Date() });
+        });
+    }
 
-  // Use a batch write for efficiency
-  const batch = writeBatch(firestore);
-  employees_old.forEach((employee) => {
-    const docRef = doc(employeesCollectionRef); // Automatically generate a new ID
-    batch.set(docRef, { ...employee, createdAt: new Date() });
-  });
-
-  try {
     await batch.commit();
-    console.log('Database seeded successfully.');
-    return {
-      success: true,
-      message: 'Database seeded successfully with initial employee data.',
-    };
+    console.log(`Collection ${collectionName} seeded successfully.`);
+    return { success: true, message: `Collection ${collectionName} seeded successfully.` };
+}
+
+
+export async function seedDatabase() {
+  try {
+    // Seed clients first
+    await seedCollection('clients', initialClientNames);
+
+    // Then seed employees
+    await seedCollection('employees', employees_old);
+
+    return { success: true, message: 'Database seeded successfully.' };
   } catch (error) {
-    console.error('Error seeding database: ', error);
-    return { success: false, message: `Error seeding database: ${error}` };
+     console.error('Error seeding database: ', error);
+     return { success: false, message: `Error seeding database: ${error}` };
   }
 }

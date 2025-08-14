@@ -12,7 +12,8 @@ import {
   Loader2,
   Bell,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  Landmark
 } from 'lucide-react';
 import {
   Card,
@@ -23,11 +24,15 @@ import {
   CardFooter,
 } from '@/components/ui/card';
 import { getEmployees } from '@/services/employeeService';
+import { getClients } from '@/services/clientService';
 import type { Employee } from '@/types/employee';
+import type { Client } from '@/types/client';
 import { onboardingTemplate } from '@/types/employee';
+import { ClientManager } from '@/components/client/client-manager';
 
 interface DashboardStats {
   totalActive: number;
+  totalClients: number;
   onboardingComplete: number;
   onboardingPending: number;
   upcomingPoEnds: Employee[];
@@ -62,11 +67,16 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClientManagerOpen, setIsClientManagerOpen] = useState(false);
 
-  useEffect(() => {
-    async function fetchStats() {
+  const fetchStats = async () => {
       setIsLoading(true);
-      const employees = await getEmployees();
+      
+      const [employees, clients] = await Promise.all([
+         getEmployees(),
+         getClients()
+      ]);
+      
       const now = new Date();
       now.setUTCHours(0, 0, 0, 0);
       
@@ -74,10 +84,11 @@ export default function Dashboard() {
       thresholdDate.setUTCDate(now.getUTCDate() + 45);
       thresholdDate.setUTCHours(0,0,0,0);
 
-
       const totalActive = employees.filter(
         (e) => e.status === 'Active'
       ).length;
+
+      const totalClients = clients.length;
 
       let onboardingComplete = 0;
       let onboardingPending = 0;
@@ -123,6 +134,7 @@ export default function Dashboard() {
 
       setStats({
         totalActive,
+        totalClients,
         onboardingComplete,
         onboardingPending,
         upcomingPoEnds,
@@ -130,6 +142,8 @@ export default function Dashboard() {
       });
       setIsLoading(false);
     }
+    
+  useEffect(() => {
     fetchStats();
   }, []);
 
@@ -141,7 +155,7 @@ export default function Dashboard() {
           </div>
         ) : (
           stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Stat Cards */}
                <Link href="/dashboard/employees">
                  <Card className="flex flex-col bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full">
@@ -159,6 +173,24 @@ export default function Dashboard() {
                     </CardFooter>
                  </Card>
                </Link>
+               
+               <Card 
+                  className="flex flex-col bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full"
+                  onClick={() => setIsClientManagerOpen(true)}
+               >
+                    <CardHeader className="flex-grow flex flex-col items-center text-center p-6 pb-2">
+                        <Landmark className="w-12 h-12 text-primary mb-4" />
+                        <CardTitle className="text-5xl font-extrabold text-foreground">
+                        {stats.totalClients}
+                        </CardTitle>
+                        <CardDescription className="text-lg font-medium">
+                        Total Clients
+                        </CardDescription>
+                    </CardHeader>
+                    <CardFooter className="p-4 pt-0 flex justify-end items-center text-primary font-semibold">
+                       Manage Clients <ArrowRight className="ml-2 h-4 w-4" />
+                    </CardFooter>
+                 </Card>
 
               <Card>
                 <CardHeader>
@@ -213,7 +245,7 @@ export default function Dashboard() {
               </Card>
 
                 {/* Upcoming PO Ends Card */}
-                <Card className="md:col-span-2 lg:col-span-3">
+                <Card className="md:col-span-2 lg:col-span-4">
                     <CardHeader>
                         <CardTitle className="text-xl flex items-center gap-2">
                             <Bell className="w-6 h-6 text-primary" />
@@ -245,6 +277,11 @@ export default function Dashboard() {
             </div>
           )
         )}
+        <ClientManager 
+            isOpen={isClientManagerOpen}
+            onOpenChange={setIsClientManagerOpen}
+            onClientsUpdate={fetchStats}
+        />
       </main>
   );
 }

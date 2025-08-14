@@ -118,7 +118,7 @@ export interface Employee {
   createdAt?: any;
 }
 
-export const clientNames = [
+export const initialClientNames = [
   'Spiro',
   'Vivance',
   'TASL',

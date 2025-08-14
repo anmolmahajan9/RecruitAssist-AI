@@ -32,9 +32,11 @@ import {
   History,
 } from 'lucide-react';
 import { addEmployee, updateEmployee } from '@/services/employeeService';
+import { getClients } from '@/services/clientService';
 import type { Employee, OnboardingStep } from '@/types/employee';
+import type { Client } from '@/types/client';
 import { cn } from '@/lib/utils';
-import { onboardingTemplate, clientNames } from '@/types/employee';
+import { onboardingTemplate } from '@/types/employee';
 import { Textarea } from '../ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 
@@ -122,11 +124,22 @@ export function EmployeeForm({
 }: EmployeeFormProps) {
   const { user } = useAuth();
   const [formData, setFormData] = useState<Omit<Employee, 'id'>>(initialEmployeeState);
+  const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchClients = async () => {
+        try {
+            const fetchedClients = await getClients();
+            setClients(fetchedClients);
+        } catch (e) {
+            console.error("Failed to fetch clients for form", e);
+        }
+    };
+    
     if (isOpen) {
+        fetchClients();
         if (employee) {
             const employeeCopy = JSON.parse(JSON.stringify(employee));
             const savedSteps = employeeCopy.onboarding?.steps || [];
@@ -159,24 +172,18 @@ export function EmployeeForm({
 
   const handleChange = (
     name: string,
-    value: string | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    value: string
   ) => {
-    const a = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    if (typeof value === 'string') {
-        setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'documentsLink') {
+       setFormData((prev) => ({
+          ...prev,
+          onboarding: {
+            ...prev.onboarding,
+            documentsLink: value,
+          },
+        }));
     } else {
-        const { name, value: val } = value.target;
-        if (name === 'documentsLink') {
-           setFormData((prev) => ({
-              ...prev,
-              onboarding: {
-                ...prev.onboarding,
-                documentsLink: val,
-              },
-            }));
-        } else {
-            setFormData((prev) => ({ ...prev, [name]: val }));
-        }
+        setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -257,7 +264,7 @@ export function EmployeeForm({
                         id="name"
                         name="name"
                         value={formData.name}
-                        onChange={(e) => handleChange('name', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                         required
                       />
                     </div>
@@ -273,9 +280,9 @@ export function EmployeeForm({
                           <SelectValue placeholder="Select a client" />
                         </SelectTrigger>
                         <SelectContent>
-                          {clientNames.map((client) => (
-                            <SelectItem key={client} value={client}>
-                              {client}
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.name}>
+                              {client.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -287,7 +294,7 @@ export function EmployeeForm({
                         id="role"
                         name="role"
                         value={formData.role}
-                        onChange={(e) => handleChange('role', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                         required
                       />
                     </div>
@@ -297,7 +304,7 @@ export function EmployeeForm({
                         id="poc"
                         name="poc"
                         value={formData.poc}
-                        onChange={(e) => handleChange('poc', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                       />
                     </div>
                     <div>
@@ -306,7 +313,7 @@ export function EmployeeForm({
                         id="recruiter"
                         name="recruiter"
                         value={formData.recruiter}
-                        onChange={(e) => handleChange('recruiter', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                       />
                     </div>
                     <div>
@@ -332,7 +339,7 @@ export function EmployeeForm({
                         id="city"
                         name="city"
                         value={formData.city}
-                        onChange={(e) => handleChange('city', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                       />
                     </div>
                     <div>
@@ -361,7 +368,7 @@ export function EmployeeForm({
                         name="doj"
                         type="date"
                         value={formData.doj}
-                        onChange={(e) => handleChange('doj', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                       />
                     </div>
                     <div>
@@ -371,7 +378,7 @@ export function EmployeeForm({
                         name="poEndDate"
                         type="date"
                         value={formData.poEndDate}
-                        onChange={(e) => handleChange('poEndDate', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                       />
                     </div>
                     <div>
@@ -380,7 +387,7 @@ export function EmployeeForm({
                         id="ctc"
                         name="ctc"
                         value={formData.ctc}
-                        onChange={(e) => handleChange('ctc', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                       />
                     </div>
                     <div>
@@ -389,7 +396,7 @@ export function EmployeeForm({
                         id="billingRate"
                         name="billingRate"
                         value={formData.billingRate}
-                        onChange={(e) => handleChange('billingRate', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                       />
                     </div>
                   </div>
@@ -399,7 +406,7 @@ export function EmployeeForm({
                         id="notes"
                         name="notes"
                         value={formData.notes}
-                        onChange={(e) => handleChange('notes', e)}
+                        onChange={(e) => handleChange(e.target.name, e.target.value)}
                         placeholder="Add any remarks or notes here..."
                      />
                   </div>
@@ -505,7 +512,7 @@ export function EmployeeForm({
                     id="documentsLink"
                     name="documentsLink"
                     value={formData.onboarding.documentsLink}
-                    onChange={(e) => handleChange('documentsLink', e)}
+                    onChange={(e) => handleChange(e.target.name, e.target.value)}
                   />
                 </div>
               </div>
