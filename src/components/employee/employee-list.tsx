@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle, AlertTriangle, CircleDotDashed, CircleAlert, ChevronDown } from 'lucide-react';
+import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle, AlertTriangle, CircleDotDashed, CircleAlert, ChevronDown, ChevronUp } from 'lucide-react';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
@@ -330,7 +330,8 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         <span className="text-xl font-semibold text-muted-foreground">{employee.client}</span>
                                     </div>
                                     <div className="col-span-1 flex justify-end">
-                                      <ChevronDown className="h-6 w-6 text-muted-foreground transition-transform duration-200" />
+                                      <ChevronDown className="h-6 w-6 text-muted-foreground transition-transform duration-200 group-data-[state=open]:hidden" />
+                                      <ChevronUp className="h-6 w-6 text-muted-foreground transition-transform duration-200 group-data-[state=closed]:hidden" />
                                     </div>
                                 </div>
                             </AccordionTrigger>
