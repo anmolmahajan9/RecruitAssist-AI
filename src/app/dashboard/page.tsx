@@ -13,7 +13,8 @@ import {
   Bell,
   CheckCircle2,
   ArrowRight,
-  Landmark
+  Landmark,
+  ListTodo,
 } from 'lucide-react';
 import {
   Card,
@@ -25,18 +26,24 @@ import {
 } from '@/components/ui/card';
 import { getEmployees } from '@/services/employeeService';
 import { getClients } from '@/services/clientService';
-import type { Employee } from '@/types/employee';
+import { getTrackerEntriesForMonth } from '@/services/timesheetService';
+import type { Employee, MonthlyTracker } from '@/types/employee';
 import type { Client } from '@/types/client';
 import { onboardingTemplate } from '@/types/employee';
 import { ClientManager } from '@/components/client/client-manager';
+
+interface UpcomingTask {
+  employeeName: string;
+  taskName: string;
+}
 
 interface DashboardStats {
   totalActive: number;
   totalClients: number;
   onboardingComplete: number;
   onboardingPending: number;
-
   upcomingPoEnds: Employee[];
+  upcomingTasks: UpcomingTask[];
   statusCounts: {
     active: number;
     pending: number;
@@ -73,12 +80,15 @@ export default function Dashboard() {
   const fetchStats = async () => {
       setIsLoading(true);
       
-      const [employees, clients] = await Promise.all([
+      const now = new Date();
+      const currentMonthStr = now.toISOString().slice(0, 7); // "YYYY-MM"
+
+      const [employees, clients, trackerEntries] = await Promise.all([
          getEmployees(),
-         getClients()
+         getClients(),
+         getTrackerEntriesForMonth(currentMonthStr)
       ]);
       
-      const now = new Date();
       now.setUTCHours(0, 0, 0, 0);
       
       const thresholdDate = new Date();
@@ -132,6 +142,45 @@ export default function Dashboard() {
         },
         { active: 0, pending: 0, ended: 0 }
       );
+      
+      // Calculate Upcoming Tasks
+      const upcomingTasks: UpcomingTask[] = [];
+      const today = new Date();
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(today.getDate() + 7);
+
+      const trackerMap = trackerEntries.reduce((acc, entry) => {
+        acc[entry.employeeId] = entry;
+        return acc;
+      }, {} as Record<string, MonthlyTracker>);
+
+      const activeEmployees = employees.filter(e => e.status === 'Active');
+
+      for (const emp of activeEmployees) {
+        const entry = trackerMap[emp.id!] || {};
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        
+        const tasks = [
+            { name: 'HR Check-in', dueDay: 12, status: entry.hrCheckin12thStatus, completed: 'Done' },
+            { name: 'HR Check-in', dueDay: 25, status: entry.hrCheckin25thStatus, completed: 'Done' },
+            { name: 'Timesheet', dueDay: 29, status: entry.timesheetStatus, completed: 'Approved' },
+            { name: 'Invoice', dueDay: new Date(year, month + 1, 0).getDate(), status: entry.invoiceStatus, completed: 'Paid' },
+        ];
+
+        for (const task of tasks) {
+            const dueDate = new Date(year, month, task.dueDay);
+            const isPending = task.name === 'Invoice' ? task.status === 'Due, Not Raised' : task.status === 'Pending' || !task.status;
+
+            if (isPending && dueDate >= today && dueDate <= oneWeekFromNow) {
+                upcomingTasks.push({
+                    employeeName: emp.name,
+                    taskName: task.name
+                });
+            }
+        }
+      }
+
 
       setStats({
         totalActive,
@@ -139,6 +188,7 @@ export default function Dashboard() {
         onboardingComplete,
         onboardingPending,
         upcomingPoEnds,
+        upcomingTasks,
         statusCounts,
       });
       setIsLoading(false);
@@ -228,6 +278,40 @@ export default function Dashboard() {
               </Card>
               
               <div className="md:col-span-2 lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Upcoming Tasks Card */}
+                <Card className="flex flex-col">
+                    <CardHeader>
+                        <CardTitle className="text-xl flex items-center gap-2">
+                            <ListTodo className="w-6 h-6 text-primary" />
+                            Upcoming Tasks (Next 7 Days)
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        {stats.upcomingTasks.length > 0 ? (
+                             <ul className="space-y-3">
+                                {stats.upcomingTasks.map((task, index) => (
+                                    <li key={index} className="flex justify-between items-center p-3 bg-secondary/50 rounded-lg">
+                                        <p className="font-semibold">{task.employeeName}</p>
+                                        <p className="font-semibold text-destructive">{task.taskName}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full">
+                               <CheckCircle2 className="w-12 h-12 text-green-500 mb-2"/>
+                               <p>No tasks due in the next week.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                     <CardFooter className="p-4 pt-0">
+                         <Button variant="link" asChild className="text-primary font-semibold p-0">
+                           <Link href="/dashboard/monthly-tracker">
+                               Go to Monthly Tracker <ArrowRight className="ml-2 h-4 w-4" />
+                           </Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+
                 {/* Upcoming PO Ends Card */}
                 <Card>
                     <CardHeader>
