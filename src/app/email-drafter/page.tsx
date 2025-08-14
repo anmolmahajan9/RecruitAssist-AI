@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -103,9 +104,6 @@ export default function EmailDrafterPage() {
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
             Email Drafter
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Draft a professional email to a client for candidate submission.
-          </p>
         </div>
       </header>
 

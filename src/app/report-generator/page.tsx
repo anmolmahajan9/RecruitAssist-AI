@@ -416,10 +416,6 @@ export default function ReportGeneratorPage() {
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
             Report Generator
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Generate a combined PDF with a call assessment and a watermarked
-            resume.
-          </p>
         </div>
       </header>
       <ReportGeneratorForm

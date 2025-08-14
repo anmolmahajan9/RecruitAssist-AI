@@ -142,9 +142,7 @@ export default function EmployeesPage() {
   return (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-card p-4 rounded-2xl shadow-sm mb-6 gap-4">
-        <p className="text-lg text-muted-foreground max-w-2xl">
-          Add, view, and manage all your on-site employee records.
-        </p>
+        <div></div>
         <Button onClick={openNewForm} size="lg" className="font-bold w-full md:w-auto">
           <PlusCircle className="mr-2 h-5 w-5" />
           Add New Employee

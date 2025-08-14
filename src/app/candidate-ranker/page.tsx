@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -103,9 +104,6 @@ export default function CandidateRankerPage() {
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
             Candidate Ranker
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Rank candidates against a job description based on their details.
-          </p>
         </div>
       </header>
 

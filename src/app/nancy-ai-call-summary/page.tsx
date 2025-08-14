@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -70,9 +71,6 @@ export default function NancyAiCallSummaryPage() {
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
             Nancy AI Call Summary
           </h1>
-          <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Generate a structured summary of a candidate call assessment.
-          </p>
         </div>
       </header>
 
