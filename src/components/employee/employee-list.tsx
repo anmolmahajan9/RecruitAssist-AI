@@ -102,19 +102,6 @@ const formatDate = (dateString: string): string => {
 
 export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeListProps) {
 
-  const getMainStatusPillClass = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700';
-      case 'Ended':
-        return 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700';
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
-    }
-  };
-
   const groupedEmployees = employees.reduce((acc, employee) => {
     let key = 'Undated';
     if (employee.doj) {
@@ -192,27 +179,34 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                 } else if (daysLeft <= 45) {
                     pillColorClass = 'text-yellow-600 border-yellow-400';
                 }
+
+                const getStatusColor = (status: string) => {
+                  switch (status) {
+                    case 'Active': return 'bg-green-500';
+                    case 'Ended': return 'bg-red-500';
+                    case 'Pending': return 'bg-yellow-500';
+                    default: return 'bg-gray-400';
+                  }
+                }
                 
                 return (
                     <Card 
                         key={employee.id} 
-                        className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                        className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
                     >
-                        <div className="p-4 grid grid-cols-12 items-center gap-4">
+                        <div className={cn("absolute left-0 top-0 h-full w-2", getStatusColor(employee.status))}></div>
+                        <div className="p-4 pl-6 grid grid-cols-12 items-center gap-4">
                             {/* Left part: Name, Role, Status */}
                             <div className="col-span-12 md:col-span-4">
-                                <div className='flex items-center gap-2'>
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
-                                <Badge variant="outline" className={cn("font-bold", getMainStatusPillClass(employee.status))}>{employee.status}</Badge>
-                                </div>
                                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                     <Briefcase className="w-4 h-4"/>
                                     {employee.role}
                                 </p>
                                 <div className="text-sm text-muted-foreground space-y-2 mt-2">
-                                <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
-                                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {formatDate(employee.doj)}</span></div>
-                            </div>
+                                  <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
+                                  <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {formatDate(employee.doj)}</span></div>
+                                </div>
                             </div>
                             {/* Middle part: Onboarding Icons */}
                              <div className="col-span-12 md:col-span-3">
