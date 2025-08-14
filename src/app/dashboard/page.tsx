@@ -174,24 +174,6 @@ export default function Dashboard() {
                  </Card>
                </Link>
                
-               <Card 
-                  className="flex flex-col bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full"
-                  onClick={() => setIsClientManagerOpen(true)}
-               >
-                    <CardHeader className="flex-grow flex flex-col items-center text-center p-6 pb-2">
-                        <Landmark className="w-12 h-12 text-primary mb-4" />
-                        <CardTitle className="text-5xl font-extrabold text-foreground">
-                        {stats.totalClients}
-                        </CardTitle>
-                        <CardDescription className="text-lg font-medium">
-                        Total Clients
-                        </CardDescription>
-                    </CardHeader>
-                    <CardFooter className="p-4 pt-0 flex justify-end items-center text-primary font-semibold">
-                       Manage Clients <ArrowRight className="ml-2 h-4 w-4" />
-                    </CardFooter>
-                 </Card>
-
               <Card>
                 <CardHeader>
                   <CardTitle className="text-xl flex items-center gap-2">
@@ -243,6 +225,25 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
+
+                <Card 
+                  className="flex flex-col bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full"
+                  onClick={() => setIsClientManagerOpen(true)}
+               >
+                    <CardHeader className="flex-grow flex flex-col items-center text-center p-6 pb-2">
+                        <Landmark className="w-12 h-12 text-primary mb-4" />
+                        <CardTitle className="text-5xl font-extrabold text-foreground">
+                        {stats.totalClients}
+                        </CardTitle>
+                        <CardDescription className="text-lg font-medium">
+                        Total Clients
+                        </CardDescription>
+                    </CardHeader>
+                    <CardFooter className="p-4 pt-0 flex justify-end items-center text-primary font-semibold">
+                       Manage Clients <ArrowRight className="ml-2 h-4 w-4" />
+                    </CardFooter>
+                 </Card>
+
 
                 {/* Upcoming PO Ends Card */}
                 <Card className="md:col-span-2 lg:col-span-4">
