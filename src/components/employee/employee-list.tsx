@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle, AlertTriangle, CircleDotDashed, CircleAlert, ChevronDown, ChevronUp } from 'lucide-react';
+import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle, AlertTriangle, CircleDotDashed, CircleAlert, ChevronDown, ChevronUp, MapPin } from 'lucide-react';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
@@ -202,6 +202,9 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                 <div className="text-sm text-muted-foreground space-y-1 mt-2">
                   <div className="flex items-center gap-2"><Building className="w-4 h-4 text-muted-foreground"/><span>{employee.client}</span></div>
                   <div className="flex items-center gap-2"><Briefcase className="w-4 h-4 text-muted-foreground"/><span>{employee.role}</span></div>
+                   {(employee.city || employee.state) && (
+                    <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-muted-foreground"/><span>{employee.city}{employee.city && employee.state && ', '}{employee.state}</span></div>
+                  )}
                 </div>
             </div>
             {/* Middle part: Onboarding Icons */}
