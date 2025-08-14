@@ -36,16 +36,6 @@ export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
     description: 'Collect all relevant educational certificates and mark sheets.',
   },
   {
-    id: 'offerLetters',
-    header: 'Previous Offer Letters',
-    description: 'Collect offer letters from previous employments.',
-  },
-  {
-    id: 'relievingDocs',
-    header: 'Relieving Documents',
-    description: 'Collect relieving letters from all previous employers.',
-  },
-  {
     id: 'experienceDocs',
     header: 'Experience Documents',
     description: 'Collect all experience certificates from previous employers.',
@@ -54,6 +44,11 @@ export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
     id: 'offerLetter',
     header: 'Offer Letter',
     description: 'Generate and send the official offer letter to the candidate.',
+  },
+  {
+    id: 'relievingDocs',
+    header: 'Relieving Documents',
+    description: 'Collect relieving letters from all previous employers.',
   },
   {
     id: 'bgv',
@@ -109,5 +104,6 @@ export interface Employee {
   state: string;
   recruiter: string;
   onboarding: OnboardingTracker;
+  notes?: string;
   createdAt?: any;
 }

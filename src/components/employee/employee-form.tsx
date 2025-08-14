@@ -34,6 +34,7 @@ import { addEmployee, updateEmployee } from '@/services/employeeService';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { cn } from '@/lib/utils';
 import { onboardingTemplate } from '@/types/employee';
+import { Textarea } from '../ui/textarea';
 
 const getInitialOnboardingSteps = (): OnboardingStep[] => {
   return onboardingTemplate.map((step) => ({
@@ -55,6 +56,7 @@ const initialEmployeeState: Omit<Employee, 'id'> = {
   city: '',
   state: '',
   recruiter: '',
+  notes: '',
   onboarding: {
     steps: getInitialOnboardingSteps(),
     documentsLink: '',
@@ -69,7 +71,11 @@ const indianStates = [
     'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab', 
     'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 
     'Uttarakhand', 'West Bengal', 'Other'
-];
+].sort((a, b) => {
+    if (a === 'Other') return 1;
+    if (b === 'Other') return -1;
+    return a.localeCompare(b);
+});
 
 
 const statusConfig = {
@@ -136,7 +142,7 @@ export function EmployeeForm({
     }
   }, [isOpen, employee]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -348,6 +354,16 @@ export function EmployeeForm({
                         onChange={handleInputChange}
                       />
                     </div>
+                  </div>
+                  <div className="mt-4">
+                     <Label htmlFor="notes">Notes</Label>
+                     <Textarea
+                        id="notes"
+                        name="notes"
+                        value={formData.notes}
+                        onChange={handleInputChange}
+                        placeholder="Add any remarks or notes here..."
+                     />
                   </div>
                 </div>
               </div>
