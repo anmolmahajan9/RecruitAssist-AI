@@ -12,7 +12,7 @@ import {
   CardHeader,
 } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, Users } from 'lucide-react';
+import { LayoutDashboard, Users, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 
@@ -30,6 +30,12 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
       <header className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-4">
+             <Link href="/">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+                <span className="sr-only">Back</span>
+              </Button>
+            </Link>
              <Link
               href="/"
               className="text-xl font-bold text-foreground hover:text-primary transition-colors"
@@ -44,11 +50,10 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
         <div className="text-left">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
-            Dashboard
+            On-site Employee Management
           </h1>
            <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Welcome, {user?.displayName || 'User'}! This is your management
-            portal.
+            Welcome, {user?.displayName || 'User'}! This is your management portal.
           </p>
         </div>
       </header>
