@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle, AlertTriangle, CircleDotDashed, CircleAlert } from 'lucide-react';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
@@ -22,13 +22,41 @@ interface GroupedEmployees {
   [key: string]: Employee[];
 }
 
-const getOnboardingProgressCount = (steps?: OnboardingStep[]) => {
-    const total = onboardingTemplate.length;
-    if (!steps || steps.length === 0) return { completed: 0, total: total };
+const getOnboardingStatusCounts = (steps?: OnboardingStep[]) => {
+    if (!steps || steps.length === 0) {
+      // Ensure we have a valid steps array, merge with template if needed.
+      const templateSteps = onboardingTemplate.map(t => ({...t, status: 'Pending' as const}));
+      steps = templateSteps;
+    }
     
-    const completedCount = steps.filter(step => step.status === 'Done' || step.status === 'NA').length;
-    return { completed: completedCount, total: total };
+    let completed = 0;
+    let pending = 0;
+    let inProgress = 0;
+    
+    // Ensure all template steps are accounted for, merging statuses from employee data
+    const allSteps = onboardingTemplate.map(templateStep => {
+        const foundStep = steps?.find(s => s.id === templateStep.id);
+        return foundStep || {...templateStep, status: 'Pending'};
+    });
+
+    allSteps.forEach(step => {
+        switch (step.status) {
+            case 'Done':
+            case 'NA':
+                completed++;
+                break;
+            case 'Pending':
+                pending++;
+                break;
+            case 'In-Progress':
+                inProgress++;
+                break;
+        }
+    });
+
+    return { completed, pending, inProgress };
 }
+
 
 const getPoProgress = (doj: string, poEndDate: string): { percentage: number, daysLeft: number } => {
     const startDate = new Date(doj);
@@ -145,7 +173,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
             <h2 className="text-2xl font-bold tracking-tight text-foreground mb-4 pb-2 border-b-2 border-primary/20">{month}</h2>
             <div className="space-y-4">
               {groupedEmployees[month].map((employee) => {
-                const onboardingCount = getOnboardingProgressCount(employee.onboarding?.steps);
+                const onboardingCount = getOnboardingStatusCounts(employee.onboarding?.steps);
                 const poProgressData = getPoProgress(employee.doj, employee.poEndDate);
                 const poProgress = poProgressData.percentage;
                 const daysLeft = poProgressData.daysLeft;
@@ -194,10 +222,24 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                 </div>
                                 <div className="flex items-center gap-2 pt-1">
                                     <Label className="text-xs font-semibold">Onboarding:</Label>
-                                    <Badge variant="secondary" className="font-bold text-base">
-                                        <CheckCircle className="w-4 h-4 mr-1.5 text-green-500"/>
-                                        {onboardingCount.completed} / {onboardingCount.total}
-                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="secondary" className="font-bold bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
+                                            <CheckCircle className="w-3 h-3 mr-1.5"/>
+                                            {onboardingCount.completed} Done
+                                        </Badge>
+                                        {onboardingCount.inProgress > 0 && (
+                                            <Badge variant="secondary" className="font-bold bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
+                                                <CircleAlert className="w-3 h-3 mr-1.5"/>
+                                                {onboardingCount.inProgress} In Progress
+                                            </Badge>
+                                        )}
+                                        {onboardingCount.pending > 0 && (
+                                            <Badge variant="secondary" className="font-bold bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700">
+                                                <CircleDotDashed className="w-3 h-3 mr-1.5"/>
+                                                {onboardingCount.pending} Pending
+                                            </Badge>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             {/* Action Button */}
