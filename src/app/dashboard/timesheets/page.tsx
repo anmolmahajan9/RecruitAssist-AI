@@ -178,48 +178,54 @@ export default function TimesheetsPage() {
                                         <TableCell>{employee.client}</TableCell>
                                         <TableCell className="font-medium">{employee.name}</TableCell>
                                         <TableCell>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <div>
-                                                      <Select 
-                                                          value={ts.timesheetStatus} 
-                                                          onValueChange={(v: TimesheetStatus) => handleStatusChange(employee.id!, 'timesheet', v)}
-                                                      >
-                                                          <SelectTrigger className={cn("w-40", getStatusColor(ts.timesheetStatus))}>
-                                                              <SelectValue />
-                                                          </SelectTrigger>
-                                                          <SelectContent>
-                                                              {timesheetStatuses.map(status => (
-                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                                                              ))}
-                                                          </SelectContent>
-                                                      </Select>
-                                                    </div>
-                                                </TooltipTrigger>
-                                                {tooltipContent && <TooltipContent>{tooltipContent}</TooltipContent>}
-                                            </Tooltip>
+                                            <div className="flex items-center gap-2">
+                                              <Select 
+                                                  value={ts.timesheetStatus} 
+                                                  onValueChange={(v: TimesheetStatus) => handleStatusChange(employee.id!, 'timesheet', v)}
+                                              >
+                                                  <SelectTrigger className={cn("w-40", getStatusColor(ts.timesheetStatus))}>
+                                                      <SelectValue />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                      {timesheetStatuses.map(status => (
+                                                          <SelectItem key={status} value={status}>{status}</SelectItem>
+                                                      ))}
+                                                  </SelectContent>
+                                              </Select>
+                                               {tooltipContent && (
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <History className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>{tooltipContent}</TooltipContent>
+                                                    </Tooltip>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell>
-                                           <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <div>
-                                                      <Select 
-                                                          value={ts.invoiceStatus}
-                                                          onValueChange={(v: InvoiceStatus) => handleStatusChange(employee.id!, 'invoice', v)}
-                                                      >
-                                                          <SelectTrigger className={cn("w-40", getStatusColor(ts.invoiceStatus))}>
-                                                              <SelectValue />
-                                                          </SelectTrigger>
-                                                          <SelectContent>
-                                                              {invoiceStatuses.map(status => (
-                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                                                              ))}
-                                                          </SelectContent>
-                                                      </Select>
-                                                    </div>
-                                                </TooltipTrigger>
-                                                {tooltipContent && <TooltipContent>{tooltipContent}</TooltipContent>}
-                                            </Tooltip>
+                                           <div className="flex items-center gap-2">
+                                              <Select 
+                                                  value={ts.invoiceStatus}
+                                                  onValueChange={(v: InvoiceStatus) => handleStatusChange(employee.id!, 'invoice', v)}
+                                              >
+                                                  <SelectTrigger className={cn("w-40", getStatusColor(ts.invoiceStatus))}>
+                                                      <SelectValue />
+                                                  </SelectTrigger>
+                                                  <SelectContent>
+                                                      {invoiceStatuses.map(status => (
+                                                          <SelectItem key={status} value={status}>{status}</SelectItem>
+                                                      ))}
+                                                  </SelectContent>
+                                              </Select>
+                                                {tooltipContent && (
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <History className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>{tooltipContent}</TooltipContent>
+                                                    </Tooltip>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 )
