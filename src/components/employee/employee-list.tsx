@@ -207,7 +207,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                             <div className="col-span-12 md:col-span-4">
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
                                 <div className="text-sm text-muted-foreground space-y-1 mt-2">
-                                  <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
+                                  <div className="flex items-center gap-2"><Building className="w-4 h-4"/><span>{employee.client}</span></div>
                                   <div className="flex items-center gap-2"><Briefcase className="w-4 h-4"/><span>{employee.role}</span></div>
                                 </div>
                             </div>
