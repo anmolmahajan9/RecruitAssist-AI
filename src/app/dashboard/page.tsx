@@ -165,12 +165,8 @@ export default function Dashboard() {
         { active: 0, pending: 0, ended: 0 }
       );
       
-      // Calculate Upcoming Tasks
       const today = new Date();
       today.setHours(0,0,0,0);
-      
-      const fifteenDaysFromNow = new Date(today);
-      fifteenDaysFromNow.setDate(today.getDate() + 15);
 
       const trackerMap = trackerEntries.reduce((acc, entry) => {
         acc[entry.employeeId] = entry;
@@ -182,10 +178,10 @@ export default function Dashboard() {
       const groupedTasks: GroupedTasks = {};
       
       const taskDefinitions = [
-        { name: 'HR Check-in (12th)', day: 12, statusField: 'hrCheckin12thStatus' },
-        { name: 'HR Check-in (25th)', day: 25, statusField: 'hrCheckin25thStatus' },
-        { name: 'Timesheet', day: 29, statusField: 'timesheetStatus' },
-        { name: 'Invoice', day: new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate(), statusField: 'invoiceStatus' },
+        { name: 'HR Check-in (12th)', day: 12, statusField: 'hrCheckin12thStatus', pendingStatus: 'Pending' },
+        { name: 'HR Check-in (25th)', day: 25, statusField: 'hrCheckin25thStatus', pendingStatus: 'Pending' },
+        { name: 'Timesheet', day: 29, statusField: 'timesheetStatus', pendingStatus: 'Pending' },
+        { name: 'Invoice', day: new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate(), statusField: 'invoiceStatus', pendingStatus: 'Due, Not Raised' },
       ] as const;
 
 
@@ -199,7 +195,14 @@ export default function Dashboard() {
         const entry = trackerMap[emp.id!] || {};
         
         for (const task of taskDefinitions) {
-            const status = entry[task.statusField] || 'Not Due';
+            let status = entry[task.statusField] || 'Not Due';
+            const dueDate = new Date(today.getFullYear(), today.getMonth(), task.day);
+            dueDate.setHours(0,0,0,0);
+
+            if (today >= dueDate && status === 'Not Due') {
+                status = task.pendingStatus;
+            }
+
             if (taskSummary[task.name][status]) {
                 taskSummary[task.name][status]++;
             } else {
@@ -406,3 +409,5 @@ export default function Dashboard() {
       </main>
   );
 }
+
+    
