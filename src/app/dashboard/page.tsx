@@ -166,7 +166,7 @@ export default function Dashboard() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const upcomingThreshold = new Date(today);
-    upcomingThreshold.setDate(today.getDate() + 7);
+    upcomingThreshold.setDate(today.getDate() + 15);
 
 
     const trackerMap = trackerEntries.reduce((acc, entry) => {
