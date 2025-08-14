@@ -146,6 +146,7 @@ export default function Dashboard() {
       // Calculate Upcoming Tasks
       const upcomingTasks: UpcomingTask[] = [];
       const today = new Date();
+      today.setHours(0,0,0,0); // Set to beginning of today for accurate date comparison
       const oneWeekFromNow = new Date();
       oneWeekFromNow.setDate(today.getDate() + 7);
 
@@ -170,9 +171,12 @@ export default function Dashboard() {
 
         for (const task of tasks) {
             const dueDate = new Date(year, month, task.dueDay);
-            const isPending = task.name === 'Invoice' ? task.status === 'Due, Not Raised' : task.status === 'Pending' || !task.status;
+            dueDate.setHours(0,0,0,0);
 
-            if (isPending && dueDate >= today && dueDate <= oneWeekFromNow) {
+            const isPending = task.name === 'Invoice' ? task.status === 'Due, Not Raised' : task.status === 'Pending' || !task.status;
+            
+            // Show if pending and ( (due date is in the past) OR (due date is in the next 7 days) )
+            if (isPending && (dueDate <= today || (dueDate > today && dueDate <= oneWeekFromNow))) {
                 upcomingTasks.push({
                     employeeName: emp.name,
                     taskName: task.name
@@ -365,4 +369,5 @@ export default function Dashboard() {
         />
       </main>
   );
-}
+
+    
