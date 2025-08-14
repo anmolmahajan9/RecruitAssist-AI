@@ -60,7 +60,10 @@ const getOnboardingStatusCounts = (steps?: OnboardingStep[]) => {
 const getPoProgress = (doj: string, poEndDate: string): { percentage: number, daysLeft: number } => {
     const startDate = new Date(doj);
     const endDate = new Date(poEndDate);
+    
+    // Create a new Date object for today and reset time to midnight for consistent day comparison
     const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
       return { percentage: 100, daysLeft: 0 };
@@ -308,5 +311,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
     </div>
   );
 }
+
+    
 
     
