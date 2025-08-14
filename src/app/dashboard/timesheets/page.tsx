@@ -69,12 +69,10 @@ export default function TimesheetsPage() {
                 getEmployees(),
                 getTimesheetsForMonth(month)
             ]);
-            
-            const activeEmployees = fetchedEmployees.filter(e => e.status === 'Active');
 
             const viewMonthStart = new Date(`${month}-01T00:00:00Z`);
 
-            const filteredEmployees = activeEmployees.filter(e => {
+            const filteredEmployees = fetchedEmployees.filter(e => {
                 if (!e.doj) return false;
 
                 const doj = new Date(e.doj);
@@ -282,5 +280,7 @@ export default function TimesheetsPage() {
         </Card>
     );
 }
+
+    
 
     
