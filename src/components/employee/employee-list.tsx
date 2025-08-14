@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { onboardingTemplate } from '@/types/employee';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 interface EmployeeListProps {
@@ -23,17 +24,15 @@ interface GroupedEmployees {
 }
 
 const getOnboardingStatusCounts = (steps?: OnboardingStep[]) => {
+    const totalSteps = onboardingTemplate.length;
     if (!steps || steps.length === 0) {
-      // Ensure we have a valid steps array, merge with template if needed.
-      const templateSteps = onboardingTemplate.map(t => ({...t, status: 'Pending' as const}));
-      steps = templateSteps;
+      return { completed: 0, pending: totalSteps, inProgress: 0, total: totalSteps };
     }
     
     let completed = 0;
     let pending = 0;
     let inProgress = 0;
     
-    // Ensure all template steps are accounted for, merging statuses from employee data
     const allSteps = onboardingTemplate.map(templateStep => {
         const foundStep = steps?.find(s => s.id === templateStep.id);
         return foundStep || {...templateStep, status: 'Pending'};
@@ -54,7 +53,7 @@ const getOnboardingStatusCounts = (steps?: OnboardingStep[]) => {
         }
     });
 
-    return { completed, pending, inProgress };
+    return { completed, pending, inProgress, total: totalSteps };
 }
 
 
@@ -222,24 +221,47 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                 </div>
                                 <div className="flex items-center gap-2 pt-1">
                                     <Label className="text-xs font-semibold">Onboarding:</Label>
+                                    <TooltipProvider>
                                     <div className="flex items-center gap-2">
-                                        <Badge variant="secondary" className="font-bold bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
-                                            <CheckCircle className="w-3 h-3 mr-1"/>
-                                            {onboardingCount.completed}
-                                        </Badge>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Badge variant="secondary" className="font-bold bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
+                                                    <CheckCircle className="w-3 h-3 mr-1"/>
+                                                    {onboardingCount.completed}
+                                                </Badge>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Completed</p>
+                                            </TooltipContent>
+                                        </Tooltip>
                                         {onboardingCount.inProgress > 0 && (
-                                            <Badge variant="secondary" className="font-bold bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
-                                                <CircleAlert className="w-3 h-3 mr-1"/>
-                                                {onboardingCount.inProgress}
-                                            </Badge>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Badge variant="secondary" className="font-bold bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
+                                                        <CircleAlert className="w-3 h-3 mr-1"/>
+                                                        {onboardingCount.inProgress}
+                                                    </Badge>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>In Progress</p>
+                                                </TooltipContent>
+                                            </Tooltip>
                                         )}
                                         {onboardingCount.pending > 0 && (
-                                            <Badge variant="secondary" className="font-bold bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700">
-                                                <CircleDotDashed className="w-3 h-3 mr-1"/>
-                                                {onboardingCount.pending}
-                                            </Badge>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Badge variant="secondary" className="font-bold bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700">
+                                                        <CircleDotDashed className="w-3 h-3 mr-1"/>
+                                                        {onboardingCount.pending}
+                                                    </Badge>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Pending</p>
+                                                </TooltipContent>
+                                            </Tooltip>
                                         )}
                                     </div>
+                                    </TooltipProvider>
                                 </div>
                             </div>
                             {/* Action Button */}
