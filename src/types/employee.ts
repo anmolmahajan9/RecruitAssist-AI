@@ -1,4 +1,3 @@
-
 export type OnboardingStatus = 'Done' | 'Pending' | 'In-Progress' | 'NA';
 
 export interface OnboardingStep {
@@ -6,9 +5,14 @@ export interface OnboardingStep {
   header: string;
   description: string;
   status: OnboardingStatus;
+  updatedBy?: string;
+  updatedAt?: any;
 }
 
-export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
+export const onboardingTemplate: Omit<
+  OnboardingStep,
+  'status' | 'updatedBy' | 'updatedAt'
+>[] = [
   {
     id: 'resignationEmail',
     header: 'Resignation Email',
@@ -18,7 +22,8 @@ export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
   {
     id: 'aadharCard',
     header: 'Aadhar Card',
-    description: "Collect a copy of the candidate's Aadhar card for verification.",
+    description:
+      "Collect a copy of the candidate's Aadhar card for verification.",
   },
   {
     id: 'panCard',
@@ -28,12 +33,14 @@ export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
   {
     id: 'payslips',
     header: 'Payslips (6 months)',
-    description: 'Collect the last 6 months of payslips from the previous employer.',
+    description:
+      'Collect the last 6 months of payslips from the previous employer.',
   },
   {
     id: 'educationDocs',
     header: 'Education Documents',
-    description: 'Collect all relevant educational certificates and mark sheets.',
+    description:
+      'Collect all relevant educational certificates and mark sheets.',
   },
   {
     id: 'experienceDocs',
@@ -43,7 +50,8 @@ export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
   {
     id: 'offerLetter',
     header: 'Offer Letter',
-    description: 'Generate and send the official offer letter to the candidate.',
+    description:
+      'Generate and send the official offer letter to the candidate.',
   },
   {
     id: 'relievingDocs',
@@ -80,7 +88,8 @@ export const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
   {
     id: 'onboardingCall',
     header: 'Onboarding Call',
-    description: 'Conduct the final onboarding call to welcome the employee to the team.',
+    description:
+      'Conduct the final onboarding call to welcome the employee to the team.',
   },
 ];
 

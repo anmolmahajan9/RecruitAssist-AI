@@ -29,17 +29,22 @@ import {
   XCircle,
   AlertCircle,
   CircleDot,
+  History,
 } from 'lucide-react';
 import { addEmployee, updateEmployee } from '@/services/employeeService';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { cn } from '@/lib/utils';
 import { onboardingTemplate } from '@/types/employee';
 import { Textarea } from '../ui/textarea';
+import { useAuth } from '@/context/AuthContext';
+import { Timestamp } from 'firebase/firestore';
 
 const getInitialOnboardingSteps = (): OnboardingStep[] => {
   return onboardingTemplate.map((step) => ({
     ...step,
     status: 'Pending',
+    updatedAt: null,
+    updatedBy: '',
   }));
 };
 
@@ -96,12 +101,28 @@ interface EmployeeFormProps {
     onSuccess: () => void;
 }
 
+const formatUpdateDate = (timestamp: any): string => {
+  if (!timestamp) return '';
+  // Firestore Timestamps can be either from the server (object with seconds/nanoseconds) or a JS Date object
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  if (isNaN(date.getTime())) return '';
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
 export function EmployeeForm({
   isOpen,
   onOpenChange,
   employee,
   onSuccess,
 }: EmployeeFormProps) {
+  const { user } = useAuth();
   const [formData, setFormData] =
     useState<Omit<Employee, 'id'>>(initialEmployeeState);
   const [isLoading, setIsLoading] = useState(false);
@@ -118,7 +139,7 @@ export function EmployeeForm({
             (s: OnboardingStep) => s.id === templateStep.id
           );
           return savedStep
-            ? { ...templateStep, status: savedStep.status }
+            ? { ...templateStep, ...savedStep }
             : templateStep;
         });
 
@@ -163,12 +184,22 @@ export function EmployeeForm({
   };
 
   const handleOnboardingStatusChange = (stepId: string, newStatus: string) => {
+    const newTimestamp = Timestamp.now();
+    const updaterName = user?.displayName || 'Unknown User';
+
     setFormData((prev) => ({
       ...prev,
       onboarding: {
         ...prev.onboarding,
         steps: prev.onboarding.steps.map((step) =>
-          step.id === stepId ? { ...step, status: newStatus as any } : step
+          step.id === stepId
+            ? {
+                ...step,
+                status: newStatus as any,
+                updatedAt: newTimestamp,
+                updatedBy: updaterName,
+              }
+            : step
         ),
       },
     }));
@@ -450,6 +481,12 @@ export function EmployeeForm({
                               </Select>
                             </div>
                           </div>
+                           {step.updatedAt && step.updatedBy && (
+                                <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground flex items-center gap-2">
+                                    <History className="h-3 w-3" />
+                                    <span>Last updated by <strong>{step.updatedBy}</strong> on {formatUpdateDate(step.updatedAt)}</span>
+                                </div>
+                            )}
                         </div>
                       </div>
                     );
