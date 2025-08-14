@@ -103,12 +103,20 @@ export default function TimesheetsPage() {
             invoiceStatus: 'Not Due'
         };
 
-        const updatedEntry: Partial<Timesheet> = {
-            ...existingEntry,
-            [type === 'timesheet' ? 'timesheetStatus' : 'invoiceStatus']: status,
-            updatedBy: user?.displayName || 'Unknown User',
-            updatedAt: new Date(),
-        };
+        const updaterName = user?.displayName || 'Unknown User';
+        const updateTime = new Date();
+
+        let updatedEntry: Partial<Timesheet> = { ...existingEntry };
+
+        if (type === 'timesheet') {
+            updatedEntry.timesheetStatus = status as TimesheetStatus;
+            updatedEntry.timesheetUpdatedBy = updaterName;
+            updatedEntry.timesheetUpdatedAt = updateTime;
+        } else {
+            updatedEntry.invoiceStatus = status as InvoiceStatus;
+            updatedEntry.invoiceUpdatedBy = updaterName;
+            updatedEntry.invoiceUpdatedAt = updateTime;
+        }
         
         try {
             const newDoc = await upsertTimesheet(updatedEntry);
@@ -169,8 +177,13 @@ export default function TimesheetsPage() {
                         <TableBody>
                             {employees.map(employee => {
                                 const ts = timesheetData[employee.id!] || { timesheetStatus: 'Pending', invoiceStatus: 'Not Due' };
-                                const tooltipContent = ts.updatedAt ? (
-                                    <span>Last updated by <strong>{ts.updatedBy}</strong> on {formatUpdateDate(ts.updatedAt)}</span>
+                                
+                                const timesheetTooltip = ts.timesheetUpdatedAt ? (
+                                    <span>Last updated by <strong>{ts.timesheetUpdatedBy}</strong> on {formatUpdateDate(ts.timesheetUpdatedAt)}</span>
+                                 ) : null;
+                                 
+                                const invoiceTooltip = ts.invoiceUpdatedAt ? (
+                                    <span>Last updated by <strong>{ts.invoiceUpdatedBy}</strong> on {formatUpdateDate(ts.invoiceUpdatedAt)}</span>
                                  ) : null;
                                 
                                 return (
@@ -192,12 +205,12 @@ export default function TimesheetsPage() {
                                                       ))}
                                                   </SelectContent>
                                               </Select>
-                                               {tooltipContent && (
+                                               {timesheetTooltip && (
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <History className="h-4 w-4 text-muted-foreground cursor-pointer" />
                                                         </TooltipTrigger>
-                                                        <TooltipContent>{tooltipContent}</TooltipContent>
+                                                        <TooltipContent>{timesheetTooltip}</TooltipContent>
                                                     </Tooltip>
                                                 )}
                                             </div>
@@ -217,12 +230,12 @@ export default function TimesheetsPage() {
                                                       ))}
                                                   </SelectContent>
                                               </Select>
-                                                {tooltipContent && (
+                                                {invoiceTooltip && (
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <History className="h-4 w-4 text-muted-foreground cursor-pointer" />
                                                         </TooltipTrigger>
-                                                        <TooltipContent>{tooltipContent}</TooltipContent>
+                                                        <TooltipContent>{invoiceTooltip}</TooltipContent>
                                                     </Tooltip>
                                                 )}
                                             </div>

@@ -1,3 +1,4 @@
+
 export type OnboardingStatus = 'Done' | 'Pending' | 'In-Progress' | 'NA';
 
 export interface OnboardingStep {
@@ -142,6 +143,8 @@ export interface Timesheet {
   month: string; // YYYY-MM format
   timesheetStatus: TimesheetStatus;
   invoiceStatus: InvoiceStatus;
-  updatedAt: any;
-  updatedBy?: string;
+  timesheetUpdatedAt?: any;
+  timesheetUpdatedBy?: string;
+  invoiceUpdatedAt?: any;
+  invoiceUpdatedBy?: string;
 }

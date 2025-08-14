@@ -9,7 +9,6 @@ import {
   getDocs,
   doc,
   setDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
 import type { Timesheet } from '@/types/employee';
 
@@ -59,19 +58,22 @@ export async function upsertTimesheet(data: Partial<Timesheet>): Promise<Timeshe
         docRef = snapshot.docs[0].ref;
         existingData = snapshot.docs[0].data();
     }
-
+    
+    // Explicitly handle date objects for Firestore
     const dataToSet = {
         ...existingData,
         ...data,
-        updatedAt: data.updatedAt, // Pass the client-side date object
+        timesheetUpdatedAt: data.timesheetUpdatedAt || existingData.timesheetUpdatedAt || null,
+        invoiceUpdatedAt: data.invoiceUpdatedAt || existingData.invoiceUpdatedAt || null,
     };
     
-    // serverTimestamp() is not needed here as we are passing the date from the client
     await setDoc(docRef, dataToSet, { merge: true });
 
-    return {
+    // Return the merged data, ensuring dates are correctly represented
+    const finalData = {
         id: docRef.id,
-        ...dataToSet,
-        // The `updatedAt` field is already a Date object passed from the client
+        ...dataToSet
     } as Timesheet;
+
+    return finalData;
 }
