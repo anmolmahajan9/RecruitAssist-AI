@@ -3,10 +3,12 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle } from 'lucide-react';
+import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight, CheckCircle, AlertTriangle } from 'lucide-react';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+
 
 interface EmployeeListProps {
   employees: Employee[];
@@ -26,22 +28,29 @@ const getOnboardingProgressCount = (steps: OnboardingStep[] = []) => {
     return { completed: completedCount, total: steps.length };
 }
 
-const getPoProgress = (doj: string, poEndDate: string): number => {
+const getPoProgress = (doj: string, poEndDate: string): { percentage: number, daysLeft: number } => {
     const startDate = new Date(doj);
     const endDate = new Date(poEndDate);
     const today = new Date();
 
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
-      return 100; // Return 100 if dates are invalid or start is after end
+      return { percentage: 100, daysLeft: 0 };
     }
+    
+    const timeLeft = endDate.getTime() - today.getTime();
+    const daysLeft = Math.max(0, Math.ceil(timeLeft / (1000 * 60 * 60 * 24)));
 
-    if (today >= endDate) return 100;
-    if (today <= startDate) return 0;
+    if (today >= endDate) return { percentage: 100, daysLeft: 0 };
+    if (today <= startDate) {
+      const totalDuration = endDate.getTime() - startDate.getTime();
+      return { percentage: 0, daysLeft: Math.ceil(totalDuration / (1000 * 60 * 60 * 24)) };
+    }
 
     const totalDuration = endDate.getTime() - startDate.getTime();
     const elapsedDuration = today.getTime() - startDate.getTime();
+    const percentage = Math.round((elapsedDuration / totalDuration) * 100);
 
-    return Math.round((elapsedDuration / totalDuration) * 100);
+    return { percentage, daysLeft };
 }
 
 
@@ -126,13 +135,23 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
             <div className="space-y-4">
               {groupedEmployees[month].map((employee) => {
                 const onboardingCount = getOnboardingProgressCount(employee.onboarding?.steps);
-                const poProgress = getPoProgress(employee.doj, employee.poEndDate);
+                const poProgressData = getPoProgress(employee.doj, employee.poEndDate);
+                const poProgress = poProgressData.percentage;
+                const daysLeft = poProgressData.daysLeft;
+
+                let progressBarColorClass = 'bg-green-500';
+                if (daysLeft < 30) {
+                    progressBarColorClass = 'bg-red-500';
+                } else if (daysLeft <= 45) {
+                    progressBarColorClass = 'bg-yellow-500';
+                }
+                
                 return (
                     <Card 
                         key={employee.id} 
                         className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
                     >
-                        <div className="p-4 grid grid-cols-12 items-center gap-4 cursor-pointer" onClick={() => onEdit(employee)}>
+                        <div className="p-4 grid grid-cols-12 items-center gap-4">
                             {/* Left part: Name, Role, Status */}
                             <div className="col-span-12 md:col-span-3">
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
@@ -150,11 +169,17 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                             {/* Progress Bars & Counts */}
                             <div className="col-span-12 md:col-span-5 space-y-3">
                                 <div>
-                                    <Label className="text-xs font-semibold">Contract Duration</Label>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Progress value={poProgress} className="h-2"/>
-                                        <span className="text-sm font-bold text-primary">{poProgress}%</span>
+                                    <div className="flex justify-between items-center mb-1">
+                                        <Label className="text-xs font-semibold">Contract Duration</Label>
+                                        <Badge variant="outline" className={cn(
+                                            daysLeft < 30 && 'text-red-600 border-red-400',
+                                            daysLeft >= 30 && daysLeft <= 45 && 'text-yellow-600 border-yellow-400'
+                                        )}>
+                                            <AlertTriangle className="w-3 h-3 mr-1.5" />
+                                            {daysLeft} days left
+                                        </Badge>
                                     </div>
+                                    <Progress value={poProgress} indicatorClassName={progressBarColorClass} className="h-2"/>
                                 </div>
                                 <div className="flex items-center gap-2 pt-1">
                                     <Label className="text-xs font-semibold">Onboarding:</Label>
@@ -166,7 +191,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                             </div>
                             {/* Action Button */}
                             <div className="col-span-12 md:col-span-1 flex justify-end">
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" size="icon" onClick={() => onEdit(employee)}>
                                     <ChevronRight className="h-6 w-6 text-muted-foreground"/>
                                 </Button>
                             </div>
