@@ -26,7 +26,6 @@ export async function getTimesheetsForMonth(month: string): Promise<Timesheet[]>
   
   return snapshot.docs.map(doc => {
       const data = doc.data();
-       // Exclude non-serializable fields if necessary, though returning them as-is from server actions is fine.
       return { id: doc.id, ...data } as Timesheet;
   });
 }
@@ -64,14 +63,15 @@ export async function upsertTimesheet(data: Partial<Timesheet>): Promise<Timeshe
     const dataToSet = {
         ...existingData,
         ...data,
-        updatedAt: serverTimestamp(),
+        updatedAt: data.updatedAt, // Pass the client-side date object
     };
-
+    
+    // serverTimestamp() is not needed here as we are passing the date from the client
     await setDoc(docRef, dataToSet, { merge: true });
 
     return {
         id: docRef.id,
         ...dataToSet,
-        updatedAt: new Date() // Return a JS date for immediate use on client
+        // The `updatedAt` field is already a Date object passed from the client
     } as Timesheet;
 }

@@ -143,4 +143,5 @@ export interface Timesheet {
   timesheetStatus: TimesheetStatus;
   invoiceStatus: InvoiceStatus;
   updatedAt: any;
+  updatedBy?: string;
 }

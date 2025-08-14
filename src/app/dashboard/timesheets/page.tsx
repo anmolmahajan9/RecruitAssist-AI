@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowLeft, ArrowRight, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { timesheetStatuses, invoiceStatuses } from '@/types/employee';
+import { useAuth } from '@/context/AuthContext';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const getStatusColor = (status: TimesheetStatus | InvoiceStatus) => {
     switch (status) {
@@ -32,7 +34,23 @@ const getStatusColor = (status: TimesheetStatus | InvoiceStatus) => {
     }
 }
 
+const formatUpdateDate = (timestamp: any): string => {
+  if (!timestamp) return '';
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  if (isNaN(date.getTime())) return '';
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
+
 export default function TimesheetsPage() {
+    const { user } = useAuth();
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [timesheetData, setTimesheetData] = useState<Record<string, Timesheet>>({});
     const [isLoading, setIsLoading] = useState(true);
@@ -88,6 +106,8 @@ export default function TimesheetsPage() {
         const updatedEntry: Partial<Timesheet> = {
             ...existingEntry,
             [type === 'timesheet' ? 'timesheetStatus' : 'invoiceStatus']: status,
+            updatedBy: user?.displayName || 'Unknown User',
+            updatedAt: new Date(),
         };
         
         try {
@@ -136,6 +156,7 @@ export default function TimesheetsPage() {
                 ) : error ? (
                     <p className="text-destructive text-center">{error}</p>
                 ) : (
+                 <TooltipProvider>
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -148,48 +169,66 @@ export default function TimesheetsPage() {
                         <TableBody>
                             {employees.map(employee => {
                                 const ts = timesheetData[employee.id!] || { timesheetStatus: 'Pending', invoiceStatus: 'Not Due' };
+                                const tooltipContent = ts.updatedAt ? (
+                                    <span>Last updated by <strong>{ts.updatedBy}</strong> on {formatUpdateDate(ts.updatedAt)}</span>
+                                 ) : null;
+                                
                                 return (
                                     <TableRow key={employee.id}>
                                         <TableCell>{employee.client}</TableCell>
                                         <TableCell className="font-medium">{employee.name}</TableCell>
                                         <TableCell>
-                                            <Select 
-                                                value={ts.timesheetStatus} 
-                                                onValueChange={(v: TimesheetStatus) => handleStatusChange(employee.id!, 'timesheet', v)}
-                                            >
-                                                <SelectTrigger className={cn("w-40", getStatusColor(ts.timesheetStatus))}>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {timesheetStatuses.map(status => (
-                                                        <SelectItem key={status} value={status}>{status}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div>
+                                                      <Select 
+                                                          value={ts.timesheetStatus} 
+                                                          onValueChange={(v: TimesheetStatus) => handleStatusChange(employee.id!, 'timesheet', v)}
+                                                      >
+                                                          <SelectTrigger className={cn("w-40", getStatusColor(ts.timesheetStatus))}>
+                                                              <SelectValue />
+                                                          </SelectTrigger>
+                                                          <SelectContent>
+                                                              {timesheetStatuses.map(status => (
+                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                                                              ))}
+                                                          </SelectContent>
+                                                      </Select>
+                                                    </div>
+                                                </TooltipTrigger>
+                                                {tooltipContent && <TooltipContent>{tooltipContent}</TooltipContent>}
+                                            </Tooltip>
                                         </TableCell>
                                         <TableCell>
-                                            <Select 
-                                                value={ts.invoiceStatus}
-                                                onValueChange={(v: InvoiceStatus) => handleStatusChange(employee.id!, 'invoice', v)}
-                                            >
-                                                <SelectTrigger className={cn("w-40", getStatusColor(ts.invoiceStatus))}>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {invoiceStatuses.map(status => (
-                                                        <SelectItem key={status} value={status}>{status}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                           <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div>
+                                                      <Select 
+                                                          value={ts.invoiceStatus}
+                                                          onValueChange={(v: InvoiceStatus) => handleStatusChange(employee.id!, 'invoice', v)}
+                                                      >
+                                                          <SelectTrigger className={cn("w-40", getStatusColor(ts.invoiceStatus))}>
+                                                              <SelectValue />
+                                                          </SelectTrigger>
+                                                          <SelectContent>
+                                                              {invoiceStatuses.map(status => (
+                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                                                              ))}
+                                                          </SelectContent>
+                                                      </Select>
+                                                    </div>
+                                                </TooltipTrigger>
+                                                {tooltipContent && <TooltipContent>{tooltipContent}</TooltipContent>}
+                                            </Tooltip>
                                         </TableCell>
                                     </TableRow>
                                 )
                             })}
                         </TableBody>
                     </Table>
+                  </TooltipProvider>
                 )}
             </CardContent>
         </Card>
     );
 }
-
