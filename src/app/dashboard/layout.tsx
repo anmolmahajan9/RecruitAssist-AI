@@ -59,8 +59,8 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
       </header>
 
       <main>
-        <Tabs value={getActiveTab()} className="w-full mb-6">
-            <TabsList className="grid w-full grid-cols-2 h-auto">
+        <Tabs value={getActiveTab()} className="w-auto mb-6">
+            <TabsList className="h-auto">
                 <TabsTrigger value="dashboard" asChild>
                     <Link href="/dashboard" className="flex items-center gap-2">
                         <LayoutDashboard className="h-4 w-4"/>
