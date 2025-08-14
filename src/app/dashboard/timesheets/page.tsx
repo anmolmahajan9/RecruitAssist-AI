@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, ArrowLeft, ArrowRight, History } from 'lucide-react';
+import { Loader2, ArrowLeft, ArrowRight, History, Building } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { timesheetStatuses, invoiceStatuses } from '@/types/employee';
 import { useAuth } from '@/context/AuthContext';
@@ -164,6 +164,20 @@ export default function TimesheetsPage() {
         });
     }
 
+    const groupedEmployees = useMemo(() => {
+        if (!employees) return {};
+        return employees.reduce((acc, employee) => {
+            const clientName = employee.client || 'Unassigned';
+            if (!acc[clientName]) {
+                acc[clientName] = [];
+            }
+            acc[clientName].push(employee);
+            return acc;
+        }, {} as Record<string, Employee[]>);
+    }, [employees]);
+
+    const sortedClients = useMemo(() => Object.keys(groupedEmployees).sort(), [groupedEmployees]);
+
     return (
         <Card>
             <CardHeader>
@@ -197,81 +211,91 @@ export default function TimesheetsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Client</TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Timesheet</TableHead>
                                 <TableHead>Invoice</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {employees.map(employee => {
-                                const ts = timesheetData[employee.id!] || { timesheetStatus: 'Pending', invoiceStatus: 'Not Due' };
-                                
-                                const timesheetTooltip = ts.timesheetUpdatedAt ? (
-                                    <span>Last updated by <strong>{ts.timesheetUpdatedBy}</strong> on {formatUpdateDate(ts.timesheetUpdatedAt)}</span>
-                                 ) : null;
-                                 
-                                const invoiceTooltip = ts.invoiceUpdatedAt ? (
-                                    <span>Last updated by <strong>{ts.invoiceUpdatedBy}</strong> on {formatUpdateDate(ts.invoiceUpdatedAt)}</span>
-                                 ) : null;
-                                
-                                return (
-                                    <TableRow key={employee.id}>
-                                        <TableCell>{employee.client}</TableCell>
-                                        <TableCell className="font-medium">{employee.name}</TableCell>
-                                        <TableCell>
+                            {sortedClients.map(clientName => (
+                                <React.Fragment key={clientName}>
+                                    <TableRow className="bg-secondary/30 hover:bg-secondary/40">
+                                        <TableCell colSpan={3} className="font-bold text-lg">
                                             <div className="flex items-center gap-2">
-                                              <Select 
-                                                  value={ts.timesheetStatus} 
-                                                  onValueChange={(v: TimesheetStatus) => handleStatusChange(employee.id!, 'timesheet', v)}
-                                              >
-                                                  <SelectTrigger className={cn("w-40", getStatusColor(ts.timesheetStatus))}>
-                                                      <SelectValue />
-                                                  </SelectTrigger>
-                                                  <SelectContent>
-                                                      {timesheetStatuses.map(status => (
-                                                          <SelectItem key={status} value={status}>{status}</SelectItem>
-                                                      ))}
-                                                  </SelectContent>
-                                              </Select>
-                                               {timesheetTooltip && (
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <History className="h-4 w-4 text-muted-foreground cursor-pointer" />
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>{timesheetTooltip}</TooltipContent>
-                                                    </Tooltip>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                           <div className="flex items-center gap-2">
-                                              <Select 
-                                                  value={ts.invoiceStatus}
-                                                  onValueChange={(v: InvoiceStatus) => handleStatusChange(employee.id!, 'invoice', v)}
-                                              >
-                                                  <SelectTrigger className={cn("w-40", getStatusColor(ts.invoiceStatus))}>
-                                                      <SelectValue />
-                                                  </SelectTrigger>
-                                                  <SelectContent>
-                                                      {invoiceStatuses.map(status => (
-                                                          <SelectItem key={status} value={status}>{status}</SelectItem>
-                                                      ))}
-                                                  </SelectContent>
-                                              </Select>
-                                                {invoiceTooltip && (
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <History className="h-4 w-4 text-muted-foreground cursor-pointer" />
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>{invoiceTooltip}</TooltipContent>
-                                                    </Tooltip>
-                                                )}
+                                                <Building className="h-5 w-5 text-primary"/>
+                                                {clientName}
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                )
-                            })}
+                                    {groupedEmployees[clientName].map(employee => {
+                                        const ts = timesheetData[employee.id!] || { timesheetStatus: 'Pending', invoiceStatus: 'Not Due' };
+                                        
+                                        const timesheetTooltip = ts.timesheetUpdatedAt ? (
+                                            <span>Last updated by <strong>{ts.timesheetUpdatedBy}</strong> on {formatUpdateDate(ts.timesheetUpdatedAt)}</span>
+                                         ) : null;
+                                         
+                                        const invoiceTooltip = ts.invoiceUpdatedAt ? (
+                                            <span>Last updated by <strong>{ts.invoiceUpdatedBy}</strong> on {formatUpdateDate(ts.invoiceUpdatedAt)}</span>
+                                         ) : null;
+                                        
+                                        return (
+                                            <TableRow key={employee.id}>
+                                                <TableCell className="font-medium">{employee.name}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
+                                                      <Select 
+                                                          value={ts.timesheetStatus} 
+                                                          onValueChange={(v: TimesheetStatus) => handleStatusChange(employee.id!, 'timesheet', v)}
+                                                      >
+                                                          <SelectTrigger className={cn("w-40", getStatusColor(ts.timesheetStatus))}>
+                                                              <SelectValue />
+                                                          </SelectTrigger>
+                                                          <SelectContent>
+                                                              {timesheetStatuses.map(status => (
+                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                                                              ))}
+                                                          </SelectContent>
+                                                      </Select>
+                                                       {timesheetTooltip && (
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <History className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>{timesheetTooltip}</TooltipContent>
+                                                            </Tooltip>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                   <div className="flex items-center gap-2">
+                                                      <Select 
+                                                          value={ts.invoiceStatus}
+                                                          onValueChange={(v: InvoiceStatus) => handleStatusChange(employee.id!, 'invoice', v)}
+                                                      >
+                                                          <SelectTrigger className={cn("w-40", getStatusColor(ts.invoiceStatus))}>
+                                                              <SelectValue />
+                                                          </SelectTrigger>
+                                                          <SelectContent>
+                                                              {invoiceStatuses.map(status => (
+                                                                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                                                              ))}
+                                                          </SelectContent>
+                                                      </Select>
+                                                        {invoiceTooltip && (
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <History className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>{invoiceTooltip}</TooltipContent>
+                                                            </Tooltip>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                                </React.Fragment>
+                            ))}
                         </TableBody>
                     </Table>
                   </TooltipProvider>
