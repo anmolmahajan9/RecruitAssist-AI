@@ -175,11 +175,11 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
 
                 let pillColorClass = '';
                 if (daysLeft > 45) {
-                    pillColorClass = 'text-green-600 border-green-400';
+                    pillColorClass = 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700';
                 } else if (daysLeft > 30) {
-                    pillColorClass = 'text-yellow-600 border-yellow-400';
+                    pillColorClass = 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700';
                 } else {
-                    pillColorClass = 'text-red-600 border-red-400';
+                    pillColorClass = 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700';
                 }
 
                 const getStatusColor = (status: string) => {
@@ -273,7 +273,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                     <div className="flex justify-between items-center mb-1">
                                         <Label className="text-xs font-semibold">PO Duration</Label>
                                         {employee.status !== 'Ended' && (
-                                            <Badge variant="outline" className={pillColorClass}>
+                                            <Badge variant="secondary" className={cn('font-bold', pillColorClass)}>
                                                 <AlertTriangle className="w-3 h-3 mr-1.5" />
                                                 {daysLeft} days left
                                             </Badge>
@@ -308,4 +308,3 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
     </div>
   );
 }
-
