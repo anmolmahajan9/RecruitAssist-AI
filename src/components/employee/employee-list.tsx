@@ -314,7 +314,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                     <Accordion key={employee.id} type="single" collapsible className="w-full">
                        <AccordionItem value={`employee-${employee.id}`} className="border-none">
                          <Card className="group transform transition-all duration-300 hover:shadow-xl relative overflow-hidden">
-                            <AccordionTrigger className="w-full hover:no-underline p-0">
+                            <AccordionTrigger className="w-full hover:no-underline p-0 data-[state=open]:border-b">
                                 <div className="p-4 pl-8 grid grid-cols-12 items-center gap-4 w-full">
                                     <div className={cn(
                                         "absolute left-0 top-0 h-full w-2 group-hover:w-8 transition-all duration-300 ease-in-out flex items-center justify-center", 
