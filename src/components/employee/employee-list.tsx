@@ -209,12 +209,14 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                 <div>
                                     <div className="flex justify-between items-center mb-1">
                                         <Label className="text-xs font-semibold">Contract Duration</Label>
-                                        <Badge variant="outline" className={pillColorClass}>
-                                            <AlertTriangle className="w-3 h-3 mr-1.5" />
-                                            {daysLeft} days left
-                                        </Badge>
+                                        {employee.status !== 'Ended' && (
+                                            <Badge variant="outline" className={pillColorClass}>
+                                                <AlertTriangle className="w-3 h-3 mr-1.5" />
+                                                {daysLeft} days left
+                                            </Badge>
+                                        )}
                                     </div>
-                                    <Progress value={100} indicatorClassName="bg-green-500" value2={poProgress} indicator2ClassName="bg-red-500" className="h-2"/>
+                                    <Progress value={100} indicatorClassName={employee.status === 'Ended' ? 'bg-muted' : 'bg-green-500'} value2={poProgress} indicator2ClassName={employee.status === 'Ended' ? 'bg-muted' : 'bg-red-500'} className="h-2"/>
                                 </div>
                                 <div className="flex items-center gap-2 pt-1">
                                     <Label className="text-xs font-semibold">Onboarding:</Label>
@@ -222,7 +224,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                     <div className="flex items-center gap-2">
                                         <Tooltip>
                                             <TooltipTrigger>
-                                                <Badge variant="secondary" className="font-bold bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
+                                                <Badge variant="secondary" className={cn("font-bold", employee.status === 'Ended' ? 'bg-muted text-muted-foreground' : 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700')}>
                                                     <CheckCircle className="w-3 h-3 mr-1"/>
                                                     {onboardingCount.completed}
                                                 </Badge>
@@ -234,7 +236,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         {onboardingCount.inProgress > 0 && (
                                             <Tooltip>
                                                 <TooltipTrigger>
-                                                    <Badge variant="secondary" className="font-bold bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700">
+                                                    <Badge variant="secondary" className={cn("font-bold", employee.status === 'Ended' ? 'bg-muted text-muted-foreground' : 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700')}>
                                                         <CircleAlert className="w-3 h-3 mr-1"/>
                                                         {onboardingCount.inProgress}
                                                     </Badge>
@@ -247,7 +249,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         {onboardingCount.pending > 0 && (
                                             <Tooltip>
                                                 <TooltipTrigger>
-                                                    <Badge variant="secondary" className="font-bold bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700">
+                                                    <Badge variant="secondary" className={cn("font-bold", employee.status === 'Ended' ? 'bg-muted text-muted-foreground' : 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700')}>
                                                         <CircleDotDashed className="w-3 h-3 mr-1"/>
                                                         {onboardingCount.pending}
                                                     </Badge>
