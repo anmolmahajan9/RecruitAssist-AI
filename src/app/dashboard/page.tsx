@@ -42,6 +42,15 @@ interface GroupedTasks {
   [taskName: string]: { employeeName: string; dueDate: Date }[];
 }
 
+interface TaskStatusCounts {
+    [status: string]: number;
+}
+
+interface CategorizedTaskCounts {
+    [category: string]: TaskStatusCounts;
+}
+
+
 interface DashboardStats {
   totalActive: number;
   totalClients: number;
@@ -54,6 +63,7 @@ interface DashboardStats {
     pending: number;
     ended: number;
   };
+  taskSummary: CategorizedTaskCounts;
 }
 
 const formatDate = (dateString: string | Date): string => {
@@ -179,29 +189,21 @@ export default function Dashboard() {
       ] as const;
 
 
+       const taskSummary: CategorizedTaskCounts = {};
+
+      for (const task of taskDefinitions) {
+          taskSummary[task.name] = {};
+      }
+
       for (const emp of activeEmployees) {
         const entry = trackerMap[emp.id!] || {};
-        const year = today.getFullYear();
-        const month = today.getMonth();
         
         for (const task of taskDefinitions) {
-            const dueDate = new Date(year, month, task.day);
-            dueDate.setHours(0,0,0,0);
-
-            const status = entry[task.statusField];
-            const isPending = task.name.includes('Invoice') ? status === 'Due, Not Raised' : status === 'Pending' || !status;
-            
-            if (isPending) {
-                // Include if it's past due or due within the next 15 days
-                if (dueDate < today || (dueDate >= today && dueDate <= fifteenDaysFromNow)) {
-                     if (!groupedTasks[task.name]) {
-                        groupedTasks[task.name] = [];
-                     }
-                     groupedTasks[task.name].push({
-                        employeeName: emp.name,
-                        dueDate,
-                     });
-                }
+            const status = entry[task.statusField] || 'Not Due';
+            if (taskSummary[task.name][status]) {
+                taskSummary[task.name][status]++;
+            } else {
+                taskSummary[task.name][status] = 1;
             }
         }
       }
@@ -220,6 +222,7 @@ export default function Dashboard() {
         upcomingPoEnds,
         groupedTasks,
         statusCounts,
+        taskSummary,
       });
       setIsLoading(false);
     }
@@ -325,45 +328,45 @@ export default function Dashboard() {
               </Card>
               
               {/* Row 3 */}
-                <Card className="flex flex-col md:col-span-1">
-                    <CardHeader>
-                        <CardTitle className="text-xl flex items-center gap-2">
-                            <ListTodo className="w-6 h-6 text-primary" />
-                            Upcoming Tasks
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                        {Object.keys(stats.groupedTasks).length > 0 ? (
-                             <ul className="space-y-4">
-                                {Object.entries(stats.groupedTasks).map(([taskName, tasks]) => (
-                                    <li key={taskName}>
-                                      <h4 className="font-bold mb-2 pb-1 border-b text-primary">{taskName}</h4>
-                                       <ul className="space-y-2 pl-2">
-                                        {tasks.map((task, index) => (
-                                            <li key={index} className="flex justify-between items-center p-2 bg-secondary/50 rounded-md">
-                                                <p className="font-semibold text-sm">{task.employeeName}</p>
-                                                <p className="font-semibold text-sm text-destructive">{formatDate(task.dueDate)}</p>
-                                            </li>
-                                        ))}
-                                      </ul>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full">
-                               <CheckCircle2 className="w-12 h-12 text-green-500 mb-2"/>
-                               <p>No overdue or upcoming tasks.</p>
-                            </div>
-                        )}
-                    </CardContent>
-                     <CardFooter className="p-4 pt-0">
-                         <Button variant="link" asChild className="text-primary font-semibold p-0">
-                           <Link href="/dashboard/monthly-tracker">
-                               Go to Monthly Tracker <ArrowRight className="ml-2 h-4 w-4" />
-                           </Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
+               <Card className="flex flex-col md:col-span-1">
+                  <CardHeader>
+                      <CardTitle className="text-xl flex items-center gap-2">
+                          <ListTodo className="w-6 h-6 text-primary" />
+                          Monthly Task Summary
+                      </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                      {Object.keys(stats.taskSummary).length > 0 ? (
+                           <ul className="space-y-4">
+                              {Object.entries(stats.taskSummary).map(([category, statuses]) => (
+                                  <li key={category}>
+                                    <h4 className="font-bold mb-2 pb-1 border-b text-primary">{category}</h4>
+                                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 pl-2">
+                                      {Object.entries(statuses).map(([status, count]) => (
+                                          <div key={status} className="flex justify-between items-center text-sm">
+                                              <span className="text-muted-foreground">{status}</span>
+                                              <span className="font-bold text-foreground">{count}</span>
+                                          </div>
+                                      ))}
+                                    </div>
+                                  </li>
+                              ))}
+                          </ul>
+                      ) : (
+                          <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full">
+                             <CheckCircle2 className="w-12 h-12 text-green-500 mb-2"/>
+                             <p>No task data available for this month.</p>
+                          </div>
+                      )}
+                  </CardContent>
+                   <CardFooter className="p-4 pt-0">
+                       <Button variant="link" asChild className="text-primary font-semibold p-0">
+                         <Link href="/dashboard/monthly-tracker">
+                             Go to Monthly Tracker <ArrowRight className="ml-2 h-4 w-4" />
+                         </Link>
+                      </Button>
+                  </CardFooter>
+              </Card>
                 <Card className="md:col-span-1">
                     <CardHeader>
                         <CardTitle className="text-xl flex items-center gap-2">
