@@ -200,10 +200,10 @@ export default function MonthlyTrackerPage() {
     const existingEntry = trackerData[employeeId] || {
       employeeId,
       month: formattedMonth,
-      timesheetStatus: 'Pending',
+      timesheetStatus: 'Not Due',
       invoiceStatus: 'Not Due',
-      hrCheckin12thStatus: 'Pending',
-      hrCheckin25thStatus: 'Pending',
+      hrCheckin12thStatus: 'Not Due',
+      hrCheckin25thStatus: 'Not Due',
     };
 
     const updaterName = user?.displayName || 'Unknown User';
@@ -254,10 +254,10 @@ export default function MonthlyTrackerPage() {
     const existingEntry = trackerData[employeeId] || {
       employeeId,
       month: formattedMonth,
-      timesheetStatus: 'Pending',
+      timesheetStatus: 'Not Due',
       invoiceStatus: 'Not Due',
-      hrCheckin12thStatus: 'Pending',
-      hrCheckin25thStatus: 'Pending',
+      hrCheckin12thStatus: 'Not Due',
+      hrCheckin25thStatus: 'Not Due',
     };
 
     let updatedEntry: Partial<MonthlyTracker> = { ...existingEntry };
@@ -359,6 +359,28 @@ export default function MonthlyTrackerPage() {
       </TooltipProvider>
     );
   };
+  
+    const getStatusAndOptions = (
+    currentStatus: HrCheckinStatus | TimesheetStatus | undefined,
+    dueDate: Date
+  ) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const isDue = today >= dueDate;
+    let displayStatus = currentStatus;
+    if (isDue && currentStatus === 'Not Due') {
+      displayStatus = 'Pending';
+    }
+
+    const options = (currentStatus === 'Done' || currentStatus === 'Approved')
+      ? [currentStatus]
+      : isDue
+        ? (hrCheckinStatuses as readonly string[]).filter(s => s !== 'Not Due')
+        : (hrCheckinStatuses as readonly string[]);
+
+    return { displayStatus, options };
+  };
 
   return (
     <Card>
@@ -424,11 +446,55 @@ export default function MonthlyTrackerPage() {
                     </TableCell>
                   </TableRow>
                   {groupedEmployees[clientName].map((employee) => {
-                    const entry = trackerData[employee.id!] || {
-                      timesheetStatus: 'Pending',
+                     const entry = trackerData[employee.id!] || {
+                      timesheetStatus: 'Not Due',
                       invoiceStatus: 'Not Due',
-                      hrCheckin12thStatus: 'Pending',
-                      hrCheckin25thStatus: 'Pending',
+                      hrCheckin12thStatus: 'Not Due',
+                      hrCheckin25thStatus: 'Not Due',
+                    };
+
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    const isDue = (day: number) => {
+                        const dueDate = new Date(currentMonth);
+                        dueDate.setDate(day);
+                        dueDate.setHours(0, 0, 0, 0);
+                        return today >= dueDate;
+                    };
+                    
+                    const lastDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+                    const isInvoiceDue = today >= lastDayOfMonth;
+
+                    const getOptions = (
+                      baseStatuses: readonly string[],
+                      isItemDue: boolean
+                    ) => {
+                      if (isItemDue) {
+                        return baseStatuses.filter((s) => s !== 'Not Due');
+                      }
+                      return baseStatuses;
+                    };
+
+                    const hr12th = {
+                        isDue: isDue(12),
+                        status: isDue(12) && entry.hrCheckin12thStatus === 'Not Due' ? 'Pending' : entry.hrCheckin12thStatus,
+                        options: getOptions(hrCheckinStatuses, isDue(12))
+                    };
+                     const hr25th = {
+                        isDue: isDue(25),
+                        status: isDue(25) && entry.hrCheckin25thStatus === 'Not Due' ? 'Pending' : entry.hrCheckin25thStatus,
+                        options: getOptions(hrCheckinStatuses, isDue(25))
+                    };
+                     const timesheet = {
+                        isDue: isDue(29),
+                        status: isDue(29) && entry.timesheetStatus === 'Not Due' ? 'Pending' : entry.timesheetStatus,
+                        options: getOptions(timesheetStatuses, isDue(29))
+                    };
+                     const invoice = {
+                        isDue: isInvoiceDue,
+                        status: isInvoiceDue && entry.invoiceStatus === 'Not Due' ? 'Due, Not Raised' : entry.invoiceStatus,
+                        options: getOptions(invoiceStatuses, isInvoiceDue)
                     };
 
                     return (
@@ -441,7 +507,7 @@ export default function MonthlyTrackerPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Select
-                              value={entry.hrCheckin12thStatus}
+                              value={hr12th.status}
                               onValueChange={(v: HrCheckinStatus) =>
                                 handleStatusChange(
                                   employee.id!,
@@ -453,13 +519,13 @@ export default function MonthlyTrackerPage() {
                               <SelectTrigger
                                 className={cn(
                                   'w-32',
-                                  getStatusColor(entry.hrCheckin12thStatus)
+                                  getStatusColor(hr12th.status)
                                 )}
                               >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {hrCheckinStatuses.map((status) => (
+                                {hr12th.options.map((status) => (
                                   <SelectItem key={status} value={status}>
                                     {status}
                                   </SelectItem>
@@ -474,7 +540,7 @@ export default function MonthlyTrackerPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Select
-                              value={entry.hrCheckin25thStatus}
+                              value={hr25th.status}
                               onValueChange={(v: HrCheckinStatus) =>
                                 handleStatusChange(
                                   employee.id!,
@@ -486,13 +552,13 @@ export default function MonthlyTrackerPage() {
                               <SelectTrigger
                                 className={cn(
                                   'w-32',
-                                  getStatusColor(entry.hrCheckin25thStatus)
+                                  getStatusColor(hr25th.status)
                                 )}
                               >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {hrCheckinStatuses.map((status) => (
+                                {hr25th.options.map((status) => (
                                   <SelectItem key={status} value={status}>
                                     {status}
                                   </SelectItem>
@@ -507,7 +573,7 @@ export default function MonthlyTrackerPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Select
-                              value={entry.timesheetStatus}
+                              value={timesheet.status}
                               onValueChange={(v: TimesheetStatus) =>
                                 handleStatusChange(
                                   employee.id!,
@@ -519,13 +585,13 @@ export default function MonthlyTrackerPage() {
                               <SelectTrigger
                                 className={cn(
                                   'w-40',
-                                  getStatusColor(entry.timesheetStatus)
+                                  getStatusColor(timesheet.status)
                                 )}
                               >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {timesheetStatuses.map((status) => (
+                                {timesheet.options.map((status) => (
                                   <SelectItem key={status} value={status}>
                                     {status}
                                   </SelectItem>
@@ -540,7 +606,7 @@ export default function MonthlyTrackerPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Select
-                              value={entry.invoiceStatus}
+                              value={invoice.status}
                               onValueChange={(v: InvoiceStatus) =>
                                 handleStatusChange(employee.id!, 'invoice', v)
                               }
@@ -548,13 +614,13 @@ export default function MonthlyTrackerPage() {
                               <SelectTrigger
                                 className={cn(
                                   'w-40',
-                                  getStatusColor(entry.invoiceStatus)
+                                  getStatusColor(invoice.status)
                                 )}
                               >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {invoiceStatuses.map((status) => (
+                                {invoice.options.map((status) => (
                                   <SelectItem key={status} value={status}>
                                     {status}
                                   </SelectItem>

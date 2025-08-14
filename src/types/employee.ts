@@ -133,6 +133,7 @@ export const initialClientNames = [
 
 
 export const timesheetStatuses = [
+  'Not Due',
   'Pending',
   'Received',
   'Sent to Client',
@@ -149,6 +150,7 @@ export const invoiceStatuses = [
 ] as const;
 
 export const hrCheckinStatuses = [
+    'Not Due',
     'Pending',
     'Done'
 ] as const;
