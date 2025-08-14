@@ -27,10 +27,10 @@ export async function getTimesheetsForMonth(month: string): Promise<Timesheet[]>
       const data = doc.data();
       // Convert any Firestore Timestamps to JS Date objects to make them serializable
       const serializableData = { ...data };
-      if (serializableData.timesheetUpdatedAt?.toDate) {
+      if (serializableData.timesheetUpdatedAt && typeof serializableData.timesheetUpdatedAt.toDate === 'function') {
           serializableData.timesheetUpdatedAt = serializableData.timesheetUpdatedAt.toDate();
       }
-      if (serializableData.invoiceUpdatedAt?.toDate) {
+      if (serializableData.invoiceUpdatedAt && typeof serializableData.invoiceUpdatedAt.toDate === 'function') {
           serializableData.invoiceUpdatedAt = serializableData.invoiceUpdatedAt.toDate();
       }
       return { id: doc.id, ...serializableData } as Timesheet;
@@ -81,10 +81,10 @@ export async function upsertTimesheet(data: Partial<Timesheet>): Promise<Timeshe
         ...dataToSet
     } as Timesheet;
     
-    if (finalData.timesheetUpdatedAt?.toDate) {
+    if (finalData.timesheetUpdatedAt && typeof finalData.timesheetUpdatedAt.toDate === 'function') {
         finalData.timesheetUpdatedAt = finalData.timesheetUpdatedAt.toDate();
     }
-     if (finalData.invoiceUpdatedAt?.toDate) {
+     if (finalData.invoiceUpdatedAt && typeof finalData.invoiceUpdatedAt.toDate === 'function') {
         finalData.invoiceUpdatedAt = finalData.invoiceUpdatedAt.toDate();
     }
 
