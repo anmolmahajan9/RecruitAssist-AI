@@ -71,7 +71,38 @@ export default function TimesheetsPage() {
             ]);
             
             const activeEmployees = fetchedEmployees.filter(e => e.status === 'Active');
-            setEmployees(activeEmployees);
+
+            const viewMonthStart = new Date(`${month}-01T00:00:00Z`);
+
+            const filteredEmployees = activeEmployees.filter(e => {
+                if (!e.doj) return false;
+
+                const doj = new Date(e.doj);
+                const poEndDate = e.poEndDate ? new Date(e.poEndDate) : null;
+                
+                // Set to start of the month for DOJ
+                const dojMonthStart = new Date(Date.UTC(doj.getUTCFullYear(), doj.getUTCMonth(), 1));
+
+                // If DOJ is in a future month, don't show
+                if (dojMonthStart > viewMonthStart) {
+                    return false;
+                }
+
+                // If PO End Date exists
+                if (poEndDate) {
+                    // Set to end of the month for PO End Date to include the whole month
+                    const poEndMonthEnd = new Date(Date.UTC(poEndDate.getUTCFullYear(), poEndDate.getUTCMonth() + 1, 0));
+                    if (poEndMonthEnd < viewMonthStart) {
+                        return false;
+                    }
+                }
+                
+                // If DOJ is valid and we passed the PO end date checks (or there was no PO end date)
+                return true;
+            });
+
+
+            setEmployees(filteredEmployees);
 
             const timesheetMap = fetchedTimesheets.reduce((acc, ts) => {
                 acc[ts.employeeId] = ts;
@@ -251,3 +282,5 @@ export default function TimesheetsPage() {
         </Card>
     );
 }
+
+    
