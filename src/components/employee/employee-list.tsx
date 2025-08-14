@@ -177,11 +177,11 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                 const poProgress = poProgressData.percentage;
                 const daysLeft = poProgressData.daysLeft;
 
-                let progressBarColorClass = 'bg-green-500';
+                let pillColorClass = '';
                 if (daysLeft < 30) {
-                    progressBarColorClass = 'bg-red-500';
+                    pillColorClass = 'text-red-600 border-red-400';
                 } else if (daysLeft <= 45) {
-                    progressBarColorClass = 'bg-yellow-500';
+                    pillColorClass = 'text-yellow-600 border-yellow-400';
                 }
                 
                 return (
@@ -209,15 +209,12 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                 <div>
                                     <div className="flex justify-between items-center mb-1">
                                         <Label className="text-xs font-semibold">Contract Duration</Label>
-                                        <Badge variant="outline" className={cn(
-                                            daysLeft < 30 && 'text-red-600 border-red-400',
-                                            daysLeft >= 30 && daysLeft <= 45 && 'text-yellow-600 border-yellow-400'
-                                        )}>
+                                        <Badge variant="outline" className={pillColorClass}>
                                             <AlertTriangle className="w-3 h-3 mr-1.5" />
                                             {daysLeft} days left
                                         </Badge>
                                     </div>
-                                    <Progress value={poProgress} indicatorClassName={progressBarColorClass} className="h-2"/>
+                                    <Progress value={100} indicatorClassName="bg-green-500" value2={poProgress} indicator2ClassName="bg-red-500" className="h-2"/>
                                 </div>
                                 <div className="flex items-center gap-2 pt-1">
                                     <Label className="text-xs font-semibold">Onboarding:</Label>
