@@ -54,7 +54,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
             On-site Employee Management
           </h1>
            <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-            Welcome, {user?.displayName || 'User'}! This is your management portal.
+            Welcome, {user?.displayName || 'User'}! Manage on-site employees here.
           </p>
         </div>
       </header>
