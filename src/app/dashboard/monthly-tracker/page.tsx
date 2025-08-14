@@ -17,21 +17,21 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 const getStatusColor = (status: TimesheetStatus | InvoiceStatus | HrCheckinStatus) => {
     switch (status) {
-        // Timesheet
+        // Timesheet & HR
         case 'Pending': return 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300';
-        case 'Received': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
-        case 'Sent to Client': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
+        case 'Done':
         case 'Approved': return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300';
+        case 'Received': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
 
-        // Invoice
-        case 'Not Due': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-        case 'Due, Not Raised': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300';
-        case 'Paid': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300';
-
-        // HR Checkin
-        case 'Done': return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300';
+        // Invoice Specific
+        case 'Due, Not Raised': return 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300';
+        case 'Sent to Client': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
+        case 'Paid': return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300';
         
+        // Neutral
+        case 'Not Due': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
         case 'Not Applicable': return 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400';
+
         default: return 'bg-white dark:bg-black';
     }
 }
