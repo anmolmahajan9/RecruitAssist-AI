@@ -218,14 +218,17 @@ export default function Dashboard() {
         );
         dueDate.setHours(0, 0, 0, 0);
 
-        if (today >= dueDate && status === 'Not Due') {
-          status = task.pendingStatus;
+        // Logic for Overdue/Pending Tasks
+        if (today >= dueDate) {
+          if (status === 'Not Due') status = task.pendingStatus;
+          
+          if (status === task.pendingStatus) {
+            pendingTasks[task.name] = (pendingTasks[task.name] || 0) + 1;
+          }
         }
-
-        if (status === task.pendingStatus) {
-           if (dueDate < today) { // Overdue
-             pendingTasks[task.name] = (pendingTasks[task.name] || 0) + 1;
-           } else if (dueDate <= upcomingThreshold) { // Upcoming
+        // Logic for Upcoming Tasks
+        else if (dueDate > today && dueDate <= upcomingThreshold) {
+           if (status === 'Not Due') {
              upcomingTasks[task.name] = (upcomingTasks[task.name] || 0) + 1;
            }
         }
@@ -398,7 +401,7 @@ export default function Dashboard() {
                      )}
                       {hasUpcomingTasks && (
                        <div>
-                          <h4 className="font-bold text-amber-600 mb-2 pt-2 border-t">Upcoming Tasks</h4>
+                          <h4 className="font-bold text-amber-600 mb-2 pt-2 border-t">Upcoming Tasks (Next 15 Days)</h4>
                            <div className="space-y-2">
                             {Object.entries(stats.upcomingTasks).map(
                               ([category, count]) => (
@@ -480,3 +483,5 @@ export default function Dashboard() {
     </main>
   );
 }
+
+    
