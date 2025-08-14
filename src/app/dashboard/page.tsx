@@ -41,6 +41,7 @@ const formatDate = (dateString: string): string => {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
+    // Use UTC methods to avoid timezone issues during rendering
     const day = String(date.getUTCDate()).padStart(2, '0');
     const month = date.toLocaleString('default', {
       month: 'short',
@@ -64,8 +65,12 @@ export default function Dashboard() {
       setIsLoading(true);
       const employees = await getEmployees();
       const now = new Date();
+      now.setUTCHours(0, 0, 0, 0);
+      
       const thresholdDate = new Date();
-      thresholdDate.setDate(now.getDate() + 45);
+      thresholdDate.setUTCDate(now.getUTCDate() + 45);
+      thresholdDate.setUTCHours(0,0,0,0);
+
 
       const totalActive = employees.filter(
         (e) => e.status === 'Active'
@@ -76,6 +81,7 @@ export default function Dashboard() {
       employees.forEach((emp) => {
         if (emp.status !== 'Active') return;
         const totalSteps = onboardingTemplate.length;
+        // Defensive check for onboarding and steps array
         const completedSteps =
           emp.onboarding?.steps?.filter(
             (s) => s.status === 'Done' || s.status === 'NA'
@@ -91,7 +97,9 @@ export default function Dashboard() {
         .filter((e) => {
             if (e.status !== 'Active' || !e.poEndDate) return false;
             try {
-                const endDate = new Date(e.poEndDate);
+                // Ensure consistent date parsing
+                const [year, month, day] = e.poEndDate.split('-').map(Number);
+                const endDate = new Date(Date.UTC(year, month - 1, day));
                 return !isNaN(endDate.getTime()) && endDate > now && endDate <= thresholdDate;
             } catch {
                 return false;
@@ -132,15 +140,17 @@ export default function Dashboard() {
           stats && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Stat Cards */}
-              <Card className="flex flex-col justify-center items-center text-center p-6 bg-primary/5 hover:border-primary/50 transition-colors">
-                <Users className="w-12 h-12 text-primary mb-4" />
-                <CardTitle className="text-5xl font-extrabold text-foreground">
-                  {stats.totalActive}
-                </CardTitle>
-                <CardDescription className="text-lg font-medium">
-                  Active Employees
-                </CardDescription>
-              </Card>
+               <Link href="/dashboard/employees">
+                  <Card className="flex flex-col justify-center items-center text-center p-6 bg-primary/5 hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer h-full">
+                    <Users className="w-12 h-12 text-primary mb-4" />
+                    <CardTitle className="text-5xl font-extrabold text-foreground">
+                      {stats.totalActive}
+                    </CardTitle>
+                    <CardDescription className="text-lg font-medium">
+                      Active Employees
+                    </CardDescription>
+                  </Card>
+                </Link>
 
               <Card>
                 <CardHeader>
@@ -160,9 +170,6 @@ export default function Dashboard() {
                             <p className="text-sm text-muted-foreground">Pending</p>
                         </div>
                    </div>
-                   <Link href="/dashboard/employees">
-                     <Button variant="outline" className="w-full mt-2">View All Employees</Button>
-                   </Link>
                 </CardContent>
               </Card>
 
