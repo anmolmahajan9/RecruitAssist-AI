@@ -264,6 +264,10 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         )}
                                     </div>
                                     <Progress value={100} indicatorClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-green-400'} value2={poProgress} indicator2ClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-red-400'} className="h-2"/>
+                                    <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
+                                      <span>{employee.doj}</span>
+                                      <span>{employee.poEndDate}</span>
+                                    </div>
                                 </div>
                             </div>
                             {/* Action Button */}
