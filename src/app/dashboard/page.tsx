@@ -35,6 +35,7 @@ import { ClientManager } from '@/components/client/client-manager';
 interface UpcomingTask {
   employeeName: string;
   taskName: string;
+  dueDate: Date;
 }
 
 interface DashboardStats {
@@ -51,22 +52,29 @@ interface DashboardStats {
   };
 }
 
-const formatDate = (dateString: string): string => {
+const formatDate = (dateString: string | Date): string => {
   if (!dateString) return 'N/A';
   try {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day));
-    if (isNaN(date.getTime())) return dateString;
-    // Use UTC methods to avoid timezone issues during rendering
-    const dayFormatted = String(date.getUTCDate()).padStart(2, '0');
-    const monthFormatted = date.toLocaleString('default', {
-      month: 'short',
-      timeZone: 'UTC',
-    });
-    const yearFormatted = date.getUTCFullYear();
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    // Handle cases where dateString might be 'YYYY-MM-DD' which is interpreted as UTC
+    if (typeof dateString === 'string' && dateString.includes('-')) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        const utcDate = new Date(Date.UTC(year, month - 1, day));
+         if (isNaN(utcDate.getTime())) return dateString;
+         const dayFormatted = String(utcDate.getUTCDate()).padStart(2, '0');
+         const monthFormatted = utcDate.toLocaleString('default', { month: 'short', timeZone: 'UTC' });
+         const yearFormatted = utcDate.getUTCFullYear();
+         return `${dayFormatted}-${monthFormatted}-${yearFormatted}`;
+    }
+    
+    if (isNaN(date.getTime())) return String(dateString);
+
+    const dayFormatted = String(date.getDate()).padStart(2, '0');
+    const monthFormatted = date.toLocaleString('default', { month: 'short' });
+    const yearFormatted = date.getFullYear();
     return `${dayFormatted}-${monthFormatted}-${yearFormatted}`;
   } catch (e) {
-    return dateString;
+    return String(dateString);
   }
 };
 
@@ -146,9 +154,7 @@ export default function Dashboard() {
       // Calculate Upcoming Tasks
       const upcomingTasks: UpcomingTask[] = [];
       const today = new Date();
-      today.setHours(0,0,0,0); // Set to beginning of today for accurate date comparison
-      const oneWeekFromNow = new Date();
-      oneWeekFromNow.setDate(today.getDate() + 7);
+      today.setHours(0,0,0,0);
 
       const trackerMap = trackerEntries.reduce((acc, entry) => {
         acc[entry.employeeId] = entry;
@@ -163,23 +169,23 @@ export default function Dashboard() {
         const month = today.getMonth();
         
         const tasks = [
-            { name: 'HR Check-in', dueDay: 12, status: entry.hrCheckin12thStatus, completed: 'Done' },
-            { name: 'HR Check-in', dueDay: 25, status: entry.hrCheckin25thStatus, completed: 'Done' },
-            { name: 'Timesheet', dueDay: 29, status: entry.timesheetStatus, completed: 'Approved' },
-            { name: 'Invoice', dueDay: new Date(year, month + 1, 0).getDate(), status: entry.invoiceStatus, completed: 'Paid' },
+            { name: 'HR Check-in (12th)', dueDay: 12, status: entry.hrCheckin12thStatus },
+            { name: 'HR Check-in (25th)', dueDay: 25, status: entry.hrCheckin25thStatus },
+            { name: 'Timesheet', dueDay: 29, status: entry.timesheetStatus },
+            { name: 'Invoice', dueDay: new Date(year, month + 1, 0).getDate(), status: entry.invoiceStatus },
         ];
 
         for (const task of tasks) {
             const dueDate = new Date(year, month, task.dueDay);
             dueDate.setHours(0,0,0,0);
-
-            const isPending = task.name === 'Invoice' ? task.status === 'Due, Not Raised' : task.status === 'Pending' || !task.status;
             
-            // Show if pending and ( (due date is in the past) OR (due date is in the next 7 days) )
-            if (isPending && (dueDate <= today || (dueDate > today && dueDate <= oneWeekFromNow))) {
+            const isPending = task.name.includes('Invoice') ? task.status === 'Due, Not Raised' : task.status === 'Pending' || !task.status;
+            
+            if (isPending) {
                 upcomingTasks.push({
                     employeeName: emp.name,
-                    taskName: task.name
+                    taskName: task.name,
+                    dueDate,
                 });
             }
         }
@@ -303,7 +309,7 @@ export default function Dashboard() {
                     <CardHeader>
                         <CardTitle className="text-xl flex items-center gap-2">
                             <ListTodo className="w-6 h-6 text-primary" />
-                            Upcoming Tasks (Next 7 Days)
+                            Upcoming Tasks
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow">
@@ -311,15 +317,18 @@ export default function Dashboard() {
                              <ul className="space-y-3">
                                 {stats.upcomingTasks.map((task, index) => (
                                     <li key={index} className="flex justify-between items-center p-3 bg-secondary/50 rounded-lg">
-                                        <p className="font-semibold">{task.employeeName}</p>
-                                        <p className="font-semibold text-destructive">{task.taskName}</p>
+                                        <div>
+                                            <p className="font-semibold">{task.employeeName}</p>
+                                            <p className="text-sm text-muted-foreground">{task.taskName}</p>
+                                        </div>
+                                        <p className="font-semibold text-destructive">{formatDate(task.dueDate)}</p>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
                             <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full">
                                <CheckCircle2 className="w-12 h-12 text-green-500 mb-2"/>
-                               <p>No tasks due in the next week.</p>
+                               <p>No pending tasks for this month.</p>
                             </div>
                         )}
                     </CardContent>
@@ -369,5 +378,4 @@ export default function Dashboard() {
         />
       </main>
   );
-
-    
+ 
