@@ -191,40 +191,27 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                     >
                         <div className="p-4 grid grid-cols-12 items-center gap-4">
                             {/* Left part: Name, Role, Status */}
-                            <div className="col-span-12 md:col-span-3">
+                            <div className="col-span-12 md:col-span-4">
+                                <div className='flex items-center gap-2'>
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
+                                <Badge variant={getStatusVariant(employee.status)} className={cn("text-white", getStatusColorClass(employee.status))}>{employee.status}</Badge>
+                                </div>
                                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
                                     <Briefcase className="w-4 h-4"/>
                                     {employee.role}
                                 </p>
-                                <Badge variant={getStatusVariant(employee.status)} className={cn("mt-2 text-white", getStatusColorClass(employee.status))}>{employee.status}</Badge>
-                            </div>
-                            {/* Middle part: Client and DOJ */}
-                            <div className="col-span-12 md:col-span-3 text-sm text-muted-foreground space-y-2">
+                                <div className="text-sm text-muted-foreground space-y-2 mt-2">
                                 <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
                                 <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {employee.doj}</span></div>
                             </div>
-                            {/* Progress Bars & Counts */}
-                            <div className="col-span-12 md:col-span-5 space-y-3">
-                                <div>
-                                    <div className="flex justify-between items-center mb-1">
-                                        <Label className="text-xs font-semibold">Contract Duration</Label>
-                                        {employee.status !== 'Ended' && (
-                                            <Badge variant="outline" className={pillColorClass}>
-                                                <AlertTriangle className="w-3 h-3 mr-1.5" />
-                                                {daysLeft} days left
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <Progress value={100} indicatorClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-green-500'} value2={poProgress} indicator2ClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-red-500'} className="h-2"/>
-                                </div>
-                                <div className="flex items-center gap-2 pt-1">
-                                    <Label className="text-xs font-semibold">Onboarding:</Label>
-                                    <TooltipProvider>
-                                    <div className="flex items-center gap-2">
+                            </div>
+                            {/* Middle part: Onboarding Icons */}
+                             <div className="col-span-12 md:col-span-3">
+                                 <TooltipProvider>
+                                    <div className="flex flex-col space-y-2">
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Badge variant="secondary" className={cn("font-bold", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700')}>
+                                                <Badge variant="secondary" className={cn("font-bold w-fit", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700')}>
                                                     <CheckCircle className="w-3 h-3 mr-1"/>
                                                     {onboardingCount.completed}
                                                 </Badge>
@@ -236,7 +223,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         {onboardingCount.inProgress > 0 && (
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Badge variant="secondary" className={cn("font-bold", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700')}>
+                                                    <Badge variant="secondary" className={cn("font-bold w-fit", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700')}>
                                                         <CircleAlert className="w-3 h-3 mr-1"/>
                                                         {onboardingCount.inProgress}
                                                     </Badge>
@@ -249,7 +236,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         {onboardingCount.pending > 0 && (
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Badge variant="secondary" className={cn("font-bold", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700')}>
+                                                    <Badge variant="secondary" className={cn("font-bold w-fit", employee.status === 'Ended' ? 'bg-gray-100 text-gray-500 border-gray-300' : 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700')}>
                                                         <CircleDotDashed className="w-3 h-3 mr-1"/>
                                                         {onboardingCount.pending}
                                                     </Badge>
@@ -261,6 +248,21 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                         )}
                                     </div>
                                     </TooltipProvider>
+                            </div>
+
+                            {/* Progress Bars & Counts */}
+                            <div className="col-span-12 md:col-span-4 space-y-3">
+                                <div>
+                                    <div className="flex justify-between items-center mb-1">
+                                        <Label className="text-xs font-semibold">Contract Duration</Label>
+                                        {employee.status !== 'Ended' && (
+                                            <Badge variant="outline" className={pillColorClass}>
+                                                <AlertTriangle className="w-3 h-3 mr-1.5" />
+                                                {daysLeft} days left
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <Progress value={100} indicatorClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-green-500'} value2={poProgress} indicator2ClassName={employee.status === 'Ended' ? 'bg-gray-300' : 'bg-red-500'} className="h-2"/>
                                 </div>
                             </div>
                             {/* Action Button */}
