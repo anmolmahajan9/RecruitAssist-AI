@@ -49,9 +49,6 @@ const employees_old: Omit<Employee, 'id'>[] = [
     city: 'Pune',
     state: 'Maharashtra',
     recruiter: '-',
-    experience: 'NA',
-    optForPF: false,
-    optForHealth: false,
     onboarding: {
       steps: getInitialOnboardingSteps().map(s => ({...s, status: s.id === 'offerLetter' ? 'Done' : 'NA' })),
       documentsLink: 'NA',

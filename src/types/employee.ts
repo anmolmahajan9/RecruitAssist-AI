@@ -27,9 +27,6 @@ export interface Employee {
   city: string;
   state: string;
   recruiter: string;
-  experience: 'IN' | 'OUT' | 'NA';
-  optForPF: boolean;
-  optForHealth: boolean;
   onboarding: OnboardingTracker;
   createdAt?: any;
 }

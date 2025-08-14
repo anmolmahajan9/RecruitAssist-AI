@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -32,9 +31,8 @@ import {
   CircleDot,
 } from 'lucide-react';
 import { addEmployee, updateEmployee } from '@/services/employeeService';
-import type { Employee, OnboardingStep, OnboardingTracker } from '@/types/employee';
+import type { Employee, OnboardingStep } from '@/types/employee';
 import { cn } from '@/lib/utils';
-import { OnboardingTimeline } from './onboarding-timeline';
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -82,9 +80,6 @@ const initialEmployeeState: Omit<Employee, 'id'> = {
   city: '',
   state: '',
   recruiter: '',
-  experience: 'NA',
-  optForPF: false,
-  optForHealth: false,
   onboarding: {
     steps: getInitialOnboardingSteps(),
     documentsLink: '',
@@ -162,13 +157,6 @@ export function EmployeeForm({
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckboxChange = (
-    name: 'optForPF' | 'optForHealth',
-    checked: boolean
-  ) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
   const handleOnboardingStatusChange = (stepId: string, newStatus: string) => {
@@ -352,44 +340,6 @@ export function EmployeeForm({
                         value={formData.billingRate}
                         onChange={handleInputChange}
                       />
-                    </div>
-                   
-                    <div className="lg:col-span-3">
-                      <Label>Experience Source</Label>
-                      <Select
-                        name="experience"
-                        value={formData.experience}
-                        onValueChange={(v) => handleSelectChange('experience', v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="IN">IN</SelectItem>
-                          <SelectItem value="OUT">OUT</SelectItem>
-                          <SelectItem value="NA">NA</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="lg:col-span-3 flex items-center space-x-6 pt-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="optForPF"
-                          checked={formData.optForPF}
-                          onCheckedChange={(c) => handleCheckboxChange('optForPF', c as boolean)}
-                        />
-                        <Label htmlFor="optForPF">Opt for PF?</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="optForHealth"
-                          checked={formData.optForHealth}
-                          onCheckedChange={(c) => handleCheckboxChange('optForHealth', c as boolean)}
-                        />
-                        <Label htmlFor="optForHealth">
-                          Opt for Health Insurance?
-                        </Label>
-                      </div>
                     </div>
                   </div>
                 </div>
