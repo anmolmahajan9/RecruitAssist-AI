@@ -24,9 +24,9 @@ export interface Employee {
   poEndDate: string;
   ctc: string;
   billingRate: string;
-  location: string;
+  city: string;
+  state: string;
   recruiter: string;
-  stage: 'Joined' | 'In-Progress';
   experience: 'IN' | 'OUT' | 'NA';
   optForPF: boolean;
   optForHealth: boolean;

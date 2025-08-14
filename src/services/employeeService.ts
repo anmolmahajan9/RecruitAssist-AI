@@ -1,3 +1,4 @@
+
 'use server';
 
 import { firestore } from '@/lib/firebase';
@@ -25,7 +26,7 @@ export async function addEmployee(employee: Omit<Employee, 'id'>): Promise<strin
 }
 
 export async function getEmployees(): Promise<Employee[]> {
-  const q = query(employeesCollection, orderBy('createdAt', 'desc'));
+  const q = query(employeesCollection, orderBy('doj', 'desc'));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => {
       const data = doc.data();

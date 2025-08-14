@@ -34,6 +34,7 @@ import {
 import { addEmployee, updateEmployee } from '@/services/employeeService';
 import type { Employee, OnboardingStep, OnboardingTracker } from '@/types/employee';
 import { cn } from '@/lib/utils';
+import { OnboardingTimeline } from './onboarding-timeline';
 
 interface EmployeeFormProps {
   isOpen: boolean;
@@ -78,9 +79,9 @@ const initialEmployeeState: Omit<Employee, 'id'> = {
   poEndDate: '',
   ctc: '',
   billingRate: '',
-  location: '',
+  city: '',
+  state: '',
   recruiter: '',
-  stage: 'In-Progress',
   experience: 'NA',
   optForPF: false,
   optForHealth: false,
@@ -279,12 +280,38 @@ export function EmployeeForm({
                         onChange={handleInputChange}
                       />
                     </div>
+                     <div>
+                      <Label htmlFor="status">Status</Label>
+                      <Select
+                        name="status"
+                        value={formData.status}
+                        onValueChange={(v) => handleSelectChange('status', v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Active">Active</SelectItem>
+                          <SelectItem value="Ended">Ended</SelectItem>
+                          <SelectItem value="Pending">Pending</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div>
-                      <Label htmlFor="location">Location</Label>
+                      <Label htmlFor="city">City</Label>
                       <Input
-                        id="location"
-                        name="location"
-                        value={formData.location}
+                        id="city"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                     <div>
+                      <Label htmlFor="state">State</Label>
+                      <Input
+                        id="state"
+                        name="state"
+                        value={formData.state}
                         onChange={handleInputChange}
                       />
                     </div>
@@ -326,39 +353,7 @@ export function EmployeeForm({
                         onChange={handleInputChange}
                       />
                     </div>
-                    <div>
-                      <Label>Status</Label>
-                      <Select
-                        name="status"
-                        value={formData.status}
-                        onValueChange={(v) => handleSelectChange('status', v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="Ended">Ended</SelectItem>
-                          <SelectItem value="Pending">Pending</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Stage</Label>
-                      <Select
-                        name="stage"
-                        value={formData.stage}
-                        onValueChange={(v) => handleSelectChange('stage', v)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Joined">Joined</SelectItem>
-                          <SelectItem value="In-Progress">In-Progress</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                   
                     <div className="lg:col-span-3">
                       <Label>Experience Source</Label>
                       <Select

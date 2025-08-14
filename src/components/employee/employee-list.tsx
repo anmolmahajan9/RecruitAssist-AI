@@ -68,6 +68,15 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
     }
   };
 
+  const getStatusColorClass = (status: string) => {
+    switch(status) {
+        case 'Active': return 'bg-green-500';
+        case 'Ended': return 'bg-red-500';
+        case 'Pending': return 'bg-yellow-500';
+        default: return 'bg-gray-500';
+    }
+  }
+
   const groupedEmployees = employees.reduce((acc, employee) => {
     let key = 'Undated';
     if (employee.doj) {
@@ -159,7 +168,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                                     <Briefcase className="w-4 h-4"/>
                                     {employee.role}
                                 </p>
-                                <Badge variant={getStatusVariant(employee.status)} className="mt-2">{employee.status}</Badge>
+                                <Badge variant={getStatusVariant(employee.status)} className={cn("mt-2 text-white", getStatusColorClass(employee.status))}>{employee.status}</Badge>
                             </div>
                             {/* Middle part: Client and DOJ */}
                             <div className="col-span-12 md:col-span-3 text-sm text-muted-foreground space-y-2">
