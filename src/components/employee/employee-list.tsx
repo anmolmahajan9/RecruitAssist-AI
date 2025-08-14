@@ -206,13 +206,9 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
                             {/* Left part: Name, Role, Status */}
                             <div className="col-span-12 md:col-span-4">
                                 <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
-                                <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                    <Briefcase className="w-4 h-4"/>
-                                    {employee.role}
-                                </p>
-                                <div className="text-sm text-muted-foreground space-y-2 mt-2">
+                                <div className="text-sm text-muted-foreground space-y-1 mt-2">
                                   <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
-                                  <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {formatDate(employee.doj)}</span></div>
+                                  <div className="flex items-center gap-2"><Briefcase className="w-4 h-4"/><span>{employee.role}</span></div>
                                 </div>
                             </div>
                             {/* Middle part: Onboarding Icons */}
