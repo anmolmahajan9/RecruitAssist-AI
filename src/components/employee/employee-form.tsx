@@ -37,7 +37,6 @@ import { cn } from '@/lib/utils';
 import { onboardingTemplate } from '@/types/employee';
 import { Textarea } from '../ui/textarea';
 import { useAuth } from '@/context/AuthContext';
-import { Timestamp } from 'firebase/firestore';
 
 const getInitialOnboardingSteps = (): OnboardingStep[] => {
   return onboardingTemplate.map((step) => ({
@@ -103,7 +102,7 @@ interface EmployeeFormProps {
 
 const formatUpdateDate = (timestamp: any): string => {
   if (!timestamp) return '';
-  // Firestore Timestamps can be either from the server (object with seconds/nanoseconds) or a JS Date object
+  // Can be a Firestore Timestamp (from existing data) or a JS Date (from new changes)
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
   if (isNaN(date.getTime())) return '';
   return date.toLocaleString('en-US', {
@@ -184,7 +183,7 @@ export function EmployeeForm({
   };
 
   const handleOnboardingStatusChange = (stepId: string, newStatus: string) => {
-    const newTimestamp = Timestamp.now();
+    const newTimestamp = new Date(); // Use standard JS Date object
     const updaterName = user?.displayName || 'Unknown User';
 
     setFormData((prev) => ({
