@@ -9,47 +9,45 @@ import {
   getDocs,
   doc,
   setDoc,
-  serverTimestamp,
   Timestamp
 } from 'firebase/firestore';
-import type { Timesheet } from '@/types/employee';
+import type { MonthlyTracker } from '@/types/employee';
 
-const timesheetsCollection = collection(firestore, 'timesheets');
+const monthlyTrackerCollection = collection(firestore, 'monthly-tracker');
 
 /**
- * Fetches all timesheet entries for a given month.
+ * Fetches all monthly tracker entries for a given month.
  * @param month - The month in YYYY-MM format.
- * @returns An array of Timesheet objects.
+ * @returns An array of MonthlyTracker objects.
  */
-export async function getTimesheetsForMonth(month: string): Promise<Timesheet[]> {
-  const q = query(timesheetsCollection, where('month', '==', month));
+export async function getTrackerEntriesForMonth(month: string): Promise<MonthlyTracker[]> {
+  const q = query(monthlyTrackerCollection, where('month', '==', month));
   const snapshot = await getDocs(q);
   
   return snapshot.docs.map(doc => {
       const data = doc.data();
-      // Convert any Firestore Timestamps to JS Date objects to make them serializable
       const serializableData: { [key: string]: any } = { ...data };
       for (const key in serializableData) {
         if (serializableData[key] instanceof Timestamp) {
           serializableData[key] = serializableData[key].toDate();
         }
       }
-      return { id: doc.id, ...serializableData } as Timesheet;
+      return { id: doc.id, ...serializableData } as MonthlyTracker;
   });
 }
 
 /**
- * Creates or updates a timesheet entry. It identifies an entry by a composite
+ * Creates or updates a monthly tracker entry. It identifies an entry by a composite
  * key of employeeId and month.
- * @param data - The partial timesheet data. Must include employeeId and month.
- * @returns The updated or created Timesheet document.
+ * @param data - The partial tracker data. Must include employeeId and month.
+ * @returns The updated or created MonthlyTracker document.
  */
-export async function upsertTimesheet(data: Partial<Timesheet>): Promise<Timesheet> {
+export async function upsertTrackerEntry(data: Partial<MonthlyTracker>): Promise<MonthlyTracker> {
     if (!data.employeeId || !data.month) {
-        throw new Error("employeeId and month are required to upsert a timesheet.");
+        throw new Error("employeeId and month are required to upsert a tracker entry.");
     }
 
-    const q = query(timesheetsCollection, 
+    const q = query(monthlyTrackerCollection, 
         where('employeeId', '==', data.employeeId), 
         where('month', '==', data.month)
     );
@@ -57,18 +55,15 @@ export async function upsertTimesheet(data: Partial<Timesheet>): Promise<Timeshe
     const snapshot = await getDocs(q);
     
     let docRef;
-    let existingData: Partial<Timesheet> = {};
+    let existingData: Partial<MonthlyTracker> = {};
 
     if (snapshot.empty) {
-        // Create new document reference
-        docRef = doc(timesheetsCollection);
+        docRef = doc(monthlyTrackerCollection);
     } else {
-        // Get reference to existing document
         docRef = snapshot.docs[0].ref;
         existingData = snapshot.docs[0].data();
     }
     
-    // Merge new data with existing data
     const dataToSet = {
         ...existingData,
         ...data,
@@ -76,19 +71,17 @@ export async function upsertTimesheet(data: Partial<Timesheet>): Promise<Timeshe
     
     await setDoc(docRef, dataToSet, { merge: true });
 
-    // Return the merged data, ensuring dates are correctly represented as serializable objects
     const finalData = {
         id: docRef.id,
         ...dataToSet
-    } as Timesheet;
+    } as MonthlyTracker;
     
-    // Convert any potential Timestamps to Dates for the return value
     const serializableData: { [key: string]: any } = { ...finalData };
-      for (const key in serializableData) {
-        if (serializableData[key] instanceof Timestamp) {
-          serializableData[key] = serializableData[key].toDate();
-        }
+    for (const key in serializableData) {
+      if (serializableData[key] instanceof Timestamp) {
+        serializableData[key] = serializableData[key].toDate();
       }
+    }
 
-    return serializableData as Timesheet;
+    return serializableData as MonthlyTracker;
 }

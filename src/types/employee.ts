@@ -148,17 +148,34 @@ export const invoiceStatuses = [
   'Not Applicable',
 ] as const;
 
+export const hrCheckinStatuses = [
+    'Pending',
+    'Done'
+] as const;
+
 export type TimesheetStatus = (typeof timesheetStatuses)[number];
 export type InvoiceStatus = (typeof invoiceStatuses)[number];
+export type HrCheckinStatus = (typeof hrCheckinStatuses)[number];
 
-export interface Timesheet {
+
+export interface MonthlyTracker {
   id?: string;
   employeeId: string;
   month: string; // YYYY-MM format
+  
   timesheetStatus: TimesheetStatus;
   timesheetUpdatedAt?: any;
   timesheetUpdatedBy?: string;
+  
   invoiceStatus: InvoiceStatus;
   invoiceUpdatedAt?: any;
   invoiceUpdatedBy?: string;
+  
+  hrCheckin12thStatus: HrCheckinStatus;
+  hrCheckin12thUpdatedAt?: any;
+  hrCheckin12thUpdatedBy?: string;
+
+  hrCheckin25thStatus: HrCheckinStatus;
+  hrCheckin25thUpdatedAt?: any;
+  hrCheckin25thUpdatedBy?: string;
 }
