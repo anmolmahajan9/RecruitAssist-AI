@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Loader2, User, Building, Calendar, Briefcase } from 'lucide-react';
+import { Edit, Loader2, User, Building, Calendar, Briefcase, ChevronRight } from 'lucide-react';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
@@ -105,41 +105,46 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
       {sortedMonthKeys.map(month => (
         <div key={month}>
             <h2 className="text-2xl font-bold tracking-tight text-foreground mb-4 pb-2 border-b-2 border-primary/20">{month}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {groupedEmployees[month].map((employee) => {
                 const onboardingProgress = getOnboardingProgress(employee.onboarding?.steps);
                 return (
-                  <Card key={employee.id} className="flex flex-col transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                    <CardHeader className="flex-row items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                            <Briefcase className="w-4 h-4"/>
-                            {employee.role}
-                        </p>
-                      </div>
-                      <Badge variant={getStatusVariant(employee.status)}>{employee.status}</Badge>
-                    </CardHeader>
-                    <CardContent className="space-y-4 flex-grow">
-                        <div className="text-sm text-muted-foreground space-y-2">
-                            <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
-                            <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {employee.doj}</span></div>
-                        </div>
-                        <div>
-                            <Label className="text-xs font-semibold">Onboarding Progress</Label>
-                            <div className="flex items-center gap-2 mt-1">
-                                <Progress value={onboardingProgress} className="h-2"/>
-                                <span className="text-xs font-bold text-primary">{onboardingProgress}%</span>
+                    <Card 
+                        key={employee.id} 
+                        className="transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                        onClick={() => onEdit(employee)}
+                    >
+                        <div className="p-4 grid grid-cols-12 items-center gap-4 cursor-pointer">
+                            {/* Left part: Name, Role, Status */}
+                            <div className="col-span-12 md:col-span-3">
+                                <CardTitle className="text-xl font-bold">{employee.name}</CardTitle>
+                                <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                                    <Briefcase className="w-4 h-4"/>
+                                    {employee.role}
+                                </p>
+                                <Badge variant={getStatusVariant(employee.status)} className="mt-2">{employee.status}</Badge>
+                            </div>
+                            {/* Middle part: Client and DOJ */}
+                            <div className="col-span-12 md:col-span-3 text-sm text-muted-foreground space-y-2">
+                                <div className="flex items-center gap-2"><Building className="w-4 h-4 text-primary"/><span>{employee.client}</span></div>
+                                <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/><span>Joined: {employee.doj}</span></div>
+                            </div>
+                            {/* Progress Bar */}
+                            <div className="col-span-12 md:col-span-5">
+                                <Label className="text-xs font-semibold">Onboarding Progress</Label>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <Progress value={onboardingProgress} className="h-2"/>
+                                    <span className="text-sm font-bold text-primary">{onboardingProgress}%</span>
+                                </div>
+                            </div>
+                            {/* Action Button */}
+                            <div className="col-span-12 md:col-span-1 flex justify-end">
+                                <Button variant="ghost" size="icon">
+                                    <ChevronRight className="h-6 w-6 text-muted-foreground"/>
+                                </Button>
                             </div>
                         </div>
-                    </CardContent>
-                    <CardFooter>
-                       <Button variant="outline" className="w-full" onClick={() => onEdit(employee)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            View & Edit
-                        </Button>
-                    </CardFooter>
-                  </Card>
+                    </Card>
                 )
               })}
             </div>
