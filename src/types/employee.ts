@@ -1,19 +1,16 @@
+
 export type OnboardingStatus = 'Done' | 'Pending' | 'In-Progress' | 'NA';
 
+export interface OnboardingStep {
+  id: string;
+  header: string;
+  description: string;
+  status: OnboardingStatus;
+}
+
 export interface OnboardingTracker {
-  offerLetter: OnboardingStatus;
-  resignationEmail: OnboardingStatus;
-  aadharCard: OnboardingStatus;
-  panCard: OnboardingStatus;
-  payslips: OnboardingStatus;
-  referenceCheck: OnboardingStatus;
-  bgCheck: OnboardingStatus;
-  relievingLetter: OnboardingStatus;
-  addToPlum: OnboardingStatus;
-  documentsLink: string;
-  leavePolicy: OnboardingStatus;
-  welcomeMail: OnboardingStatus;
-  onboardingCall: OnboardingStatus;
+  steps: OnboardingStep[];
+  documentsLink: string; // Keep this for the general documents link if needed
 }
 
 export interface Employee {

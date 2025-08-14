@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Loader2, User, Building, Calendar, Briefcase } from 'lucide-react';
-import type { Employee } from '@/types/employee';
+import type { Employee, OnboardingStep } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 
@@ -19,13 +19,11 @@ interface GroupedEmployees {
   [key: string]: Employee[];
 }
 
-const getOnboardingProgress = (onboarding: Employee['onboarding']) => {
-    const fields = Object.keys(onboarding).filter(key => key !== 'documentsLink');
-    const total = fields.length;
-    if (total === 0) return 0;
+const getOnboardingProgress = (steps: OnboardingStep[] = []) => {
+    if (!steps || steps.length === 0) return 0;
     
-    const doneCount = fields.filter(key => onboarding[key as keyof typeof onboarding] === 'Done').length;
-    return Math.round((doneCount / total) * 100);
+    const doneCount = steps.filter(step => step.status === 'Done').length;
+    return Math.round((doneCount / steps.length) * 100);
 }
 
 
@@ -109,7 +107,7 @@ export function EmployeeList({ employees, onEdit, isLoading, error }: EmployeeLi
             <h2 className="text-2xl font-bold tracking-tight text-foreground mb-4 pb-2 border-b-2 border-primary/20">{month}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {groupedEmployees[month].map((employee) => {
-                const onboardingProgress = getOnboardingProgress(employee.onboarding);
+                const onboardingProgress = getOnboardingProgress(employee.onboarding?.steps);
                 return (
                   <Card key={employee.id} className="flex flex-col transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     <CardHeader className="flex-row items-start justify-between gap-4">
