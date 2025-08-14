@@ -33,39 +33,14 @@ import {
 import { addEmployee, updateEmployee } from '@/services/employeeService';
 import type { Employee, OnboardingStep } from '@/types/employee';
 import { cn } from '@/lib/utils';
-
-interface EmployeeFormProps {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-  employee: Employee | null;
-  onSuccess: () => void;
-}
-
-const onboardingTemplate: Omit<OnboardingStep, 'status'>[] = [
-    { id: 'offerLetter', header: 'Offer Letter', description: 'Generate and send the official offer letter to the candidate.' },
-    { id: 'resignationEmail', header: 'Resignation Email', description: 'Confirm receipt of the candidate\'s resignation email from their previous employer.' },
-    { id: 'aadharCard', header: 'Aadhar Card', description: 'Collect a copy of the candidate\'s Aadhar card for verification.' },
-    { id: 'panCard', header: 'PAN Card', description: 'Collect a copy of the candidate\'s PAN card for tax purposes.' },
-    { id: 'payslips', header: 'Payslips (6 months)', description: 'Collect the last 6 months of payslips from the previous employer.' },
-    { id: 'educationDocs', header: 'Education Documents', description: 'Collect all relevant educational certificates and mark sheets.' },
-    { id: 'offerLetters', header: 'Previous Offer Letters', description: 'Collect offer letters from previous employments.' },
-    { id: 'relievingDocs', header: 'Relieving Documents', description: 'Collect relieving letters from all previous employers.' },
-    { id: 'experienceDocs', header: 'Experience Documents', description: 'Collect all experience certificates from previous employers.' },
-    { id: 'bgv', header: 'Background Verification (BGV)', description: 'Initiate and track the background verification process.' },
-    { id: 'callRefCheck', header: 'Call Reference Check', description: 'Conduct a telephonic reference check with previous managers.' },
-    { id: 'addToPlum', header: 'Add to Plum', description: 'Add the new employee to the Plum health insurance portal.' },
-    { id: 'welcomeMail', header: 'Welcome Mail', description: 'Send the official welcome email with Suitable AI credentials and first-day instructions.' },
-    { id: 'companyDetailsMail', header: 'Company Details Mail', description: 'Send an email covering leave policy, Plum, payroll details, etc.' },
-    { id: 'onboardingCall', header: 'Onboarding Call', description: 'Conduct the final onboarding call to welcome the employee to the team.' },
-];
+import { onboardingTemplate } from '@/types/employee';
 
 const getInitialOnboardingSteps = (): OnboardingStep[] => {
-    return onboardingTemplate.map(step => ({
-        ...step,
-        status: 'Pending'
-    }));
+  return onboardingTemplate.map((step) => ({
+    ...step,
+    status: 'Pending',
+  }));
 };
-
 
 const initialEmployeeState: Omit<Employee, 'id'> = {
   poc: 'Aakriti',
@@ -114,9 +89,13 @@ export function EmployeeForm({
         const employeeCopy = JSON.parse(JSON.stringify(employee));
         // Merge saved steps with the template to ensure all steps are present
         const savedSteps = employeeCopy.onboarding?.steps || [];
-        const mergedSteps = getInitialOnboardingSteps().map(templateStep => {
-            const savedStep = savedSteps.find((s: OnboardingStep) => s.id === templateStep.id);
-            return savedStep ? { ...templateStep, status: savedStep.status } : templateStep;
+        const mergedSteps = getInitialOnboardingSteps().map((templateStep) => {
+          const savedStep = savedSteps.find(
+            (s: OnboardingStep) => s.id === templateStep.id
+          );
+          return savedStep
+            ? { ...templateStep, status: savedStep.status }
+            : templateStep;
         });
 
         setFormData({
@@ -133,7 +112,7 @@ export function EmployeeForm({
           onboarding: {
             steps: getInitialOnboardingSteps(),
             documentsLink: '',
-          }
+          },
         });
       }
     }
@@ -143,16 +122,16 @@ export function EmployeeForm({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleDocLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       onboarding: {
         ...prev.onboarding,
         documentsLink: value,
-      }
-    }))
+      },
+    }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -268,7 +247,7 @@ export function EmployeeForm({
                         onChange={handleInputChange}
                       />
                     </div>
-                     <div>
+                    <div>
                       <Label htmlFor="status">Status</Label>
                       <Select
                         name="status"
@@ -294,7 +273,7 @@ export function EmployeeForm({
                         onChange={handleInputChange}
                       />
                     </div>
-                     <div>
+                    <div>
                       <Label htmlFor="state">State</Label>
                       <Input
                         id="state"
@@ -352,64 +331,94 @@ export function EmployeeForm({
                   Timeline
                 </h3>
                 <div className="space-y-6 relative pl-5">
-                   {/* Timeline vertical line */}
-                   <div className="absolute left-7 top-2 bottom-2 w-0.5 bg-border -z-10"></div>
-                   
-                   {formData.onboarding.steps.map((step, index) => {
-                       const stepStatus = step.status || 'Pending';
-                       const config = statusConfig[stepStatus];
-                       const Icon = config.icon;
-                       return (
-                           <div key={step.id} className="relative flex items-start gap-5">
-                                <div className={cn("mt-1 flex h-10 w-10 items-center justify-center rounded-full z-10", 
-                                    stepStatus === 'Done' && 'bg-green-100',
-                                    stepStatus === 'Pending' && 'bg-red-100',
-                                    stepStatus === 'In-Progress' && 'bg-yellow-100',
-                                    stepStatus === 'NA' && 'bg-slate-100',
-                                )}>
-                                    <Icon className={cn("h-5 w-5", config.color)} />
-                                </div>
-                               <div className="flex-1 p-4 rounded-2xl bg-secondary/30 border">
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                        <div className="flex-1 mb-2 sm:mb-0">
-                                            <h4 className="font-semibold text-foreground">{step.header}</h4>
-                                            <p className="text-sm text-muted-foreground mt-1">{step.description}</p>
+                  {/* Timeline vertical line */}
+                  <div className="absolute left-7 top-2 bottom-2 w-0.5 bg-border -z-10"></div>
+
+                  {formData.onboarding.steps.map((step, index) => {
+                    const stepStatus = step.status || 'Pending';
+                    const config = statusConfig[stepStatus];
+                    const Icon = config.icon;
+                    return (
+                      <div
+                        key={step.id}
+                        className="relative flex items-start gap-5"
+                      >
+                        <div
+                          className={cn(
+                            'mt-1 flex h-10 w-10 items-center justify-center rounded-full z-10',
+                            stepStatus === 'Done' && 'bg-green-100',
+                            stepStatus === 'Pending' && 'bg-red-100',
+                            stepStatus === 'In-Progress' && 'bg-yellow-100',
+                            stepStatus === 'NA' && 'bg-slate-100'
+                          )}
+                        >
+                          <Icon className={cn('h-5 w-5', config.color)} />
+                        </div>
+                        <div className="flex-1 p-4 rounded-2xl bg-secondary/30 border">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex-1 mb-2 sm:mb-0">
+                              <h4 className="font-semibold text-foreground">
+                                {step.header}
+                              </h4>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {step.description}
+                              </p>
+                            </div>
+                            <div className="w-full sm:w-48">
+                              <Select
+                                value={stepStatus}
+                                onValueChange={(v) =>
+                                  handleOnboardingStatusChange(step.id, v)
+                                }
+                              >
+                                <SelectTrigger
+                                  className={cn(
+                                    'font-semibold',
+                                    stepStatus === 'Done' &&
+                                      'bg-green-100/80 border-green-200 text-green-800 dark:bg-green-900/50 dark:border-green-800 dark:text-green-300',
+                                    stepStatus === 'Pending' &&
+                                      'bg-red-100/80 border-red-200 text-red-800 dark:bg-red-900/50 dark:border-red-800 dark:text-red-300',
+                                    stepStatus === 'In-Progress' &&
+                                      'bg-yellow-100/80 border-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:border-yellow-800 dark:text-yellow-300',
+                                    stepStatus === 'NA' &&
+                                      'bg-slate-100/80 border-slate-200 text-slate-800 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-300'
+                                  )}
+                                >
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {Object.entries(statusConfig).map(
+                                    ([
+                                      status,
+                                      { icon: Icon, color, label },
+                                    ]) => (
+                                      <SelectItem key={status} value={status}>
+                                        <div className="flex items-center gap-2">
+                                          <Icon
+                                            className={cn('h-4 w-4', color)}
+                                          />
+                                          <span>{label}</span>
                                         </div>
-                                        <div className="w-full sm:w-48">
-                                            <Select
-                                                value={stepStatus}
-                                                onValueChange={(v) => handleOnboardingStatusChange(step.id, v)}
-                                            >
-                                                <SelectTrigger className={cn(
-                                                    "font-semibold",
-                                                    stepStatus === 'Done' && 'bg-green-100/80 border-green-200 text-green-800 dark:bg-green-900/50 dark:border-green-800 dark:text-green-300',
-                                                    stepStatus === 'Pending' && 'bg-red-100/80 border-red-200 text-red-800 dark:bg-red-900/50 dark:border-red-800 dark:text-red-300',
-                                                    stepStatus === 'In-Progress' && 'bg-yellow-100/80 border-yellow-200 text-yellow-800 dark:bg-yellow-900/50 dark:border-yellow-800 dark:text-yellow-300',
-                                                    stepStatus === 'NA' && 'bg-slate-100/80 border-slate-200 text-slate-800 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-300',
-                                                )}>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {Object.entries(statusConfig).map(([status, { icon: Icon, color, label }]) => (
-                                                        <SelectItem key={status} value={status}>
-                                                            <div className="flex items-center gap-2">
-                                                                <Icon className={cn("h-4 w-4", color)} />
-                                                                <span>{label}</span>
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                               </div>
-                           </div>
-                       )
-                   })}
+                                      </SelectItem>
+                                    )
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="pt-4">
                   <Label htmlFor="documentsLink">Documents Link</Label>
-                  <Input id="documentsLink" name="documentsLink" value={formData.onboarding.documentsLink} onChange={handleDocLinkChange}/>
+                  <Input
+                    id="documentsLink"
+                    name="documentsLink"
+                    value={formData.onboarding.documentsLink}
+                    onChange={handleDocLinkChange}
+                  />
                 </div>
               </div>
 

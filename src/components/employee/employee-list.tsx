@@ -8,6 +8,7 @@ import type { Employee, OnboardingStep } from '@/types/employee';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { onboardingTemplate } from '@/types/employee';
 
 
 interface EmployeeListProps {
@@ -21,11 +22,12 @@ interface GroupedEmployees {
   [key: string]: Employee[];
 }
 
-const getOnboardingProgressCount = (steps: OnboardingStep[] = []) => {
-    if (!steps || steps.length === 0) return { completed: 0, total: 0 };
+const getOnboardingProgressCount = (steps?: OnboardingStep[]) => {
+    const total = onboardingTemplate.length;
+    if (!steps || steps.length === 0) return { completed: 0, total: total };
     
     const completedCount = steps.filter(step => step.status === 'Done' || step.status === 'NA').length;
-    return { completed: completedCount, total: steps.length };
+    return { completed: completedCount, total: total };
 }
 
 const getPoProgress = (doj: string, poEndDate: string): { percentage: number, daysLeft: number } => {
