@@ -43,7 +43,7 @@ export default function Home() {
                 <Users className="w-7 h-7 text-primary" />
                 Employee Management
               </CardTitle>
-              <CardDescription>Track and manage all your on-site employees in one place.</CardDescription>
+              <CardDescription className="text-base text-muted-foreground">Track and manage all your on-site employees in one place.</CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
@@ -57,7 +57,7 @@ export default function Home() {
                 <Briefcase className="w-7 h-7 text-primary" />
                 Job Explainer
               </CardTitle>
-              <CardDescription>Break down complex job descriptions into simple terms and tasks.</CardDescription>
+              <CardDescription className="text-base text-muted-foreground">Break down complex job descriptions into simple terms and tasks.</CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Get Started <ArrowRight className="ml-2 h-5 w-5" />
@@ -72,7 +72,7 @@ export default function Home() {
                 <Search className="w-7 h-7 text-primary" />
                 Boolean Query Helper
               </CardTitle>
-              <CardDescription>Generate powerful boolean search strings for candidate sourcing.</CardDescription>
+              <CardDescription className="text-base text-muted-foreground">Generate powerful boolean search strings for candidate sourcing.</CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Generate Query <ArrowRight className="ml-2 h-5 w-5" />
@@ -86,7 +86,7 @@ export default function Home() {
                 <Combine className="w-7 h-7 text-primary" />
                 Candidate Report Generator
               </CardTitle>
-              <CardDescription>Create professional candidate reports from interview notes.</CardDescription>
+              <CardDescription className="text-base text-muted-foreground">Create professional candidate reports from interview notes.</CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Generate Report <ArrowRight className="ml-2 h-5 w-5" />
@@ -100,7 +100,7 @@ export default function Home() {
                 <Mail className="w-7 h-7 text-primary" />
                 Email Drafter
               </CardTitle>
-              <CardDescription>Draft professional client submission emails in seconds.</CardDescription>
+              <CardDescription className="text-base text-muted-foreground">Draft professional client submission emails in seconds.</CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Draft Email <ArrowRight className="ml-2 h-5 w-5" />
@@ -114,7 +114,7 @@ export default function Home() {
                 <Medal className="w-7 h-7 text-primary" />
                 Candidate Ranker
               </CardTitle>
-              <CardDescription>Score and rank candidates against job requirements automatically.</CardDescription>
+              <CardDescription className="text-base text-muted-foreground">Score and rank candidates against job requirements automatically.</CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Start Ranking <ArrowRight className="ml-2 h-5 w-5" />
@@ -128,7 +128,7 @@ export default function Home() {
                 <FileEdit className="w-7 h-7 text-primary" />
                 PDF Editor
               </CardTitle>
-              <CardDescription>Combine multiple PDFs or add a watermark with ease.</CardDescription>
+              <CardDescription className="text-base text-muted-foreground">Combine multiple PDFs or add a watermark with ease.</CardDescription>
             </CardHeader>
             <div className="p-6 pt-0 flex justify-end items-center text-primary font-semibold">
               Edit PDFs <ArrowRight className="ml-2 h-5 w-5" />
